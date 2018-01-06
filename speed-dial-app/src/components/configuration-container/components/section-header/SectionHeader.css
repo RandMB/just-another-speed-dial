@@ -1,0 +1,35 @@
+.sidebar-top-icon {
+    font-size: 1.6rem;
+
+    padding: 0px 6px;
+}
+
+.sidebar-top-icon:hover {
+    background-color: lightgray;
+
+    cursor: pointer;
+}
+
+.sidebar-top-container {
+    display: flex;
+
+    flex-direction: row;
+
+    align-items: center;
+
+    border-bottom: 1px solid #d7d7db;
+    padding: 4px;
+    min-height: 3rem;
+
+    overflow-x: hidden;
+}
+
+.sidebar-section-name {
+    flex-grow: 1;
+
+    text-align: center;
+}
+
+.sidebar-section-name p {
+    margin: 0;
+}

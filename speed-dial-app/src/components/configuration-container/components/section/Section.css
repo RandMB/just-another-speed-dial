@@ -1,0 +1,42 @@
+.section-content {
+    flex-grow: 1;
+
+    display: flex;
+    flex-direction: column;
+
+    font-size: 1rem;
+
+    overflow-y: auto;
+}
+
+.section {
+    display: flex;
+    flex-direction: column;
+    width: inherit;
+    height: inherit;
+
+    position: absolute;
+    top: inherit;
+    right: 0;
+
+    background-color: white;
+    opacity: 1;
+
+    font-size: 1.2rem;
+
+    transition: transform 0.15s ease;
+}
+
+.section-subsection {
+    transform: translateZ(0) translateX(100%);
+}
+
+.section-open {
+    transform: translateZ(0) translateX(0);
+}
+
+.section-content-padded {
+    padding-top: 4px;
+    padding-left: 8px;
+    padding-right: 8px;
+}

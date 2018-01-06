@@ -1,0 +1,33 @@
+.folder-picker {
+    display: flex;
+    flex-direction: column;
+}
+
+.folder-picker-header {
+    display: flex;
+    flex-direction: row;
+
+    align-items: center;
+
+    padding: 4px;
+}
+
+.folder-picker-header:hover {
+    cursor: pointer;
+}
+
+.folder-title {
+    flex-grow: 1;
+
+    padding-left: 8px;
+}
+
+.folder-children {
+    flex-grow: 1;
+    margin-left: 32px;
+}
+
+.folder-picker-header.selected {
+    background-color: lightblue;
+}
+

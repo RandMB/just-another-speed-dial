@@ -1,0 +1,42 @@
+.dial-title-container {
+    display: flex;
+    justify-content: center;
+    padding-top: 4px;
+}
+
+.dial-title-background {
+    background-color: white;
+    padding: 4px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    border-radius: 4px;
+}
+
+.dial-item-container {
+    position: absolute;
+    width: 220px;
+    height: 209px;
+
+    display: flex;
+    flex-direction: column;
+
+    transition: transform 0s ease-out;
+}
+
+.dial-tile {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    align-content: center;
+    cursor: pointer;
+    width: 100%;
+    flex: 1;
+    background: rgb(138, 173, 219);
+
+    -moz-user-select: none;
+    -webkit-user-select: none;
+    -ms-user-select: none;
+    user-select: none;
+}

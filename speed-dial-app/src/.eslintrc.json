@@ -1,0 +1,10 @@
+{
+    "extends": "react-app",
+    "env": {
+        "webextensions": true        
+    },
+    "rules": {
+        "semi": "error",
+        "react/prop-types": "warn"
+    }
+}

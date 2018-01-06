@@ -1,0 +1,27 @@
+html, body {
+    height: 100vh;
+}
+
+body {
+    margin: 0;
+    padding: 0;
+    overflow: hidden;
+    font-family: sans-serif;
+}
+
+* {
+    box-sizing: border-box;
+}
+
+#root {
+    height: 100%;
+    overflow: hidden;
+}
+
+.rounded-borders {
+    border-radius: 8px;
+}
+
+.rounded-borders-half {
+    border-radius: 4px;
+}
