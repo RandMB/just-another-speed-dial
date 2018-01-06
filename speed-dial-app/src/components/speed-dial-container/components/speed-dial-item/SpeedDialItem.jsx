@@ -50,11 +50,18 @@ class SpeedDialItem extends Component {
         if (viewData.dialPosX !== this.state.currentPosX ||
             viewData.dialPosY !== this.state.currentPosY) {
 
-            this.cachedState.push({
+            const newState = {
                 currentPosX: viewData.dialPosX,
                 currentPosY: viewData.dialPosY,
                 transitionDuration: 0.25,
-            });
+            };
+
+            // If the element is being dragged, skip the workaround, as i creates janky transition
+            if (this.state.isDragged) {
+                this.setState(newState);
+            } else {
+                this.cachedState.push(newState);
+            }
         }
     }
 
@@ -134,6 +141,8 @@ class SpeedDialItem extends Component {
     }
 
     componentDidUpdate() {
+        // HACK: React remounts the component, skipping transition.
+        // Delay the state change to allow the browser to process and paint stuff
         setTimeout(() => {
             window.requestAnimationFrame(() => {
                 if (this.cachedState.length > 0) {

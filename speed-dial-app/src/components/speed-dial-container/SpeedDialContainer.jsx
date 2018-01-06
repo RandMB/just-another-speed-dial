@@ -10,6 +10,10 @@ const DIAL_HEIGHT = 239;
 const DIAL_WIDTH = 250;
 const WIDTH_TO_LEAVE = 100;
 
+function onError(error) {
+    console.error(`Error: ${error}`);
+}
+
 class SpeedDialContainer extends Component {
     constructor(props) {
         super(props);
@@ -86,13 +90,18 @@ class SpeedDialContainer extends Component {
         };
 
         const newIndex = this.computeDialIndex(dialPos,
-             this.state.dialColumns, this.state.currentFolderNodes.length, DIAL_WIDTH, DIAL_HEIGHT);
+            this.state.dialColumns, this.state.currentFolderNodes.length, DIAL_WIDTH, DIAL_HEIGHT);
 
         if (newIndex !== dragData.index) {
             const newChildren = _cloneDeep(this.state.currentFolderNodes);
 
-            const removed = newChildren.splice(dragData.index, 1);
-            newChildren.splice(newIndex, 0, removed[0]);
+            const [removed] = newChildren.splice(dragData.index, 1);
+            newChildren.splice(newIndex, 0, removed);
+
+            browser.bookmarks.move(removed.id, {
+                // +1 because for mozilla arrays start at 1
+                index: newIndex + 1,
+            }).then(null, onError);
 
             this.updateChildren(newChildren, this.state.dialColumns);
         }
