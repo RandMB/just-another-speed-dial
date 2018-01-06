@@ -21,7 +21,15 @@
     display: flex;
     flex-direction: column;
 
-    transition: transform 0s ease-out;
+    transition: transform 0.25s ease-out;
+}
+
+.dial-dragged {
+    z-index: 500;
+}
+
+.dial-dragged .dial-tile {
+    box-shadow: 0 0 10px rgba(0,0,0, .65);
 }
 
 .dial-tile {

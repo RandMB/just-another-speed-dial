@@ -1,6 +1,8 @@
 import React, { Component } from 'react';
-import SpeedDialItem from '../speed-dial-item/SpeedDialItem';
 import PropTypes from 'prop-types';
+
+import SpeedDialItem from '../speed-dial-item/SpeedDialItem';
+
 import './SpeedDialViewPlane.css';
 
 class SpeedDialViewPlane extends Component {
@@ -12,19 +14,21 @@ class SpeedDialViewPlane extends Component {
         };
 
         return (
-            <div className="speed-dial-view-plane config-close"
+            <div
+                id="speed-dial"
+                className="speed-dial-view-plane config-close"
                 style={dialsStyle}>
 
-                {bookmarkTree.map(({ treeNode, data }) =>
+                {bookmarkTree.map(({ id, treeNode, data }, index) =>
                     <SpeedDialItem
                         onOpenFolder={this.props.onOpenFolder}
-                        key={treeNode.id}
+                        key={'' + id}
                         node={treeNode}
                         data={data}
+                        id={id}
+                        onDrag={this.props.onDialDrag}
                     />)}
             </div>
-
-
         );
     }
 }
@@ -34,6 +38,7 @@ SpeedDialViewPlane.propTypes = {
     onOpenFolder: PropTypes.func.isRequired,
     width: PropTypes.number.isRequired,
     height: PropTypes.number.isRequired,
+    onDialDrag: PropTypes.func.isRequired,
 };
 
 export default SpeedDialViewPlane;
