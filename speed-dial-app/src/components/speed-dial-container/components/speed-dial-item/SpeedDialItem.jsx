@@ -77,7 +77,11 @@ class SpeedDialItem extends Component {
     }
 
     onDragStart(event) {
-        console.log(event.nativeEvent);
+        // 0 button means left click
+        if (event.nativeEvent.button !== 0) {
+            return;
+        }
+
         event.persist();
         // Delay the event, to allow click event to do the work
         this.dragTimeout = setTimeout(() => {
@@ -124,20 +128,20 @@ class SpeedDialItem extends Component {
             return {
                 dragPosX: prevState.dragStartPosX - (prevState.mouseDragStartPosX - event.clientX),
                 dragPosY: prevState.dragStartPosY - (prevState.mouseDragStartPosY - event.clientY),
-                dragTransitionDuration: 0.05
+                dragTransitionDuration: 0.1
             };
         });
     }
 
     componentDidUpdate() {
-        window.requestAnimationFrame(() => {
-            setTimeout(() => {
+        setTimeout(() => {
+            window.requestAnimationFrame(() => {
                 if (this.cachedState.length > 0) {
                     const state = this.cachedState.pop();
                     this.setState(state);
                 }
-            }, 0);
-        });
+            });
+        }, 0);
     }
 
     render() {
@@ -180,7 +184,7 @@ class SpeedDialItem extends Component {
                     onClick={this.onClick}>
 
                     {type === 'folder' &&
-                        <img alt="" src={folderImage} />
+                        <img alt="" draggable="false" src={folderImage} />
                     }
                     {type === 'bookmark' &&
                         <a>{new URL(url).host}</a>

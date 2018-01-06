@@ -13,5 +13,11 @@
     "permissions": [
         "bookmarks",
         "storage"
-    ]
+    ],
+    "applications": {
+        "gecko": {
+          "id": "justAnotherSpeedDial@gmail.com",
+          "strict_min_version": "57.0"
+        }
+      }
 }
