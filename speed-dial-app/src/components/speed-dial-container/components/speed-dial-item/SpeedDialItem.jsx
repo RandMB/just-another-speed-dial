@@ -89,7 +89,13 @@ class SpeedDialItem extends Component {
             return;
         }
 
+        if (this.dragTimeout) { 
+            clearTimeout(this.dragTimeout);
+            this.dragTimeout = null;
+        }
+
         event.persist();
+
         // Delay the event, to allow click event to do the work
         this.dragTimeout = setTimeout(() => {
             const nativeEvent = event.nativeEvent;
@@ -181,16 +187,13 @@ class SpeedDialItem extends Component {
             <div
                 draggable="true"
                 className={dialClass}
-                style={dialStyle}
-                onMouseDown={this.onDragStart}
-                ref={(node) => { this.dialNode = node; }}
-                data-index={this.props.data.view.index}
-                data-drag={this.state.isDragged}>
+                style={dialStyle}>
 
                 <div
                     className="dial-tile rounded-borders"
                     title={url}
-                    onClick={this.onClick}>
+                    onClick={this.onClick}
+                    onMouseDown={this.onDragStart}>
 
                     {type === 'folder' &&
                         <img alt="" draggable="false" src={folderImage} />

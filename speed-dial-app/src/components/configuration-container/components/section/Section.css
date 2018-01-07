@@ -17,7 +17,7 @@
 
     position: absolute;
     top: inherit;
-    right: 0;
+    left: 0;
 
     background-color: white;
     opacity: 1;
@@ -28,7 +28,7 @@
 }
 
 .section-subsection {
-    transform: translateZ(0) translateX(100%);
+    transform: translateZ(0) translateX(-100%);
 }
 
 .section-open {

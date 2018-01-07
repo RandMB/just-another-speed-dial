@@ -25,7 +25,6 @@ class SpeedDialViewPlane extends Component {
                         key={'' + id}
                         node={treeNode}
                         data={data}
-                        id={id}
                         onDrag={this.props.onDialDrag}
                     />)}
             </div>

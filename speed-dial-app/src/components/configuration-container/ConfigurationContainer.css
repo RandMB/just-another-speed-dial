@@ -3,7 +3,7 @@
     width: 20rem;
     position: absolute;
     top: 0;
-    right: -20rem;
+    left: -20rem;
     background-color: transparent;
     z-index: 10000;
     transition: transform 0.25s cubic-bezier(.07, .95, 0, 1);
@@ -11,5 +11,5 @@
 }
 
 .configuration-sidebar.sidebar-open {
-    transform: translateZ(0) translateX(-20rem);
+    transform: translateZ(0) translateX(20rem);
 }

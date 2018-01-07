@@ -44,7 +44,7 @@ class App extends Component {
         };
 
         this.onFolderSelect = this.onFolderSelect.bind(this);
-        this.onConfigChange = this.onConfigChange.bind(this);        
+        this.onConfigChange = this.onConfigChange.bind(this);
 
         this.configPromise = browser.storage.local.get('config');
     }
@@ -66,10 +66,7 @@ class App extends Component {
         }, onError);
 
         document.getElementById('root').addEventListener('click', (event) => {
-            console.log(event);
             if (event.target.matches('.config-close') && this.state.isConfigOpen) {
-                console.log('Event registered at root, closing configuration sidebar');
-
                 this.setState({
                     isConfigOpen: false,
                 });
@@ -116,7 +113,7 @@ class App extends Component {
     render() {
         // Styling for page body
         let bodyStyle = `background-image: url('${backgroundImageUrl}');`;
-        bodyStyle += `background-size: 100%;`;
+        bodyStyle += `background-size: cover;`;
 
         document.body.style = bodyStyle;
 
@@ -140,12 +137,13 @@ class App extends Component {
                     </ConfigurationContainer>
                 }
 
-                <button
-                    type="button"
-                    className="openConfigButton"
-                    onClickCapture={(event) => this.setConfigSidebarOpen(true, event)}>
-                    Open config
-                </button>
+                <div
+                    className="config-open-button"
+                    onClickCapture={(event) => this.setConfigSidebarOpen(true, event)}
+                    tile="Open configuration sidebar">
+
+                    <i className="fas fa-cog"></i>
+                </div>
             </React.Fragment>
         );
     }
