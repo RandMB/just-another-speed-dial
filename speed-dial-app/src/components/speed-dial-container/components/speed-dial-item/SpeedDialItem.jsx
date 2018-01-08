@@ -6,6 +6,10 @@ import _throttle from 'lodash/throttle';
 import './SpeedDialItem.css';
 import folderImage from '../../../../assets/folder.png';
 
+function extractRGB(a) {
+    return `rgb(${a[0]},${a[1]},${a[2]})`;
+}
+
 class SpeedDialItem extends Component {
     constructor(props) {
         super(props);
@@ -34,14 +38,19 @@ class SpeedDialItem extends Component {
         this.onDragEnd = this.onDragEnd.bind(this);
         this.onMouseMove = this.onMouseMove.bind(this);
 
-        // 16ms = 60fps
-        this.throttledMouseMove = _throttle(this.onMouseMove, 16);
-        this.throttledDrag = _throttle(this.props.onDrag, 60);
+        // 16ms = 60fps, but updates also take time, so lower value has to be used
+        this.throttledMouseMove = _throttle(this.onMouseMove, 14);
+        // 250ms was selected by simply testing
+        this.throttledDrag = _throttle(this.props.onDrag, 250);
 
         this.dragTimeout = null;
         this.suppressOnClick = false;
 
         this.cachedState = [];
+
+        if (!props.dialMeta && props.node.type !== 'folder') {
+            this.props.onUpdate(props.node.id, props.node.url);
+        }
     }
 
     componentWillReceiveProps(newProps) {
@@ -89,19 +98,19 @@ class SpeedDialItem extends Component {
             return;
         }
 
-        if (this.dragTimeout) { 
+        event.persist();
+
+        if (this.dragTimeout) {
             clearTimeout(this.dragTimeout);
-            this.dragTimeout = null;
         }
 
-        event.persist();
+        document.addEventListener('mouseup', this.onDragEnd);
 
         // Delay the event, to allow click event to do the work
         this.dragTimeout = setTimeout(() => {
             const nativeEvent = event.nativeEvent;
 
             document.addEventListener('mousemove', this.throttledMouseMove);
-            document.addEventListener('mouseup', this.onDragEnd);
 
             this.setState({
                 mouseDragStartPosX: nativeEvent.clientX,
@@ -115,19 +124,27 @@ class SpeedDialItem extends Component {
 
                 isDragged: true,
             });
-        }, 100);
+        }, 300);
     }
 
     onDragEnd(event) {
-        document.removeEventListener('mousemove', this.throttledMouseMove);
+        if (this.state.isDragged) {
+            document.removeEventListener('mousemove', this.throttledMouseMove);
+
+            this.setState({
+                isDragged: false,
+            });
+
+            this.suppressOnClick = true;
+        }
+
         document.removeEventListener('mouseup', this.onDragEnd);
 
-        this.setState({
-            isDragged: false,
-        });
+        if (this.dragTimeout) {
+            clearTimeout(this.dragTimeout);
+            this.dragTimeout = null;
+        }
 
-        this.dragTimeout = null;
-        this.suppressOnClick = true;
     }
 
     onMouseMove(event) {
@@ -149,14 +166,15 @@ class SpeedDialItem extends Component {
     componentDidUpdate() {
         // HACK: React remounts the component, skipping transition.
         // Delay the state change to allow the browser to process and paint stuff
-        setTimeout(() => {
-            window.requestAnimationFrame(() => {
-                if (this.cachedState.length > 0) {
-                    const state = this.cachedState.pop();
+        if (this.cachedState.length > 0) {
+            const state = this.cachedState.pop();
+            setTimeout(() => {
+                window.requestAnimationFrame(() => {
+                    console.log(this.props.node.id);
                     this.setState(state);
-                }
-            });
-        }, 0);
+                });
+            }, 10);
+        }
     }
 
     render() {
@@ -183,6 +201,15 @@ class SpeedDialItem extends Component {
             transitionDuration: `${transitionDuration}s`,
         };
 
+        let dialTileStyle = {};
+
+        if (this.props.dialMeta) {
+            dialTileStyle = {
+                background: extractRGB(this.props.dialMeta.background),
+                color: extractRGB(this.props.dialMeta.text),
+            };
+        }
+
         return (
             <div
                 draggable="true"
@@ -193,7 +220,8 @@ class SpeedDialItem extends Component {
                     className="dial-tile rounded-borders"
                     title={url}
                     onClick={this.onClick}
-                    onMouseDown={this.onDragStart}>
+                    onMouseDown={this.onDragStart}
+                    style={dialTileStyle}>
 
                     {type === 'folder' &&
                         <img alt="" draggable="false" src={folderImage} />
@@ -218,8 +246,10 @@ class SpeedDialItem extends Component {
 SpeedDialItem.propTypes = {
     node: PropTypes.object.isRequired,
     data: PropTypes.object.isRequired,
+    dialMeta: PropTypes.object,
     onOpenFolder: PropTypes.func.isRequired,
     onDrag: PropTypes.func.isRequired,
+    onUpdate: PropTypes.func.isRequired,
 };
 
 export default SpeedDialItem;

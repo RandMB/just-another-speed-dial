@@ -1,23 +1,27 @@
 {
     "manifest_version": 2,
     "name": "Just another speed dial",
-    "version": "0.0.2",
+    "version": "0.0.3",
     "description": "Shows a speed dial made of bookmarks",
     "icons": {
         "64": "icons/folder.png",
         "96": "icons/folder.svg"
     },
-    "chrome_url_overrides": { 
-		"newtab": "content/index.html"
+    "chrome_url_overrides": {
+        "newtab": "content/index.html"
     },
     "permissions": [
         "bookmarks",
-        "storage"
+        "storage",
+        "*://s2.googleusercontent.com/s2/favicons"
     ],
     "applications": {
         "gecko": {
-          "id": "justAnotherSpeedDial@gmail.com",
-          "strict_min_version": "57.0"
+            "id": "justAnotherSpeedDial@gmail.com",
+            "strict_min_version": "57.0"
         }
-      }
+    },
+    "background": {
+        "page": "background/background.html"
+    }
 }

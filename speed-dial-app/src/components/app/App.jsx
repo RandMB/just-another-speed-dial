@@ -123,6 +123,7 @@ class App extends Component {
             <React.Fragment>
                 {this.state.isLoaded &&
                     <Container
+                        key={rootBookmarkTreeId}
                         onFolderSelect={this.onFolderSelect}
                         rootBookmarkTreeId={rootBookmarkTreeId}>
                     </Container>

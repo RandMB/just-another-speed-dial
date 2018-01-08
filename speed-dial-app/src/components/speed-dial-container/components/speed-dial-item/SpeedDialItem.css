@@ -17,10 +17,8 @@
     position: absolute;
     width: 220px;
     height: 209px;
-
     display: flex;
     flex-direction: column;
-
     transition: transform 0.25s ease;
 }
 
@@ -29,7 +27,7 @@
 }
 
 .dial-dragged .dial-tile {
-    box-shadow: 0 0 10px rgba(0,0,0, .65);
+    box-shadow: 0 0 10px rgba(0, 0, 0, .65);
 }
 
 .dial-tile {
@@ -41,8 +39,8 @@
     cursor: pointer;
     width: 100%;
     flex: 1;
-    background: rgb(138, 173, 219);
-
+    background: white;
+    color: black;
     -moz-user-select: none;
     -webkit-user-select: none;
     -ms-user-select: none;

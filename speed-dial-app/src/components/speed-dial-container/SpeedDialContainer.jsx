@@ -8,7 +8,7 @@ import _cloneDeep from 'lodash/cloneDeep';
 
 const DIAL_HEIGHT = 239;
 const DIAL_WIDTH = 250;
-const WIDTH_TO_LEAVE = 100;
+const WIDTH_TO_LEAVE = 60;
 
 function onError(error) {
     console.error(`Error: ${error}`);
@@ -84,12 +84,12 @@ class SpeedDialContainer extends Component {
     }
 
     onDrag(dragData) {
-        const dialPos = {
-            x: dragData.dragPosX,
-            y: Math.max(dragData.dragPosY, 0),
+        const normalizedPositions = {
+            x: Math.min(Math.max(dragData.dragPosX, 0), this.state.dialColumns * DIAL_WIDTH - 30),
+            y: Math.min(Math.max(dragData.dragPosY, 0), this.computeRows(this.state.currentFolderNodes.length, this.state.dialColumns) * DIAL_HEIGHT),
         };
 
-        const newIndex = this.computeDialIndex(dialPos,
+        const newIndex = this.computeDialIndex(normalizedPositions,
             this.state.dialColumns, this.state.currentFolderNodes.length, DIAL_WIDTH, DIAL_HEIGHT);
 
         if (newIndex !== dragData.index) {
@@ -195,6 +195,8 @@ class SpeedDialContainer extends Component {
                 <div className="dial-container config-close">
                     {children &&
                         <SpeedDialViewPlane
+                            key={this.state.currentBookmarkFolderId}
+                            folderId={this.state.currentBookmarkFolderId}
                             bookmarks={children}
                             onOpenFolder={this.openFolder}
                             onDialDrag={this.onDrag}

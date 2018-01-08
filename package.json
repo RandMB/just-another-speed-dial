@@ -42,6 +42,7 @@
   "scripts": {
     "start": "node speed-dial-app/scripts/start.js",
     "build": "node speed-dial-app/scripts/build.js",
+    "pack": "web-ext build -s extension -a build --overwrite-dest",
     "test": "node speed-dial-app/scripts/test.js --env=jsdom"
   },
   "jest": {
