@@ -1,5 +1,5 @@
 import React, { Component } from 'react';
-import SpeedDialViewPlane from './components/speed-dial-view-plane/SpeedDialViewPlane';
+import DialFolder from './components/dial-folder/DialFolder';
 import PropTypes from 'prop-types';
 import './SpeedDialContainer.css';
 
@@ -194,7 +194,7 @@ class SpeedDialContainer extends Component {
 
                 <div className="dial-container config-close">
                     {children &&
-                        <SpeedDialViewPlane
+                        <DialFolder
                             key={this.state.currentBookmarkFolderId}
                             folderId={this.state.currentBookmarkFolderId}
                             bookmarks={children}
@@ -203,7 +203,7 @@ class SpeedDialContainer extends Component {
                             width={(DIAL_WIDTH * this.state.dialColumns) - 30}
                             height={DIAL_HEIGHT * this.computeRows(children.length, this.state.dialColumns)}
                         >
-                        </SpeedDialViewPlane>
+                        </DialFolder>
                     }
                 </div>
             </div>

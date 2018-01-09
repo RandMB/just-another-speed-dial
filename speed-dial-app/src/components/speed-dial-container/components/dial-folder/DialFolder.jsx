@@ -1,17 +1,17 @@
 import React, { Component } from 'react';
 import PropTypes from 'prop-types';
 
-import SpeedDialItem from '../speed-dial-item/SpeedDialItem';
+import DialContainer from '../dial-container/DialContainer';
 
 import _cloneDeep from 'lodash/cloneDeep';
 
-import './SpeedDialViewPlane.css';
+import './DialFolder.css';
 
 function onError(error) {
     console.error(`Error: ${error}`);
 }
 
-class SpeedDialViewPlane extends Component {
+class DialFolder extends Component {
     constructor(props) {
         super(props);
 
@@ -72,22 +72,24 @@ class SpeedDialViewPlane extends Component {
                 style={dialsStyle}>
 
                 {this.state.isConfigLoaded && bookmarkTree.map(({ id, treeNode, data }, index) =>
-                    <SpeedDialItem
+                    <DialContainer
                         onOpenFolder={this.props.onOpenFolder}
                         key={'' + id}
                         node={treeNode}
                         data={data}
                         dialMeta={this.state.folderData[id]}
                         onUpdate={this.onDialUpdate}
-                        onDrag={this.props.onDialDrag}
-                    />)
+                        onDrag={this.props.onDialDrag}>
+                        
+                    </DialContainer>
+                    )
                 }
             </div>
         );
     }
 }
 
-SpeedDialViewPlane.propTypes = {
+DialFolder.propTypes = {
     bookmarks: PropTypes.array.isRequired,
     onOpenFolder: PropTypes.func.isRequired,
     width: PropTypes.number.isRequired,
@@ -96,4 +98,4 @@ SpeedDialViewPlane.propTypes = {
     folderId: PropTypes.string.isRequired,
 };
 
-export default SpeedDialViewPlane;
+export default DialFolder;

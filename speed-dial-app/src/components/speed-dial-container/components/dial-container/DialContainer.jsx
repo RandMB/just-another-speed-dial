@@ -3,14 +3,14 @@ import PropTypes from 'prop-types';
 
 import _throttle from 'lodash/throttle';
 
-import './SpeedDialItem.css';
+import './DialContainer.css';
 import folderImage from '../../../../assets/folder.png';
 
 function extractRGB(a) {
     return `rgb(${a[0]},${a[1]},${a[2]})`;
 }
 
-class SpeedDialItem extends Component {
+class DialContainer extends Component {
     constructor(props) {
         super(props);
 
@@ -243,7 +243,7 @@ class SpeedDialItem extends Component {
     }
 }
 
-SpeedDialItem.propTypes = {
+DialContainer.propTypes = {
     node: PropTypes.object.isRequired,
     data: PropTypes.object.isRequired,
     dialMeta: PropTypes.object,
@@ -252,4 +252,4 @@ SpeedDialItem.propTypes = {
     onUpdate: PropTypes.func.isRequired,
 };
 
-export default SpeedDialItem;
+export default DialContainer;
