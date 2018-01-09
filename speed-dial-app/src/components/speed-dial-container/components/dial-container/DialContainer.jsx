@@ -72,7 +72,7 @@ class DialContainer extends Component {
             currentPosY,
         } = this.state;
 
-        const transitionDuration = isDragged ? 0.03 : 0.25;
+        const transitionDuration = isDragged ? 0 : 0.25;
 
         const {
             title,
