@@ -1,10 +1,12 @@
 import React, { Component } from 'react';
 import PropTypes from 'prop-types';
 
+import DialTitle from '../dial-title/DialTitle';
+import DialTile from '../dial-tile/DialTile';
+
 import _throttle from 'lodash/throttle';
 
 import './DialContainer.css';
-import folderImage from '../../../../assets/folder.png';
 
 function extractRGB(a) {
     return `rgb(${a[0]},${a[1]},${a[2]})`;
@@ -184,13 +186,8 @@ class DialContainer extends Component {
             url,
         } = this.props.node;
 
-        const {
-            currentPosX,
-            currentPosY,
-        } = this.state;
-
-        const xPos = this.state.isDragged ? this.state.dragPosX : currentPosX;
-        const yPos = this.state.isDragged ? this.state.dragPosY : currentPosY;
+        const xPos = this.state.isDragged ? this.state.dragPosX : this.state.currentPosX;
+        const yPos = this.state.isDragged ? this.state.dragPosY : this.state.currentPosY;
         const transitionDuration = this.state.isDragged ? this.state.dragTransitionDuration : this.state.transitionDuration;
 
         let dialClass = 'dial-item-container';
@@ -216,28 +213,16 @@ class DialContainer extends Component {
                 className={dialClass}
                 style={dialStyle}>
 
-                <div
-                    className="dial-tile rounded-borders"
-                    title={url}
+                <DialTile
+                    url={url}
+                    type={type}
                     onClick={this.onClick}
                     onMouseDown={this.onDragStart}
-                    style={dialTileStyle}>
+                    tileStyle={dialTileStyle}>
 
-                    {type === 'folder' &&
-                        <img alt="" draggable="false" src={folderImage} />
-                    }
-                    {type === 'bookmark' &&
-                        <a>{new URL(url).host}</a>
-                    }
-                </div>
-                <div className="dial-title-container">
-                    <div
-                        className="dial-title-background"
-                        title={title}>
+                </DialTile>
 
-                        <a>{title}</a>
-                    </div>
-                </div>
+                <DialTitle title={title}></DialTitle>
             </div>
         );
     }
