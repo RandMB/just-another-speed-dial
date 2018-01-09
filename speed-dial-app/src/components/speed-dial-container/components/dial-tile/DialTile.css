@@ -1,0 +1,16 @@
+.dial-tile {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    align-content: center;
+    cursor: pointer;
+    width: 100%;
+    flex: 1;
+    background: white;
+    color: black;
+    -moz-user-select: none;
+    -webkit-user-select: none;
+    -ms-user-select: none;
+    user-select: none;
+}

@@ -4,8 +4,6 @@ import PropTypes from 'prop-types';
 import DialTitle from '../dial-title/DialTitle';
 import DialTile from '../dial-tile/DialTile';
 
-import _throttle from 'lodash/throttle';
-
 import './DialContainer.css';
 
 function extractRGB(a) {
@@ -17,38 +15,12 @@ class DialContainer extends Component {
         super(props);
 
         this.state = {
+            currentPosX: props.xPos,
+            currentPosY: props.yPos,
             transitionDuration: 0,
-            currentPosX: props.data.view.dialPosX,
-            currentPosY: props.data.view.dialPosY,
-
-            dragPosX: null,
-            dragPosY: null,
-
-            dragStartPosX: null,
-            dragStartPosY: null,
-
-            mouseDragStartPosX: null,
-            mouseDragStartPosY: null,
-
-            dragTransitionDuration: 0,
-
-            isDragged: false,
         };
 
-        this.onClick = this.onClick.bind(this);
-        this.onDragStart = this.onDragStart.bind(this);
-        this.onDragEnd = this.onDragEnd.bind(this);
-        this.onMouseMove = this.onMouseMove.bind(this);
-
-        // 16ms = 60fps, but updates also take time, so lower value has to be used
-        this.throttledMouseMove = _throttle(this.onMouseMove, 14);
-        // 250ms was selected by simply testing
-        this.throttledDrag = _throttle(this.props.onDrag, 250);
-
-        this.dragTimeout = null;
-        this.suppressOnClick = false;
-
-        this.cachedState = [];
+        this.cachedState = null;
 
         if (!props.dialMeta && props.node.type !== 'folder') {
             this.props.onUpdate(props.node.id, props.node.url);
@@ -56,123 +28,31 @@ class DialContainer extends Component {
     }
 
     componentWillReceiveProps(newProps) {
-        const viewData = newProps.data.view;
 
-        if (viewData.dialPosX !== this.state.currentPosX ||
-            viewData.dialPosY !== this.state.currentPosY) {
+        const newState = {
+            currentPosX: newProps.xPos,
+            currentPosY: newProps.yPos,
+        };
 
-            const newState = {
-                currentPosX: viewData.dialPosX,
-                currentPosY: viewData.dialPosY,
-                transitionDuration: 0.25,
-            };
-
-            // If the element is being dragged, skip the workaround, as i creates janky transition
-            if (this.state.isDragged) {
-                this.setState(newState);
-            } else {
-                this.cachedState.push(newState);
-            }
-        }
-    }
-
-    onClick(event) {
-        if (this.suppressOnClick) {
-            this.suppressOnClick = false;
-            return;
-        }
-
-        if (this.dragTimeout) {
-            clearTimeout(this.dragTimeout);
-            this.dragTimeout = null;
-        }
-
-        if (this.props.node.type === 'folder') {
-            this.props.onOpenFolder(this.props.node.id);
-        } else if (this.props.node.type === 'bookmark') {
-            window.location.href = this.props.node.url;
-        }
-    }
-
-    onDragStart(event) {
-        // 0 button means left click
-        if (event.nativeEvent.button !== 0) {
-            return;
-        }
-
-        event.persist();
-
-        if (this.dragTimeout) {
-            clearTimeout(this.dragTimeout);
-        }
-
-        document.addEventListener('mouseup', this.onDragEnd);
-
-        // Delay the event, to allow click event to do the work
-        this.dragTimeout = setTimeout(() => {
-            const nativeEvent = event.nativeEvent;
-
-            document.addEventListener('mousemove', this.throttledMouseMove);
-
-            this.setState({
-                mouseDragStartPosX: nativeEvent.clientX,
-                mouseDragStartPosY: nativeEvent.clientY,
-
-                dragPosX: this.state.currentPosX,
-                dragPosY: this.state.currentPosY,
-
-                dragStartPosX: this.state.currentPosX,
-                dragStartPosY: this.state.currentPosY,
-
-                isDragged: true,
-            });
-        }, 300);
-    }
-
-    onDragEnd(event) {
+        // If the element is being dragged, skip the workaround, as it creates janky transition
         if (this.state.isDragged) {
-            document.removeEventListener('mousemove', this.throttledMouseMove);
+            this.setState(newState);
+        } else if (newState.currentPosX !== this.state.currentPosX ||
+            newState.currentPosY !== this.state.currentPosY) {
 
-            this.setState({
-                isDragged: false,
-            });
-
-            this.suppressOnClick = true;
+            this.cachedState = newState;
         }
 
-        document.removeEventListener('mouseup', this.onDragEnd);
-
-        if (this.dragTimeout) {
-            clearTimeout(this.dragTimeout);
-            this.dragTimeout = null;
-        }
-
-    }
-
-    onMouseMove(event) {
-        this.throttledDrag({
-            index: this.props.data.view.index,
-            dragPosX: this.state.dragStartPosX - (this.state.mouseDragStartPosX - event.clientX),
-            dragPosY: this.state.dragStartPosY - (this.state.mouseDragStartPosY - event.clientY),
-        });
-
-        this.setState((prevState) => {
-            return {
-                dragPosX: prevState.dragStartPosX - (prevState.mouseDragStartPosX - event.clientX),
-                dragPosY: prevState.dragStartPosY - (prevState.mouseDragStartPosY - event.clientY),
-                dragTransitionDuration: 0.1
-            };
-        });
     }
 
     componentDidUpdate() {
         // HACK: React remounts the component, skipping transition.
         // Delay the state change to allow the browser to process and paint stuff
-        if (this.cachedState.length > 0) {
-            const state = this.cachedState.pop();
+        if (this.cachedState) {
+            const state = this.cachedState;
+            this.cachedState = null;
             setTimeout(() => {
                 window.requestAnimationFrame(() => {
-                    console.log(this.props.node.id);
                     this.setState(state);
                 });
             }, 10);
@@ -181,43 +61,47 @@ class DialContainer extends Component {
 
     render() {
         const {
+            node,
+            isDragged,
+            dialMeta,
+            onMouseDown,
+        } = this.props;
+
+        const { 
+            currentPosX, 
+            currentPosY,
+        } = this.state;
+
+        const transitionDuration = isDragged ? 0.03 : 0.25;
+
+        const {
             title,
             type,
             url,
-        } = this.props.node;
-
-        const xPos = this.state.isDragged ? this.state.dragPosX : this.state.currentPosX;
-        const yPos = this.state.isDragged ? this.state.dragPosY : this.state.currentPosY;
-        const transitionDuration = this.state.isDragged ? this.state.dragTransitionDuration : this.state.transitionDuration;
+        } = node;
 
         let dialClass = 'dial-item-container';
-        dialClass += this.state.isDragged ? ' dial-dragged' : '';
+        dialClass += isDragged ? ' dial-dragged' : '';
 
         const dialStyle = {
-            transform: `translate3D(${xPos}px,${yPos}px,0)`,
+            transform: `translate3D(${currentPosX}px,${currentPosY}px,0)`,
             transitionDuration: `${transitionDuration}s`,
         };
 
-        let dialTileStyle = {};
-
-        if (this.props.dialMeta) {
-            dialTileStyle = {
-                background: extractRGB(this.props.dialMeta.background),
-                color: extractRGB(this.props.dialMeta.text),
-            };
-        }
+        const dialTileStyle = !dialMeta ? {} : {
+            background: extractRGB(dialMeta.background),
+            color: extractRGB(dialMeta.text),
+        };
 
         return (
             <div
-                draggable="true"
                 className={dialClass}
                 style={dialStyle}>
 
                 <DialTile
                     url={url}
                     type={type}
-                    onClick={this.onClick}
-                    onMouseDown={this.onDragStart}
+                    onMouseDown={onMouseDown}
                     tileStyle={dialTileStyle}>
 
                 </DialTile>
@@ -230,11 +114,13 @@ class DialContainer extends Component {
 
 DialContainer.propTypes = {
     node: PropTypes.object.isRequired,
-    data: PropTypes.object.isRequired,
+    view: PropTypes.object.isRequired,
     dialMeta: PropTypes.object,
-    onOpenFolder: PropTypes.func.isRequired,
-    onDrag: PropTypes.func.isRequired,
     onUpdate: PropTypes.func.isRequired,
+    xPos: PropTypes.number.isRequired,
+    yPos: PropTypes.number.isRequired,
+    isDragged: PropTypes.bool.isRequired,
+    onMouseDown: PropTypes.func.isRequired,
 };
 
 export default DialContainer;

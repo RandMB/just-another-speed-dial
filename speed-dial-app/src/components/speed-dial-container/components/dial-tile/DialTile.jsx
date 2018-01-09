@@ -4,12 +4,11 @@ import PropTypes from 'prop-types';
 import './DialTile.css';
 import folderImage from '../../../../assets/folder.png';
 
-function DialTitle(props) {
+function DialTile(props) {
     return (
         <div
             className="dial-tile rounded-borders"
             title={props.url}
-            onClick={props.onClick}
             onMouseDown={props.onMouseDown}
             style={props.tileStyle}>
 
@@ -23,12 +22,11 @@ function DialTitle(props) {
     );
 }
 
-DialTitle.propTypes = {
+DialTile.propTypes = {
     url: PropTypes.string,
     type: PropTypes.string.isRequired,
-    onClick: PropTypes.func.isRequired,
     onMouseDown: PropTypes.func.isRequired,
     tileStyle: PropTypes.object,
 };
 
-export default DialTitle;
+export default DialTile;

@@ -1,7 +1,7 @@
 import React, { Component } from 'react';
 import PropTypes from 'prop-types';
 
-import DialContainer from '../dial-container/DialContainer';
+import DraggableTileContainer from '../draggable-tile-container/DraggableTileContainer';
 
 import _cloneDeep from 'lodash/cloneDeep';
 
@@ -23,7 +23,7 @@ class DialFolder extends Component {
         this.configPromise = browser.storage.local.get(`folder${props.folderId}`);
         this.scriptPort = browser.runtime.connect();
 
-        this.scriptPort.onMessage.addListener(({id, ...rest}) => {
+        this.scriptPort.onMessage.addListener(({ id, ...rest }) => {
             this.setState((prevState) => {
                 const newFolder = _cloneDeep(prevState.folderData);
 
@@ -38,6 +38,7 @@ class DialFolder extends Component {
         });
 
         this.onDialUpdate = this.onDialUpdate.bind(this);
+        this.onClick = this.onClick.bind(this);
     }
 
     componentWillMount() {
@@ -58,6 +59,15 @@ class DialFolder extends Component {
         });
     }
 
+    onClick(index) {
+        console.log(this.props.bookmarks[index]);
+        if (this.props.bookmarks[index].treeNode.type === 'folder') {
+            this.props.onOpenFolder(this.props.bookmarks[index].treeNode.id);
+        } else if (this.props.bookmarks[index].treeNode.type === 'bookmark') {
+            window.location.href = this.props.bookmarks[index].treeNode.url;
+        }
+    }
+
     render() {
         const bookmarkTree = this.props.bookmarks;
         const dialsStyle = {
@@ -71,18 +81,28 @@ class DialFolder extends Component {
                 className="speed-dial-view-plane config-close"
                 style={dialsStyle}>
 
-                {this.state.isConfigLoaded && bookmarkTree.map(({ id, treeNode, data }, index) =>
-                    <DialContainer
-                        onOpenFolder={this.props.onOpenFolder}
-                        key={'' + id}
-                        node={treeNode}
-                        data={data}
-                        dialMeta={this.state.folderData[id]}
-                        onUpdate={this.onDialUpdate}
-                        onDrag={this.props.onDialDrag}>
-                        
-                    </DialContainer>
-                    )
+                {this.state.isConfigLoaded && bookmarkTree.map(({ treeNode, view }, index) => {
+                    const dialData = {
+                        node: treeNode,
+                        view: view,
+                        dialMeta: this.state.folderData[treeNode.id],
+                        onUpdate: this.onDialUpdate,
+                    };
+
+                    return (
+                        <DraggableTileContainer
+                            xPos={view.dialPosX}
+                            yPos={view.dialPosY}
+                            id={index}
+                            onDrag={this.props.onDialDrag}
+                            onClick={this.onClick}
+
+                            key={'' + treeNode.id}
+                            data={dialData}>
+
+                        </DraggableTileContainer>
+                    );
+                })
                 }
             </div>
         );

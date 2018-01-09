@@ -70,7 +70,7 @@ class SpeedDialContainer extends Component {
     updateChildren(children, columnCount) {
         children.forEach((child, index) => {
             //console.log(`${index}:(${this.computeDialXPos(index, columnCount)},${this.computeDialYPos(index, columnCount)})`);
-            child.data.view = Object.assign(child.data.view, {
+            child.view = Object.assign(child.view, {
                 index: index,
                 dialPosX: this.computeDialXPos(index, columnCount),
                 dialPosY: this.computeDialYPos(index, columnCount),
@@ -98,7 +98,7 @@ class SpeedDialContainer extends Component {
             const [removed] = newChildren.splice(dragData.index, 1);
             newChildren.splice(newIndex, 0, removed);
 
-            browser.bookmarks.move(removed.id, {
+            browser.bookmarks.move(removed.treeNode.id, {
                 // +1 because for mozilla arrays start at 1
                 index: newIndex + 1,
             }).then(null, onError);
@@ -131,14 +131,11 @@ class SpeedDialContainer extends Component {
             return child.type === 'folder';
         }).map((child, index) => {
             return {
-                id: child.id,
                 treeNode: child,
-                data: {
-                    view: {
-                        index: index,
-                        dialPosX: this.computeDialXPos(index, this.state.dialColumns),
-                        dialPosY: this.computeDialYPos(index, this.state.dialColumns),
-                    },
+                view: {
+                    index: index,
+                    dialPosX: this.computeDialXPos(index, this.state.dialColumns),
+                    dialPosY: this.computeDialYPos(index, this.state.dialColumns),
                 },
             };
         });

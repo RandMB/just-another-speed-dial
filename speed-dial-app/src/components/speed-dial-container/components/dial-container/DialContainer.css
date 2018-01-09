@@ -11,23 +11,6 @@
     z-index: 500;
 }
 
-.dial-dragged .dial-tile {
+.dial-dragged .dial-tile, .dial-tile:hover {
     box-shadow: 0 0 10px rgba(0, 0, 0, .65);
-}
-
-.dial-tile {
-    display: flex;
-    flex-direction: column;
-    justify-content: center;
-    align-items: center;
-    align-content: center;
-    cursor: pointer;
-    width: 100%;
-    flex: 1;
-    background: white;
-    color: black;
-    -moz-user-select: none;
-    -webkit-user-select: none;
-    -ms-user-select: none;
-    user-select: none;
 }
