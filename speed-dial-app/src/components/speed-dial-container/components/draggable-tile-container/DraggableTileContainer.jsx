@@ -96,9 +96,13 @@ class DraggableDialContainer extends Component {
                 dragPosX: this.state.dragPosX,
                 dragPosY: this.state.dragPosY,
             });
-        }, 200);
+        }, 180);
 
-        window.requestAnimationFrame(this.dragAnimate);
+        this.setState({
+            isDragged: true,
+        });
+
+        this.dragAnimate();
     }
 
     onMouseUp(event) {
@@ -123,17 +127,13 @@ class DraggableDialContainer extends Component {
         if (!this.currentDragState.hasDragThresholdCrossed && this.currentDragState.isDraggedCurrently) {
             const distance = computeDistance(
                 this.currentDragState.mouseDragStartPosX,
-                event.clientX,
                 this.currentDragState.mouseDragStartPosY,
+                event.clientX,
                 event.clientY,
             );
 
             if (distance > DRAG_DISTANCE_THRESHOLD) {
                 this.currentDragState.hasDragThresholdCrossed = true;
-
-                this.setState({
-                    isDragged: true,
-                });
             }
         }
 

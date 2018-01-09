@@ -7,10 +7,6 @@
     transition: transform 0.25s ease;
 }
 
-.dial-dragged {
-    z-index: 500;
-}
-
 .dial-dragged .dial-tile, .dial-tile:hover {
     box-shadow: 0 0 10px rgba(0, 0, 0, .65);
 }

@@ -65,6 +65,7 @@ class DialContainer extends Component {
             isDragged,
             dialMeta,
             onMouseDown,
+            view,
         } = this.props;
 
         const { 
@@ -86,6 +87,7 @@ class DialContainer extends Component {
         const dialStyle = {
             transform: `translate3D(${currentPosX}px,${currentPosY}px,0)`,
             transitionDuration: `${transitionDuration}s`,
+            zIndex: isDragged ? 500 : view.zIndex,
         };
 
         const dialTileStyle = !dialMeta ? {} : {

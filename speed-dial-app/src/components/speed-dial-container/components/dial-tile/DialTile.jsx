@@ -7,13 +7,18 @@ import folderImage from '../../../../assets/folder.png';
 function DialTile(props) {
     return (
         <div
+            draggable="false"
             className="dial-tile rounded-borders"
             title={props.url}
             onMouseDown={props.onMouseDown}
             style={props.tileStyle}>
 
             {props.type === 'folder' &&
-                <img alt="" draggable="false" src={folderImage} />
+                <img
+                    alt=""
+                    draggable="false"
+                    src={folderImage}
+                    onDragStart={(event) => { event.preventDefault(); }} />
             }
             {props.type === 'bookmark' &&
                 <a>{new URL(props.url).host}</a>

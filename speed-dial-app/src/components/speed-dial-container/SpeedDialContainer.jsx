@@ -71,6 +71,7 @@ class SpeedDialContainer extends Component {
         children.forEach((child, index) => {
             //console.log(`${index}:(${this.computeDialXPos(index, columnCount)},${this.computeDialYPos(index, columnCount)})`);
             child.view = Object.assign(child.view, {
+                zIndex: children.length - index,
                 index: index,
                 dialPosX: this.computeDialXPos(index, columnCount),
                 dialPosY: this.computeDialYPos(index, columnCount),
@@ -123,17 +124,20 @@ class SpeedDialContainer extends Component {
     }
 
     transformChildren(children) {
-        return children.filter((child) => {
+        const filteredChildren = children.filter((child) => {
             if (child.type === 'bookmark') {
                 return !(child.url.startsWith('place:') || child.url.startsWith('about:'));
             }
 
             return child.type === 'folder';
-        }).map((child, index) => {
+        });
+        
+        return filteredChildren.map((child, index) => {
             return {
                 treeNode: child,
                 view: {
                     index: index,
+                    zIndex: filteredChildren.length - index,
                     dialPosX: this.computeDialXPos(index, this.state.dialColumns),
                     dialPosY: this.computeDialYPos(index, this.state.dialColumns),
                 },
