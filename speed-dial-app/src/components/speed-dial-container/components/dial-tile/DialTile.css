@@ -14,3 +14,36 @@
     -ms-user-select: none;
     user-select: none;
 }
+
+.tile-edit-button {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    position: absolute;
+    right: 4px;
+    top: 4px;
+    padding: 4px;
+    border-radius: 4px;
+    width: 32px;
+    height: 32px;
+    opacity: 0;
+    font-size: 16px;
+    color: white;
+    background-color: rgba(0, 0, 0, 0.356);
+}
+
+.tile-edit-button:hover {
+    background-color: rgba(0, 0, 0, 0.514);
+}
+
+.dial-locked .tile-edit-button {
+    display: none;
+}
+
+.dial-tile:hover .tile-edit-button {
+    opacity: 1;
+}
+
+.dial-dragged .dial-tile:hover .tile-edit-button {
+    opacity: 0;
+}

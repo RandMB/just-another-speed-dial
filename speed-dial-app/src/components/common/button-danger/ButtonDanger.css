@@ -1,0 +1,12 @@
+.button-danger {
+    color: #ffffff;
+    background-color: #ff0039;
+}
+
+.button-danger:hover {
+    background-color: #d70022;
+}
+
+.button-danger:active {
+    background-color: #a4000f;
+}

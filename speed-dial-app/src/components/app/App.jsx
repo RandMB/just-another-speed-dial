@@ -1,5 +1,6 @@
 import React, { Component } from 'react';
 import PropTypes from 'prop-types';
+
 import SpeedDialContainer from '../speed-dial-container/SpeedDialContainer';
 import FolderPickerContainer from '../folder-picker-container/FolderPickerContainer';
 import ConfigurationContainer from '../configuration-container/ConfigurationContainer';
@@ -142,6 +143,7 @@ class App extends Component {
 
                     <i className="fas fa-cog"></i>
                 </div>
+
             </React.Fragment>
         );
     }

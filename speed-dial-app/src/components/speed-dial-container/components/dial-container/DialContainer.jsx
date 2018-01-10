@@ -8,7 +8,7 @@ import DialTile from '../dial-tile/DialTile';
 import './DialContainer.css';
 
 const DRAG_ZINDEX = 500;
-const TRANZITION_DURATION = 0.25;
+const TRANSITION_DURATION = 0.25;
 
 function extractRGB(a) {
     return `rgb(${a[0]},${a[1]},${a[2]})`;
@@ -29,6 +29,8 @@ class DialContainer extends Component {
         if (!props.dialMeta && props.node.type !== 'folder') {
             this.props.onUpdate(props.node.id, props.node.url);
         }
+
+        this.onEditMouseDown = this.onEditMouseDown.bind(this);
     }
 
     componentWillReceiveProps(newProps) {
@@ -63,6 +65,15 @@ class DialContainer extends Component {
         }
     }
 
+    onEditMouseDown(event) {
+        event.stopPropagation();
+        console.log('Edit button pressed');
+
+        window.addEventListener('mouseup', () => {
+            this.props.onEdit(this.props.view.index, this.props.node.id);
+        }, { once: true });
+    }
+
     render() {
         const {
             node,
@@ -75,11 +86,11 @@ class DialContainer extends Component {
         const { currentPosX, currentPosY } = this.state;
         const { title, type, url } = node;
 
-        const transitionDuration = isDragged ? 0 : TRANZITION_DURATION;
+        const transitionDuration = isDragged ? 0 : TRANSITION_DURATION;
 
         const dialClass = ClassNames({
             'dial-item-container': true,
-            'isDragged': isDragged,
+            'dial-dragged': isDragged,
         });
 
         const dialStyle = {
@@ -106,6 +117,7 @@ class DialContainer extends Component {
                     url={url}
                     type={type}
                     onMouseDown={onMouseDown}
+                    onEditMouseDown={this.onEditMouseDown}
                     tileStyle={dialTileStyle}>
 
                 </DialTile>
@@ -125,6 +137,7 @@ DialContainer.propTypes = {
     yPos: PropTypes.number.isRequired,
     isDragged: PropTypes.bool.isRequired,
     onMouseDown: PropTypes.func.isRequired,
+    onEdit: PropTypes.func.isRequired,
 };
 
 export default DialContainer;

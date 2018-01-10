@@ -1,7 +1,9 @@
 import React, { Component } from 'react';
 import PropTypes from 'prop-types';
+import { Portal } from 'react-portal';
 
 import DraggableTileContainer from '../draggable-tile-container/DraggableTileContainer';
+import TileEditModal from '../../../modals/tile-edit-modal/TileEditModal';
 
 import _cloneDeep from 'lodash/cloneDeep';
 
@@ -18,6 +20,8 @@ class DialFolder extends Component {
         this.state = {
             folderData: {},
             isConfigLoaded: false,
+
+            configuredTile: null,
         };
 
         this.configPromise = browser.storage.local.get(`folder${props.folderId}`);
@@ -38,7 +42,9 @@ class DialFolder extends Component {
         });
 
         this.onDialUpdate = this.onDialUpdate.bind(this);
+        this.onEditModalClose = this.onEditModalClose.bind(this);
         this.onClick = this.onClick.bind(this);
+        this.onEdit = this.onEdit.bind(this);
     }
 
     componentWillMount() {
@@ -60,16 +66,42 @@ class DialFolder extends Component {
     }
 
     onClick(index) {
-        console.log(this.props.bookmarks[index]);
-        if (this.props.bookmarks[index].treeNode.type === 'folder') {
-            this.props.onOpenFolder(this.props.bookmarks[index].treeNode.id);
-        } else if (this.props.bookmarks[index].treeNode.type === 'bookmark') {
-            window.location.href = this.props.bookmarks[index].treeNode.url;
+        const node = this.props.bookmarks[index].treeNode;
+
+        if (node.type === 'folder') {
+            this.props.onOpenFolder(node.id);
+        } else if (node.type === 'bookmark') {
+            window.location.href = node.url;
         }
+    }
+
+    onEdit(index, id) {
+        // Do not allow simultaneous editing of multiple tiles
+        if (!this.state.configuredTile || !this.testCurrentEditTileExists()) {
+
+            this.setState({
+                configuredTile: {
+                    index,
+                    id,
+                },
+            });
+        }
+    }
+
+    testCurrentEditTileExists() {
+        const tile = this.props.bookmarks[this.state.configuredTile.index];
+        return tile && tile.treeNode.id === this.state.configuredTile.id;
+    }
+
+    onEditModalClose() {
+        this.setState({
+            configuredTile: null,
+        });
     }
 
     render() {
         const bookmarkTree = this.props.bookmarks;
+        const configuredTile = this.state.configuredTile;
         const dialsStyle = {
             width: this.props.width,
             height: this.props.height,
@@ -81,28 +113,39 @@ class DialFolder extends Component {
                 className="speed-dial-view-plane config-close"
                 style={dialsStyle}>
 
-                {this.state.isConfigLoaded && bookmarkTree.map(({ treeNode, view }, index) => {
-                    const dialData = {
-                        node: treeNode,
-                        view: view,
-                        dialMeta: this.state.folderData[treeNode.id],
-                        onUpdate: this.onDialUpdate,
-                    };
+                {
+                    this.state.isConfigLoaded && bookmarkTree.map(({ treeNode, view }, index) => {
+                        const dialData = {
+                            node: treeNode,
+                            view: view,
+                            dialMeta: this.state.folderData[treeNode.id],
+                            onUpdate: this.onDialUpdate,
+                            onEdit: this.onEdit,
+                        };
 
-                    return (
-                        <DraggableTileContainer
-                            xPos={view.dialPosX}
-                            yPos={view.dialPosY}
-                            id={index}
-                            onDrag={this.props.onDialDrag}
-                            onClick={this.onClick}
+                        return (
+                            <DraggableTileContainer
+                                xPos={view.dialPosX}
+                                yPos={view.dialPosY}
+                                id={index}
+                                onDrag={this.props.onDialDrag}
+                                onClick={this.onClick}
 
-                            key={'' + treeNode.id}
-                            data={dialData}>
+                                key={'' + treeNode.id}
+                                data={dialData}>
 
-                        </DraggableTileContainer>
-                    );
-                })
+                            </DraggableTileContainer>
+
+
+                        );
+                    })
+                }
+
+                {configuredTile && this.testCurrentEditTileExists() &&
+                    <Portal node={document && document.getElementById('modals')}>
+                        <TileEditModal onClose={this.onEditModalClose}>
+                        </TileEditModal>
+                    </Portal>
                 }
             </div>
         );

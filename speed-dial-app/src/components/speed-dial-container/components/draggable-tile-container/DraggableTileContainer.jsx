@@ -72,7 +72,7 @@ class DraggableDialContainer extends Component {
             return;
         }
 
-        document.addEventListener('mouseup', this.onMouseUp);
+        document.addEventListener('mouseup', this.onMouseUp, { once: true });
         document.addEventListener('mousemove', this.onMouseMove);
 
         const nativeEvent = event.nativeEvent;
@@ -107,10 +107,8 @@ class DraggableDialContainer extends Component {
 
     onMouseUp(event) {
         document.removeEventListener('mousemove', this.onMouseMove);
-        document.removeEventListener('mouseup', this.onMouseUp);
 
         if (!this.currentDragState.hasDragThresholdCrossed) {
-            console.log('distance');
             this.props.onClick(this.props.id);
         }
 

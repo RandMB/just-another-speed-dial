@@ -1,0 +1,19 @@
+button {
+    font-weight: normal;
+    font-size: 0.9rem;
+    border-radius: 2px;
+    border: none;
+    padding: 0px 8px;
+    min-height: 32px;
+    min-width: 66px;
+    background-color: rgba(12, 12, 13, .1);
+    color: #0c0c0d;
+}
+
+button:hover {
+    background-color: rgba(12, 12, 13, .2);
+}
+
+button:active {
+    background-color: rgba(12, 12, 13, .3);
+}
