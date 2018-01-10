@@ -3,12 +3,8 @@
     "name": "Just another speed dial",
     "version": "0.0.3",
     "description": "Shows a speed dial made of bookmarks",
-    "icons": {
-        "64": "icons/folder.png",
-        "96": "icons/folder.svg"
-    },
     "chrome_url_overrides": {
-        "newtab": "content/index.html"
+        "newtab": "speed-dial-app/index.html"
     },
     "permissions": [
         "bookmarks",
@@ -23,5 +19,9 @@
     },
     "background": {
         "page": "background/background.html"
+    },
+    "options_ui": {
+        "page": "options-app/index.html",
+        "open_in_tab": false
     }
 }

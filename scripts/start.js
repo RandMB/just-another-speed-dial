@@ -11,28 +11,13 @@ process.on('unhandledRejection', err => {
     throw err;
 });
 
-// Ensure environment variables are read.
-require('../config/env');
-
 const webpack = require('webpack');
-//const clearConsole = require('react-dev-utils/clearConsole');
-const checkRequiredFiles = require('react-dev-utils/checkRequiredFiles');
 
-const paths = require('../config/paths');
-const config = require('../config/webpack.config.dev');
+const dialAppConfig = require('../speed-dial-app/config/webpack.config.dev');
+const optionsAppConfig = require('../options-app/config/webpack.config.dev');
 const webExt = require('web-ext').default;
-const fs = require('fs-extra');
 
-//const isInteractive = process.stdout.isTTY;
-
-// Warn and crash if required files are missing
-if (!checkRequiredFiles([paths.appHtml, paths.appIndexJs])) {
-    process.exit(1);
-}
-
-const compiler = webpack(config);
-
-//webExt.util.logger.consoleStream.makeVerbose();
+const compiler = webpack([dialAppConfig, optionsAppConfig]);
 
 const compilingPromise = new Promise((resolve, reject) => {
     compiler.run((err, stats) => {
@@ -51,7 +36,7 @@ const compilingPromise = new Promise((resolve, reject) => {
 
 compilingPromise.then(() => {
     return webExt.cmd.run({
-        firefox: 'C:\\Program Files\\Nightly\\firefox.exe',
+        firefox: 'nightly',
         sourceDir: process.cwd() + '\\extension',
         firefoxProfile: 'Webextension',
         noInput: true,
@@ -63,27 +48,7 @@ compilingPromise.then(() => {
         aggregateTimeout: 300,
         ignored: /node_modules/
     }, (err, stats) => {
-        if (err) {
-            console.error(err.stack || err);
-            if (err.details) {
-                console.error(err.details);
-            }
-            return;
-        }
-
-        if (stats.hasErrors()) {
-            console.error(stats.errors);
-        } else {
-            console.log('\nCompiled successfuly');
-        }
-
-        copyPublicFolder();
-
-        if (stats.hasWarnings()) {
-            console.warn(stats.warnings);
-        }
-
-        console.log(stats.toString('minimal'));
+        printStatus(err, stats);
     });
 
     // Stupid Windows workaround for graceful exit... 
@@ -111,9 +76,22 @@ compilingPromise.then(() => {
     }
 });
 
-function copyPublicFolder() {
-    fs.copySync(paths.appPublic, paths.appBuild, {
-        dereference: true,
-        filter: file => file !== paths.appHtml,
-    });
+function printStatus(err, stats) {
+    if (err) {
+        console.error(err.stack || err);
+        if (err.details) {
+            console.error(err.details);
+        }
+        return;
+    }
+
+    if (stats.hasErrors()) {
+        console.error(stats.errors);
+    } else {
+        console.log('\nCompiled successfuly');
+    }
+
+    if (stats.hasWarnings()) {
+        console.warn(stats.warnings);
+    }
 }

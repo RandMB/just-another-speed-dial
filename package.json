@@ -41,41 +41,38 @@
     "webpack": "^3.10.0"
   },
   "scripts": {
-    "start": "node speed-dial-app/scripts/start.js",
-    "build": "node speed-dial-app/scripts/build.js",
+    "start": "node scripts/start.js",
+    "build": "node scripts/build.js",
     "pack": "web-ext build -s extension -a build --overwrite-dest",
-    "test": "node speed-dial-app/scripts/test.js --env=jsdom"
+    "test": "node scripts/test.js --env=jsdom"
   },
   "jest": {
     "collectCoverageFrom": [
-      "speed-dial-app/src/**/*.{js,jsx,mjs}"
+      "speed-dial-app/src/**/*.{js,jsx}",
+      "options-app/src/**/*.{js,jsx}"
     ],
     "setupFiles": [
-      "<rootDir>/speed-dial-app/config/polyfills.js"
+      "<rootDir>/scripts/polyfills.js"
     ],
     "testMatch": [
-      "<rootDir>/speed-dial-app/src/**/__tests__/**/*.{js,jsx,mjs}",
-      "<rootDir>/speed-dial-app/src/**/?(*.)(spec|test).{js,jsx,mjs}"
+      "<rootDir>/speed-dial-app/src/**/__tests__/**/*.{js,jsx}",
+      "<rootDir>/speed-dial-app/src/**/?(*.)(spec|test).{js,jsx}",
+      "<rootDir>/options-app/src/**/__tests__/**/*.{js,jsx}",
+      "<rootDir>/options-app/src/**/?(*.)(spec|test).{js,jsx}"
     ],
     "testEnvironment": "node",
     "testURL": "http://localhost",
     "transform": {
       "^.+\\.(js|jsx|mjs)$": "<rootDir>/node_modules/babel-jest",
-      "^.+\\.css$": "<rootDir>/speed-dial-app/config/jest/cssTransform.js",
-      "^(?!.*\\.(js|jsx|mjs|css|json)$)": "<rootDir>/speed-dial-app/config/jest/fileTransform.js"
+      "^.+\\.css$": "<rootDir>/scripts/jest/cssTransform.js",
+      "^(?!.*\\.(js|jsx|mjs|css|json)$)": "<rootDir>/scripts/jest/fileTransform.js"
     },
     "transformIgnorePatterns": [
-      "[/\\\\]node_modules[/\\\\].+\\.(js|jsx|mjs)$"
+      "[/\\\\]node_modules[/\\\\].+\\.(js|jsx)$"
     ],
-    "moduleNameMapper": {
-      "^react-native$": "react-native-web"
-    },
     "moduleFileExtensions": [
-      "web.js",
-      "mjs",
       "js",
       "json",
-      "web.jsx",
       "jsx",
       "node"
     ]

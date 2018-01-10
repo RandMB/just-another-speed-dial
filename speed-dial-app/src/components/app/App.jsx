@@ -138,7 +138,7 @@ class App extends Component {
 
                 <div
                     className="config-open-button"
-                    onClickCapture={(event) => this.setConfigSidebarOpen(true, event)}
+                    onClick={(event) => browser.runtime.openOptionsPage().then()}
                     tile="Open configuration sidebar">
 
                     <i className="fas fa-cog"></i>

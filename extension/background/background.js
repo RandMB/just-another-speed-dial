@@ -25,7 +25,7 @@ function getColors(url) {
     const imgUrl = baseUrl + encodeURIComponent(url);
     return new Promise((resolve) => {
         getImage(imgUrl).then((img) => {
-            const colorThief = new ColorThief();
+            const colorThief = new window.ColorThief();
 
             const dominant = colorThief.getColor(img, 3);
 
