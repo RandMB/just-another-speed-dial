@@ -9,8 +9,6 @@ import './SpeedDialContainer.css';
 import _debounce from 'lodash/debounce';
 import _cloneDeep from 'lodash/cloneDeep';
 
-console.log(DialUtils);
-
 const DIAL_HEIGHT = 239;
 const DIAL_WIDTH = 250;
 const BETWEEN_DIALS = 30;
