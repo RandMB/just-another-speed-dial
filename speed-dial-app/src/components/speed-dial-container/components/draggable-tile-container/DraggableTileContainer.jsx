@@ -96,7 +96,7 @@ class DraggableDialContainer extends Component {
                 dragPosX: this.state.dragPosX,
                 dragPosY: this.state.dragPosY,
             });
-        }, 180);
+        }, 150);
 
         this.setState({
             isDragged: true,

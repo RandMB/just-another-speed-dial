@@ -1,10 +1,14 @@
 import React, { Component } from 'react';
 import PropTypes from 'prop-types';
+import ClassNames from 'classnames';
 
 import DialTitle from '../dial-title/DialTitle';
 import DialTile from '../dial-tile/DialTile';
 
 import './DialContainer.css';
+
+const DRAG_ZINDEX = 500;
+const TRANZITION_DURATION = 0.25;
 
 function extractRGB(a) {
     return `rgb(${a[0]},${a[1]},${a[2]})`;
@@ -68,32 +72,30 @@ class DialContainer extends Component {
             view,
         } = this.props;
 
-        const { 
-            currentPosX, 
-            currentPosY,
-        } = this.state;
+        const { currentPosX, currentPosY } = this.state;
+        const { title, type, url } = node;
 
-        const transitionDuration = isDragged ? 0 : 0.25;
+        const transitionDuration = isDragged ? 0 : TRANZITION_DURATION;
 
-        const {
-            title,
-            type,
-            url,
-        } = node;
-
-        let dialClass = 'dial-item-container';
-        dialClass += isDragged ? ' dial-dragged' : '';
+        const dialClass = ClassNames({
+            'dial-item-container': true,
+            'isDragged': isDragged,
+        });
 
         const dialStyle = {
             transform: `translate3D(${currentPosX}px,${currentPosY}px,0)`,
             transitionDuration: `${transitionDuration}s`,
-            zIndex: isDragged ? 500 : view.zIndex,
+            zIndex: isDragged ? DRAG_ZINDEX : view.zIndex,
         };
 
-        const dialTileStyle = !dialMeta ? {} : {
-            background: extractRGB(dialMeta.background),
-            color: extractRGB(dialMeta.text),
-        };
+        let dialTileStyle = {};
+
+        if (dialMeta) {
+            dialTileStyle = {
+                background: extractRGB(dialMeta.background),
+                color: extractRGB(dialMeta.text),
+            };
+        }
 
         return (
             <div

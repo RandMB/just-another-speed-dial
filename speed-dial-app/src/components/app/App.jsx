@@ -112,10 +112,7 @@ class App extends Component {
 
     render() {
         // Styling for page body
-        let bodyStyle = `background-image: url('${backgroundImageUrl}');`;
-        bodyStyle += `background-size: cover;`;
-
-        document.body.style = bodyStyle;
+        document.body.style = `background-image: url('${backgroundImageUrl}'); background-size: cover;`;
 
         const rootBookmarkTreeId = this.state.config.rootId;
 
