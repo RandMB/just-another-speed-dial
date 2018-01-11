@@ -42,6 +42,7 @@ class DraggableDialContainer extends Component {
         this.dragAnimate = this.dragAnimate.bind(this);
 
         this.dragReportInterval = null;
+        this.dragStartIndex = null;
     }
 
     dragAnimate() {
@@ -96,13 +97,15 @@ class DraggableDialContainer extends Component {
                 dragPosX: this.state.dragPosX,
                 dragPosY: this.state.dragPosY,
             });
-        }, 120);
+        }, 100);
 
         this.setState({
             isDragged: true,
         });
 
         this.dragAnimate();
+
+        this.dragStartIndex = this.props.id;
     }
 
     onMouseUp(event) {
@@ -111,14 +114,13 @@ class DraggableDialContainer extends Component {
         if (!this.currentDragState.hasDragThresholdCrossed) {
             this.props.onClick(this.props.id);
         } else {
-            this.props.onDragEnd && this.props.onDragEnd(this.props.id);
-        } 
+            this.props.onDragEnd && this.props.onDragEnd(this.dragStartIndex, this.props.id);
+        }
 
-        this.currentDragState = Object.assign({}, this.dragDefault);
+        Object.assign(this.currentDragState, this.dragDefault);
 
-        this.setState({
-            isDragged: false,
-        });
+        this.setState({ isDragged: false, });
+        this.dragStartIndex = null;
 
         clearInterval(this.dragReportInterval);
     }
@@ -137,7 +139,7 @@ class DraggableDialContainer extends Component {
             }
         }
 
-        this.currentDragState = Object.assign(this.currentDragState, {
+        Object.assign(this.currentDragState, {
             currentMousePosX: event.clientX,
             currentMousePosY: event.clientY,
         });

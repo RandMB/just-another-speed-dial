@@ -33,7 +33,6 @@ class SpeedDialContainer extends Component {
         this.onDragEnd = this.onDragEnd.bind(this);
 
         this.browserUtils = this.props.browserUtils;
-        this.dragTileIndex = null;
 
         window.addEventListener('resize',
             _debounce(this.onResize, 200, { trailing: true }));
@@ -66,13 +65,24 @@ class SpeedDialContainer extends Component {
 
     updateChildren(children, columnCount) {
         children.forEach((child, index) => {
-            child.view = Object.assign(child.view, {
+            Object.assign(child.view, {
                 zIndex: children.length - index,
                 index: index,
                 dialPosX: DialUtils.computeDialXPos(index, columnCount, DIAL_WIDTH),
                 dialPosY: DialUtils.computeDialYPos(index, columnCount, DIAL_HEIGHT),
             });
         });
+    }
+
+    updateChildrenPartial(children, columnCount, start, end) {
+        for (let index = start; index <= end; index++) {
+            Object.assign(children[index].view, {
+                zIndex: children.length - index,
+                index: index,
+                dialPosX: DialUtils.computeDialXPos(index, columnCount, DIAL_WIDTH),
+                dialPosY: DialUtils.computeDialYPos(index, columnCount, DIAL_HEIGHT),
+            });
+        }
     }
 
     onDrag(dragData) {
@@ -88,12 +98,15 @@ class SpeedDialContainer extends Component {
             this.setState((prevState, props) => {
                 const newChildren = _cloneDeep(prevState.children);
 
-                this.dragTileIndex = newChildren[newIndex].treeNode.index;
-
                 const [removed] = newChildren.splice(dragData.index, 1);
                 newChildren.splice(newIndex, 0, removed);
 
-                this.updateChildren(newChildren, this.state.dialColumns);
+                this.updateChildrenPartial(
+                    newChildren, 
+                    this.state.dialColumns,
+                    Math.min(newIndex, dragData.index),
+                    Math.max(newIndex, dragData.index),
+                );
 
                 return {
                     children: newChildren,
@@ -102,10 +115,18 @@ class SpeedDialContainer extends Component {
         }
     }
 
-    async onDragEnd(newIndex) {
-        if (this.state.children[newIndex].treeNode.index !== this.dragTileIndex) {
+    async onDragEnd(oldIndex, newIndex) {
+        if (newIndex !== oldIndex) {
+            let indexToMove;
+
+            if (newIndex < oldIndex) {
+                indexToMove = this.state.children[newIndex + 1].treeNode.index;
+            } else {
+                indexToMove = this.state.children[newIndex - 1].treeNode.index;
+            }
+
             await this.browserUtils.bookmarks.move(
-                this.state.children[newIndex].treeNode.id, { index: this.dragTileIndex });
+                this.state.children[newIndex].treeNode.id, { index: indexToMove });
 
             const children =
                 await this.browserUtils.bookmarks.getFolderChildren(this.state.currFolderId);
@@ -114,8 +135,6 @@ class SpeedDialContainer extends Component {
                 children: this.transformChildren(children),
             });
         }
-
-        this.dragTileIndex = null;
     }
 
     transformChildren(children) {
@@ -186,6 +205,7 @@ class SpeedDialContainer extends Component {
                             onOpenFolder={this.openFolder}
                             onDialDrag={this.onDrag}
                             onDragEnd={this.onDragEnd}
+                            
                             width={DialUtils.computeDialsWidth(this.state.dialColumns, DIAL_WIDTH, BETWEEN_DIALS)}
                             height={DialUtils.computeDialsHeight(children.length, this.state.dialColumns, DIAL_HEIGHT)}
                         >
