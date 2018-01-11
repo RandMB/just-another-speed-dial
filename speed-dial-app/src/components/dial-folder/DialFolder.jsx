@@ -129,6 +129,8 @@ class DialFolder extends Component {
                                 yPos={view.dialPosY}
                                 id={index}
                                 onDrag={this.props.onDialDrag}
+                                onDragEnd={this.props.onDragEnd}
+
                                 onClick={this.onClick}
 
                                 key={'' + treeNode.id}
@@ -158,6 +160,7 @@ DialFolder.propTypes = {
     width: PropTypes.number.isRequired,
     height: PropTypes.number.isRequired,
     onDialDrag: PropTypes.func.isRequired,
+    onDragEnd: PropTypes.func,
     folderId: PropTypes.string.isRequired,
 };
 

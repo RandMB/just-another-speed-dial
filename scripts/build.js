@@ -4,6 +4,14 @@
 process.env.BABEL_ENV = 'production';
 process.env.NODE_ENV = 'production';
 
+
+if (process.argv.includes('--enable-sourcemaps')) {
+    console.log('Enabling sourcemaps, disabling minification')
+    console.log('See: https://github.com/webpack-contrib/babel-minify-webpack-plugin/issues/68')
+
+    process.env.SOURCEMAPS_ENABLE = '1';
+}
+
 // Makes the script crash on unhandled rejections instead of silently
 // ignoring them. In the future, promise rejections that are not handled will
 // terminate the Node.js process with a non-zero exit code.
@@ -83,6 +91,7 @@ function buildWithConfig(paths, configs) {
         err => {
             console.log(chalk.red('Failed to compile.\n'));
             printBuildError(err);
+            console.log(err);
             process.exit(1);
         }
         );
@@ -132,7 +141,7 @@ function buildWithConfig(paths, configs) {
 
 console.time('build');
 
-buildWithConfig(dialAppPaths, dialAppConfig).then(() =>{
+buildWithConfig(dialAppPaths, dialAppConfig).then(() => {
     buildWithConfig(optionsAppPaths, optionsAppConfig).then(() => {
         console.timeEnd('build');
     });

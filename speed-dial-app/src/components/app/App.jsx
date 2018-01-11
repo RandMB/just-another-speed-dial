@@ -4,6 +4,8 @@ import PropTypes from 'prop-types';
 import SpeedDialContainer from '../speed-dial-container/SpeedDialContainer';
 import FolderPickerContainer from '../folder-picker-container/FolderPickerContainer';
 
+import browserUtils from '../../utils/browserUtils';
+
 import _isEmpty from 'lodash/isEmpty';
 
 import './App.css';
@@ -11,16 +13,27 @@ import backgroundImageUrl from '../../assets/background-default.jpg';
 
 function Container(props) {
     if (props.rootBookmarkTreeId) {
-        return <SpeedDialContainer bookmarkTreeId={props.rootBookmarkTreeId}></SpeedDialContainer>;
+        return (
+            <SpeedDialContainer
+                bookmarkTreeId={props.rootBookmarkTreeId}
+                browserUtils={props.browserUtils}>
+            </SpeedDialContainer>
+        );
     }
     else {
-        return <FolderPickerContainer onSelect={props.onFolderSelect}></FolderPickerContainer>;
+        return (
+            <FolderPickerContainer
+                onSelect={props.onFolderSelect}
+                browserUtils={props.browserUtils}>>
+            </FolderPickerContainer>
+        );
     }
 }
 
 Container.propTypes = {
     rootBookmarkTreeId: PropTypes.string,
     onFolderSelect: PropTypes.func.isRequired,
+    browserUtils: PropTypes.object.isRequired,
 };
 
 class App extends Component {
@@ -37,12 +50,10 @@ class App extends Component {
         };
 
         this.onFolderSelect = this.onFolderSelect.bind(this);
-
-        this.configPromise = browser.storage.local.get('config');
     }
 
     async componentWillMount() {
-        const config = await this.configPromise;
+        const config = await browserUtils.localStorage.get('config');
 
         let newConfig = {
             rootId: null,
@@ -63,7 +74,7 @@ class App extends Component {
             rootId: folderId,
         };
 
-        await browser.storage.local.set({ config: newConfig });
+        await browserUtils.localStorage.set({ config: newConfig });
 
         this.setState({
             config: newConfig,
@@ -82,7 +93,8 @@ class App extends Component {
                     <Container
                         key={rootBookmarkTreeId}
                         onFolderSelect={this.onFolderSelect}
-                        rootBookmarkTreeId={rootBookmarkTreeId}>
+                        rootBookmarkTreeId={rootBookmarkTreeId}
+                        browserUtils={browserUtils}>
                     </Container>
                 }
 

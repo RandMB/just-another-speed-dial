@@ -14,40 +14,37 @@ const DIAL_WIDTH = 250;
 const BETWEEN_DIALS = 30;
 const WIDTH_TO_LEAVE = 60;
 
-function onError(error) {
-    console.error(`Error: ${error}`);
-}
-
 class SpeedDialContainer extends Component {
     constructor(props) {
         super(props);
 
         this.state = {
-            currentBookmarkFolderId: props.bookmarkTreeId,
-            previousBookmarkFolderId: null,
-            currentFolderNodes: null,
+            currFolderId: props.bookmarkTreeId,
+            prevFolderId: null,
+            children: null,
 
             dialColumns: DialUtils.computeColumns(DIAL_WIDTH, WIDTH_TO_LEAVE),
         };
-
-        // Dispatch the request immediately, but don't call setState() in constructor,
-        //   even if it completes immediately
-        this.childrenPromise = browser.bookmarks.getChildren(props.bookmarkTreeId);
 
         this.openFolder = this.openFolder.bind(this);
         this.goBack = this.goBack.bind(this);
         this.onResize = this.onResize.bind(this);
         this.onDrag = this.onDrag.bind(this);
+        this.onDragEnd = this.onDragEnd.bind(this);
+
+        this.browserUtils = this.props.browserUtils;
+        this.dragTileIndex = null;
 
         window.addEventListener('resize',
             _debounce(this.onResize, 200, { trailing: true }));
     }
 
-    componentWillMount() {
-        this.childrenPromise.then((children) => {
-            this.setState({
-                currentFolderNodes: this.transformChildren(children),
-            });
+    async componentWillMount() {
+        const children =
+            await this.browserUtils.bookmarks.getFolderChildren(this.props.bookmarkTreeId);
+
+        this.setState({
+            children: this.transformChildren(children),
         });
     }
 
@@ -55,9 +52,15 @@ class SpeedDialContainer extends Component {
         const columns = DialUtils.computeColumns(DIAL_WIDTH, WIDTH_TO_LEAVE);
 
         if (columns !== this.state.dialColumns) {
-            const newChildren = _cloneDeep(this.state.currentFolderNodes);
+            this.setState((prevState, props) => {
+                const newChildren = _cloneDeep(this.state.children);
+                this.updateChildren(newChildren, columns);
 
-            this.updateChildren(newChildren, columns);
+                return {
+                    children: newChildren,
+                    dialColumns: columns,
+                };
+            });
         }
     }
 
@@ -70,52 +73,58 @@ class SpeedDialContainer extends Component {
                 dialPosY: DialUtils.computeDialYPos(index, columnCount, DIAL_HEIGHT),
             });
         });
-
-        this.setState({
-            currentFolderNodes: children,
-            dialColumns: columnCount,
-        });
     }
 
     onDrag(dragData) {
         const normalizedPositions = {
             x: DialUtils.nomalizePosX(dragData.dragPosX, this.state.dialColumns, DIAL_WIDTH, BETWEEN_DIALS),
-            y: DialUtils.nomalizePosY(dragData.dragPosY, this.state.currentFolderNodes.length, this.state.dialColumns, DIAL_HEIGHT),
+            y: DialUtils.nomalizePosY(dragData.dragPosY, this.state.children.length, this.state.dialColumns, DIAL_HEIGHT),
         };
 
         const newIndex = DialUtils.computeDialIndex(normalizedPositions,
-            this.state.dialColumns, this.state.currentFolderNodes.length, DIAL_WIDTH, DIAL_HEIGHT);
+            this.state.dialColumns, this.state.children.length, DIAL_WIDTH, DIAL_HEIGHT);
 
         if (newIndex !== dragData.index) {
-            const newChildren = _cloneDeep(this.state.currentFolderNodes);
+            this.setState((prevState, props) => {
+                const newChildren = _cloneDeep(prevState.children);
 
-            const [removed] = newChildren.splice(dragData.index, 1);
-            newChildren.splice(newIndex, 0, removed);
+                this.dragTileIndex = newChildren[newIndex].treeNode.index;
 
-            browser.bookmarks.move(removed.treeNode.id, {
-                // +1 because for mozilla arrays start at 1
-                index: newIndex + 1,
-            }).then(null, onError);
+                const [removed] = newChildren.splice(dragData.index, 1);
+                newChildren.splice(newIndex, 0, removed);
 
-            this.updateChildren(newChildren, this.state.dialColumns);
+                this.updateChildren(newChildren, this.state.dialColumns);
+
+                return {
+                    children: newChildren,
+                };
+            });
         }
     }
 
+    async onDragEnd(newIndex) {
+        if (this.state.children[newIndex].treeNode.index !== this.dragTileIndex) {
+            await this.browserUtils.bookmarks.move(
+                this.state.children[newIndex].treeNode.id, { index: this.dragTileIndex });
+
+            const children =
+                await this.browserUtils.bookmarks.getFolderChildren(this.state.currFolderId);
+
+            this.setState({
+                children: this.transformChildren(children),
+            });
+        }
+
+        this.dragTileIndex = null;
+    }
+
     transformChildren(children) {
-        const filteredChildren = children.filter((child) => {
-            if (child.type === 'bookmark') {
-                return !(child.url.startsWith('place:') || child.url.startsWith('about:'));
-            }
-
-            return child.type === 'folder';
-        });
-
-        return filteredChildren.map((child, index) => {
+        return children.map((child, index) => {
             return {
                 treeNode: child,
                 view: {
                     index: index,
-                    zIndex: filteredChildren.length - index,
+                    zIndex: children.length - index,
                     dialPosX: DialUtils.computeDialXPos(index, this.state.dialColumns, DIAL_WIDTH),
                     dialPosY: DialUtils.computeDialYPos(index, this.state.dialColumns, DIAL_HEIGHT),
                 },
@@ -124,59 +133,59 @@ class SpeedDialContainer extends Component {
     }
 
     async openFolder(folderId) {
-        const children = await browser.bookmarks.getChildren(folderId);
+        const children =
+            await this.browserUtils.bookmarks.getFolderChildren(folderId);
 
-        const newChildren = this.transformChildren(children);
         this.setState((prevState, props) => {
             return {
-                currentFolderNodes: newChildren,
-                currentBookmarkFolderId: folderId,
-                previousBookmarkFolderId: prevState.currentBookmarkFolderId
+                children: this.transformChildren(children),
+                currFolderId: folderId,
+                prevFolderId: prevState.currFolderId
             };
         });
     }
 
-    goBack() {
-        if (this.state.currentBookmarkFolderId === this.props.bookmarkTreeId) {
+    async goBack() {
+        if (this.state.currFolderId === this.props.bookmarkTreeId) {
             console.warn('Attempting to go back beyond the root folder');
             return;
         }
 
-        const folderId = this.state.previousBookmarkFolderId;
+        const folderId = this.state.prevFolderId;
 
-        const childrenNodes = browser.bookmarks.getChildren(folderId);
-        const folderNode = browser.bookmarks.get(folderId);
+        const childrenNodes = this.browserUtils.bookmarks.getFolderChildren(folderId);
+        const folderNode = this.browserUtils.bookmarks.get(folderId);
 
-        Promise.all([childrenNodes, folderNode])
-            .then(([children, folder]) => {
-                this.setState((prevState, props) => ({
-                    currentFolderNodes: this.transformChildren(children),
-                    currentBookmarkFolderId: folderId,
-                    previousBookmarkFolderId: folder[0].parentId,
-                }));
-            });
+        const [children, folder] = await Promise.all([childrenNodes, folderNode]);
+
+        this.setState((prevState, props) => ({
+            children: this.transformChildren(children),
+            currFolderId: folderId,
+            prevFolderId: folder[0].parentId,
+        }));
     }
 
     render() {
-        const children = this.state.currentFolderNodes;
-        const isRoot = this.state.currentBookmarkFolderId === this.props.bookmarkTreeId;
+        const children = this.state.children;
+        const isRoot = this.state.currFolderId === this.props.bookmarkTreeId;
 
         return (
             <div className="speed-dials config-close" onDragOver={(event) => event.preventDefault()}>
                 <div className="dial-container-top config-close">
                     {!isRoot &&
-                        <button type="button" onClick={this.goBack}> &lt;&lt; Back</button>
+                        <button className="button-transparent" type="button" onClick={this.goBack}> &lt;&lt; Back</button>
                     }
                 </div>
 
                 <div className="dial-container config-close">
                     {children &&
                         <DialFolder
-                            key={this.state.currentBookmarkFolderId}
-                            folderId={this.state.currentBookmarkFolderId}
+                            key={this.state.currFolderId}
+                            folderId={this.state.currFolderId}
                             bookmarks={children}
                             onOpenFolder={this.openFolder}
                             onDialDrag={this.onDrag}
+                            onDragEnd={this.onDragEnd}
                             width={DialUtils.computeDialsWidth(this.state.dialColumns, DIAL_WIDTH, BETWEEN_DIALS)}
                             height={DialUtils.computeDialsHeight(children.length, this.state.dialColumns, DIAL_HEIGHT)}
                         >
@@ -190,6 +199,7 @@ class SpeedDialContainer extends Component {
 
 SpeedDialContainer.propTypes = {
     bookmarkTreeId: PropTypes.string.isRequired,
+    browserUtils: PropTypes.object.isRequired,
 };
 
 export default SpeedDialContainer;

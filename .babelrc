@@ -1,0 +1,25 @@
+{
+    "plugins": [
+        "transform-react-jsx",
+        [
+            "transform-object-rest-spread",
+            {
+                "useBuiltIns": true
+            }
+        ]
+    ],
+    "env": {
+        "development": {
+            "plugins": [
+                "transform-react-jsx-source",
+                "transform-react-jsx-self"
+            ]
+        },
+        "test": {
+            "plugins": [
+                "transform-react-jsx-source",
+                "transform-react-jsx-self"
+            ]
+        }
+    }
+}

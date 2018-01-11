@@ -39,35 +39,21 @@ class FolderPickerContainer extends Component {
         this.onFolderSelect = this.onFolderSelect.bind(this);
         this.onFolderRequest = this.onFolderRequest.bind(this);
         this.onUseFolder = this.onUseFolder.bind(this);
+
+        this.browserUtils = props.browserUtils;
     }
 
-    extractFolders(bookmarkArray) {
-        return bookmarkArray
-            .filter((element) => element.type === 'folder')
-            .map((element) => {
-                return {
-                    id: element.id,
-                    title: element.title,
-                    selected: false,
-                };
-            });
-    }
+    async componentWillMount() {
+        const rootFolderNodes =
+            await this.browserUtils.bookmarks.getRootChildren({ selected: false });
 
-    componentWillMount() {
-        browser.bookmarks.getTree()
-            .then((tree) => {
-                return browser.bookmarks.getChildren(tree[0].id);
-            }).then((children) => {
-                const folderChildren = this.extractFolders(children);
+        rootFolderNodes.forEach((element) => {
+            this.folderIdMap.set(element.id, element);
+        });
 
-                folderChildren.forEach((element) => {
-                    this.folderIdMap.set(element.id, element);
-                });
-
-                this.setState({
-                    bookmarkTree: folderChildren,
-                });
-            });
+        this.setState({
+            bookmarkTree: rootFolderNodes,
+        });
     }
 
     onNewFolder() {
@@ -93,30 +79,24 @@ class FolderPickerContainer extends Component {
         });
     }
 
-    onFolderRequest(folderId) {
+    async onFolderRequest(folderId) {
         console.log('Getting children for folder with id ' + folderId);
 
-        browser.bookmarks.getChildren(folderId)
-            .then((children) => {
-                const folderChildren = this.extractFolders(children);
+        const folderChildren =
+            await this.browserUtils.bookmarks.getSubfolders(folderId, { selected: false });
 
-                folderChildren.forEach((element) => {
-                    this.folderIdMap.set(element.id, element);
-                });
+        folderChildren.forEach((element) => {
+            this.folderIdMap.set(element.id, element);
+        });
 
-                // Add newly retrieved children - Hacky
-                this.folderIdMap.get(folderId).children = folderChildren;
-                
-                // No need to update if there are no children
-                if (children && children.length > 0) {
-                    // We need to force a rerender. Yes, we should not mutate state
-                    this.setState((prevstate, props) => {
-                        return {
-                            bookmarkTree: prevstate.bookmarkTree
-                        };
-                    });
-                }
-            });
+        // Add newly retrieved children - Hacky
+        this.folderIdMap.get(folderId).children = folderChildren;
+
+        // No need to update if there are no children
+        if (folderChildren && folderChildren.length > 0) {
+            // We need to force a rerender. Yes, we should not mutate state
+            this.forceUpdate();
+        }
     }
 
     onUseFolder() {
@@ -135,13 +115,22 @@ class FolderPickerContainer extends Component {
                     <p className="folder-pick-text">
                         Pick a bookmark folder for your speed dial:
                     </p>
-                    {getFolderPickerComponent(
-                        bookmarkTree,
-                        this.onFolderSelect,
-                        this.onFolderRequest)}
+                    {
+                        getFolderPickerComponent(
+                            bookmarkTree,
+                            this.onFolderSelect,
+                            this.onFolderRequest)
+                    }
                     <div className="new-folder-container">
-                        <button type="button" onClick={this.onNewFolder} disabled>New Folder</button>
                         <button
+                            className="button-transparent"
+                            type="button"
+                            onClick={this.onNewFolder}
+                            disabled>
+                            New Folder
+                        </button>
+                        <button
+                            className="button-transparent"
                             type="button"
                             onClick={this.onUseFolder}
                             disabled={!isSelected}>
@@ -156,6 +145,7 @@ class FolderPickerContainer extends Component {
 
 FolderPickerContainer.propTypes = {
     onSelect: PropTypes.func.isRequired,
+    browserUtils: PropTypes.object.isRequired,
 };
 
 export default FolderPickerContainer;

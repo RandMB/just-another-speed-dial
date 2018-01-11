@@ -96,7 +96,7 @@ class DraggableDialContainer extends Component {
                 dragPosX: this.state.dragPosX,
                 dragPosY: this.state.dragPosY,
             });
-        }, 150);
+        }, 120);
 
         this.setState({
             isDragged: true,
@@ -110,7 +110,9 @@ class DraggableDialContainer extends Component {
 
         if (!this.currentDragState.hasDragThresholdCrossed) {
             this.props.onClick(this.props.id);
-        }
+        } else {
+            this.props.onDragEnd && this.props.onDragEnd(this.props.id);
+        } 
 
         this.currentDragState = Object.assign({}, this.dragDefault);
 
@@ -170,6 +172,7 @@ DraggableDialContainer.propTypes = {
     id: PropTypes.any.isRequired,
     data: PropTypes.object.isRequired,
     onDrag: PropTypes.func.isRequired,
+    onDragEnd: PropTypes.func,
     onClick: PropTypes.func.isRequired,
 };
 

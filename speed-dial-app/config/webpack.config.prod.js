@@ -6,10 +6,11 @@ const HtmlWebpackPlugin = require('html-webpack-plugin');
 const ExtractTextPlugin = require('extract-text-webpack-plugin');
 const eslintFormatter = require('react-dev-utils/eslintFormatter');
 const ModuleScopePlugin = require('react-dev-utils/ModuleScopePlugin');
+const MinifyPlugin = require("babel-minify-webpack-plugin");
 const paths = require('./paths');
 
 const shouldUseRelativeAssetPaths = true;
-const shouldUseSourceMap = true;
+const shouldUseSourceMap = process.env.SOURCEMAPS_ENABLE ? true : false;
 
 const env = { 'process.env': { NODE_ENV: '"production"' } };
 
@@ -30,6 +31,39 @@ const extractTextPluginOptions = shouldUseRelativeAssetPaths
   ? // Making sure that the publicPath goes back to to build folder.
     { publicPath: Array(cssFilename.split('/').length).join('../') }
   : {};
+
+const plugins = [
+  // Generates an `index.html` file with the <script> injected.
+  new HtmlWebpackPlugin({
+    inject: true,
+    template: paths.appHtml,
+    minify: {
+      removeComments: true,
+      removeRedundantAttributes: true,
+      useShortDoctype: true,
+      removeEmptyAttributes: true,
+      removeStyleLinkTypeAttributes: true,
+      keepClosingSlash: true,
+      minifyJS: true,
+      minifyCSS: true,
+      minifyURLs: true,
+    },
+  }),
+  // Makes some environment variables available to the JS code, for example:
+  // if (process.env.NODE_ENV === 'production') { ... }. See `./env.js`.
+  // It is absolutely essential that NODE_ENV was set to production here.
+  // Otherwise React will be compiled in the very slow development mode.
+  new webpack.DefinePlugin(env),
+  // Note: this won't work without ExtractTextPlugin.extract(..) in `loaders`.
+  new ExtractTextPlugin({
+    filename: cssFilename,
+  }),
+];
+
+// https://github.com/webpack-contrib/babel-minify-webpack-plugin/issues/68
+if (!process.env.SOURCEMAPS_ENABLE) {
+  plugins.push(new MinifyPlugin({}, {}));
+}
 
 // This is the production configuration.
 // It compiles slowly and is focused on producing a fast and minimal bundle.
@@ -184,51 +218,7 @@ module.exports = {
       },
     ],
   },
-  plugins: [
-    // Generates an `index.html` file with the <script> injected.
-    new HtmlWebpackPlugin({
-      inject: true,
-      template: paths.appHtml,
-      minify: {
-        removeComments: true,
-        removeRedundantAttributes: true,
-        useShortDoctype: true,
-        removeEmptyAttributes: true,
-        removeStyleLinkTypeAttributes: true,
-        keepClosingSlash: true,
-        minifyJS: true,
-        minifyCSS: true,
-        minifyURLs: true,
-      },
-    }),
-    // Makes some environment variables available to the JS code, for example:
-    // if (process.env.NODE_ENV === 'production') { ... }. See `./env.js`.
-    // It is absolutely essential that NODE_ENV was set to production here.
-    // Otherwise React will be compiled in the very slow development mode.
-    new webpack.DefinePlugin(env),
-    // Minify the code.
-    new webpack.optimize.UglifyJsPlugin({
-      compress: {
-        warnings: false,
-        // Disabled because of an issue with Uglify breaking seemingly valid code:
-        // https://github.com/facebookincubator/create-react-app/issues/2376
-        // Pending further investigation:
-        // https://github.com/mishoo/UglifyJS2/issues/2011
-        comparisons: false,
-      },     
-      output: {
-        comments: false,
-        // Turned on because emoji and regex is not minified properly using default
-        // https://github.com/facebookincubator/create-react-app/issues/2488
-        ascii_only: true,
-      },
-      sourceMap: shouldUseSourceMap,
-    }),
-    // Note: this won't work without ExtractTextPlugin.extract(..) in `loaders`.
-    new ExtractTextPlugin({
-      filename: cssFilename,
-    }),
-  ],
+  plugins: plugins,
   // Some libraries import Node modules but don't use them in the browser.
   // Tell Webpack to provide empty mocks for them so importing them works.
   node: {

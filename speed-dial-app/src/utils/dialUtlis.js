@@ -20,7 +20,7 @@ function computeDialIndex(currentPos, columnCount, dialCount, dialWidth, dialHei
     const columnPosition = Math.floor(currentPos.x / dialWidth);
     const rowPosition = Math.floor(currentPos.y / dialHeight);
 
-    return Math.min(Math.max(rowPosition * columnCount + columnPosition, 0), dialCount);
+    return Math.min(Math.max(rowPosition * columnCount + columnPosition, 0), dialCount - 1);
 }
 
 function computeDialXPos(index, columnCount, dialWidth) {
