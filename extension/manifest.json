@@ -8,8 +8,7 @@
     },
     "permissions": [
         "bookmarks",
-        "storage",
-        "*://s2.googleusercontent.com/s2/favicons"
+        "storage"
     ],
     "applications": {
         "gecko": {

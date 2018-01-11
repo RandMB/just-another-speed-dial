@@ -23,10 +23,6 @@ Container.propTypes = {
     onFolderSelect: PropTypes.func.isRequired,
 };
 
-function onError(error) {
-    console.error(`Error: ${error}`);
-}
-
 class App extends Component {
     constructor(props) {
         super(props);
@@ -45,31 +41,29 @@ class App extends Component {
         this.configPromise = browser.storage.local.get('config');
     }
 
-    componentWillMount() {
-        this.configPromise.then((config) => {
-            let newConfig = {
-                rootId: null,
-            };
+    async componentWillMount() {
+        const config = await this.configPromise;
 
-            if (!_isEmpty(config)) {
-                newConfig = config.config;
-            }
+        let newConfig = {
+            rootId: null,
+        };
 
-            this.setState({
-                config: newConfig,
-                isLoaded: true,
-            });
-        }, onError);
+        if (!_isEmpty(config)) {
+            newConfig = config.config;
+        }
+
+        this.setState({
+            config: newConfig,
+            isLoaded: true,
+        });
     }
 
-    onFolderSelect(folderId) {
+    async onFolderSelect(folderId) {
         const newConfig = {
             rootId: folderId,
         };
 
-        const setConfigPromise = browser.storage.local.set({ config: newConfig });
-        // Just force execution
-        setConfigPromise.then(null, onError);
+        await browser.storage.local.set({ config: newConfig });
 
         this.setState({
             config: newConfig,

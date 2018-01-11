@@ -1,68 +1,51 @@
-const baseUrl = 'https://s2.googleusercontent.com/s2/favicons?domain_url=';
+const colors = ['#0a84ff', '#00feff', '#ff1ad9', '#30e60b', '#ffe900', '#ff0039', '#9400ff', '#ff9400', '##0060df', '#00c8d7', '#ed00b5', '#12bc00', '#d7b600', '#d70022', '#8000d7', '#d76e00', '#ffffff'];
 
-function getImage(imageUrl) {
-    return new Promise((resolve, reject) => {
-        const img = new Image();
-
-        // Can't set cross origin to be anonymous for data url's
-        // https://github.com/mrdoob/three.js/issues/1305
-        if (imageUrl.substring(0, 5) !== 'data:')
-            img.crossOrigin = "Anonymous";
-
-        img.onload = function () {
-            resolve(img);
-        };
-
-        img.onerror = function () {
-            reject();
-        };
-
-        img.src = imageUrl;
-    });
+// See: https://stackoverflow.com/a/5624139 
+function hexToRgb(hex) {
+    var result = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(hex);
+    return result ? {
+        r: parseInt(result[1], 16),
+        g: parseInt(result[2], 16),
+        b: parseInt(result[3], 16)
+    } : null;
 }
 
-function getColors(url) {
-    const imgUrl = baseUrl + encodeURIComponent(url);
+function getRandomInt(max) {
+    return Math.floor(Math.random() * Math.floor(max));
+}
+
+function getRandomPhotonColor() {
+    return colors[getRandomInt(colors.length)];
+}
+
+function getTextColor(backgroundColor) {
+    // See: https://stackoverflow.com/a/1855903
+    // Counting the perceptive luminance - human eye favors green color... 
+    const a = 1 - (0.299 * backgroundColor.r + 0.587 * backgroundColor.g + 0.114 * backgroundColor.b) / 255;
+
+    if (a < 0.5) {
+        return [0, 0, 0]; // bright colors - black font
+    }
+    else {
+        return [255, 255, 255]; // dark colors - white font
+    }
+}
+
+function getColors() {
     return new Promise((resolve) => {
-        getImage(imgUrl).then((img) => {
-            const colorThief = new window.ColorThief();
+        const color = hexToRgb(getRandomPhotonColor());
+        const textColor = getTextColor(color);
 
-            const dominant = colorThief.getColor(img, 3);
-
-            // See: https://stackoverflow.com/a/1855903
-            let d = 0;
-
-            // Counting the perceptive luminance - human eye favors green color... 
-            let a = 1 - (0.299 * dominant[0] + 0.587 * dominant[1] + 0.114 * dominant[2]) / 255;
-
-            if (a < 0.5) {
-                d = 0; // bright colors - black font
-            }
-            else {
-                d = 255; // dark colors - white font
-            }
-            
-            console.log(imgUrl);
-            console.log(dominant);
-            console.log(`rgb(${d}, ${d}, ${d})`);
-            
-            resolve({
-                background: dominant,
-                text: [d, d, d],
-            });
-        }).catch(() => {
-            // Return some sane defaults
-            resolve({
-                background: [255, 255, 255],
-                text: [0, 0, 0],
-            });
+        resolve({
+            background: [color.r, color.g, color.b],
+            text: textColor,
         });
-    });
+    })
 }
 
 function connected(p) {
     p.onMessage.addListener((message) => {
-        getColors(message.url).then((color) => {
+        getColors().then((color) => {
             p.postMessage({
                 id: message.id,
                 background: color.background,

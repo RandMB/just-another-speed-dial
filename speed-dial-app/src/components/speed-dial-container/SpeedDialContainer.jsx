@@ -123,18 +123,16 @@ class SpeedDialContainer extends Component {
         });
     }
 
-    openFolder(folderId) {
-        const childrenNodes = browser.bookmarks.getChildren(folderId);
+    async openFolder(folderId) {
+        const children = await browser.bookmarks.getChildren(folderId);
 
-        childrenNodes.then((children) => {
-            const newChildren = this.transformChildren(children);
-            this.setState((prevState, props) => {
-                return {
-                    currentFolderNodes: newChildren,
-                    currentBookmarkFolderId: folderId,
-                    previousBookmarkFolderId: prevState.currentBookmarkFolderId
-                };
-            });
+        const newChildren = this.transformChildren(children);
+        this.setState((prevState, props) => {
+            return {
+                currentFolderNodes: newChildren,
+                currentBookmarkFolderId: folderId,
+                previousBookmarkFolderId: prevState.currentBookmarkFolderId
+            };
         });
     }
 
