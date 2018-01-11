@@ -3,11 +3,8 @@ import PropTypes from 'prop-types';
 
 import SpeedDialContainer from '../speed-dial-container/SpeedDialContainer';
 import FolderPickerContainer from '../folder-picker-container/FolderPickerContainer';
-import ConfigurationContainer from '../configuration-container/ConfigurationContainer';
 
 import _isEmpty from 'lodash/isEmpty';
-import _merge from 'lodash/merge';
-import _cloneDeep from 'lodash/merge';
 
 import './App.css';
 import backgroundImageUrl from '../../assets/background-default.jpg';
@@ -39,13 +36,11 @@ class App extends Component {
             config: {
                 rootId: null,
             },
+
             isLoaded: false,
-            isConfigLoaded: true,
-            isConfigOpen: false,
         };
 
         this.onFolderSelect = this.onFolderSelect.bind(this);
-        this.onConfigChange = this.onConfigChange.bind(this);
 
         this.configPromise = browser.storage.local.get('config');
     }
@@ -65,14 +60,6 @@ class App extends Component {
                 isLoaded: true,
             });
         }, onError);
-
-        document.getElementById('root').addEventListener('click', (event) => {
-            if (event.target.matches('.config-close') && this.state.isConfigOpen) {
-                this.setState({
-                    isConfigOpen: false,
-                });
-            }
-        }, false);
     }
 
     onFolderSelect(folderId) {
@@ -86,28 +73,6 @@ class App extends Component {
 
         this.setState({
             config: newConfig,
-        });
-    }
-
-    onConfigChange(newPartialConfig) {
-        const newConfig = _cloneDeep(this.state.config);
-        _merge(newConfig, newPartialConfig);
-
-        this.setState({
-            config: newConfig,
-        });
-
-        browser.storage.local.set({ config: newConfig }).then(null, onError);
-    }
-
-    setConfigSidebarOpen(isOpen, event) {
-        if (event) {
-            event.stopPropagation();
-        }
-
-        this.setState({
-            isConfigOpen: isOpen,
-            isConfigLoaded: true,
         });
     }
 
@@ -125,15 +90,6 @@ class App extends Component {
                         onFolderSelect={this.onFolderSelect}
                         rootBookmarkTreeId={rootBookmarkTreeId}>
                     </Container>
-                }
-
-                {this.state.isConfigLoaded &&
-                    <ConfigurationContainer
-                        onClose={() => this.setConfigSidebarOpen(false)}
-                        isOpen={this.state.isConfigOpen}
-                        onConfigChange={this.onConfigChange}
-                        currentConfig={this.state.config}>
-                    </ConfigurationContainer>
                 }
 
                 <div
