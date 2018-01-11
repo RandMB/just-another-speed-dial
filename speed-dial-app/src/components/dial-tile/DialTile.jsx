@@ -2,7 +2,7 @@ import React from 'react';
 import PropTypes from 'prop-types';
 
 import './DialTile.css';
-import folderImage from '../../../../assets/folder.png';
+import folderImage from '../../assets/folder.png';
 
 function DialTile(props) {
     return (

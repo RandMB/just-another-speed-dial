@@ -3,7 +3,7 @@ import PropTypes from 'prop-types';
 import { Portal } from 'react-portal';
 
 import DraggableTileContainer from '../draggable-tile-container/DraggableTileContainer';
-import TileEditModal from '../../../modals/tile-edit-modal/TileEditModal';
+import TileEditModal from '../common/tile-edit-modal/TileEditModal';
 
 import _cloneDeep from 'lodash/cloneDeep';
 

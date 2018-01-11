@@ -1,7 +1,7 @@
 import React, { Component } from 'react';
 import PropTypes from 'prop-types';
 import './FolderPicker.css';
-import folderImage from '../../../../assets/folder.png';
+import folderImage from '../../assets/folder.png';
 
 class FolderPicker extends Component {
     onSeleted(folder) {

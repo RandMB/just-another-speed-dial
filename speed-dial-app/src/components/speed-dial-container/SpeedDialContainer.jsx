@@ -1,7 +1,7 @@
 import React, { Component } from 'react';
 import PropTypes from 'prop-types';
 
-import DialFolder from './components/dial-folder/DialFolder';
+import DialFolder from '../dial-folder/DialFolder';
 import DialUtils from '../../utils/dialUtlis';
 
 import './SpeedDialContainer.css';

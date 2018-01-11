@@ -49,6 +49,7 @@ compilingPromise.then(() => {
         ignored: /node_modules/
     }, (err, stats) => {
         printStatus(err, stats);
+        console.log(stats.toString('minimal'));
     });
 
     // Stupid Windows workaround for graceful exit... 

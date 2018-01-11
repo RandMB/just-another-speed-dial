@@ -1,6 +1,6 @@
 import React, { Component } from 'react';
 import PropTypes from 'prop-types';
-import FolderPicker from './components/folder-picker/FolderPicker';
+import FolderPicker from '../folder-picker/FolderPicker';
 import './FolderPickerContainer.css';
 
 function getFolderPickerComponent(bookmarkTree, onFolderSelect, onFolderRequest) {
