@@ -2,7 +2,6 @@
 
 const path = require('path');
 const webpack = require('webpack');
-const HtmlWebpackPlugin = require('html-webpack-plugin');
 const ExtractTextPlugin = require('extract-text-webpack-plugin');
 const eslintFormatter = require('react-dev-utils/eslintFormatter');
 const ModuleScopePlugin = require('react-dev-utils/ModuleScopePlugin');
@@ -21,7 +20,7 @@ if (env['process.env'].NODE_ENV !== '"production"') {
 }
 
 // Note: defined here because it will be used more than once.
-const cssFilename = 'static/css/style.css';
+const cssFilename = 'css/[name].css';
 
 // ExtractTextPlugin expects the build output to be flat.
 // (See https://github.com/webpack-contrib/extract-text-webpack-plugin/issues/27)
@@ -33,22 +32,6 @@ const extractTextPluginOptions = shouldUseRelativeAssetPaths
   : {};
 
 const plugins = [
-  // Generates an `index.html` file with the <script> injected.
-  new HtmlWebpackPlugin({
-    inject: true,
-    template: paths.appHtml,
-    minify: {
-      removeComments: true,
-      removeRedundantAttributes: true,
-      useShortDoctype: true,
-      removeEmptyAttributes: true,
-      removeStyleLinkTypeAttributes: true,
-      keepClosingSlash: true,
-      minifyJS: true,
-      minifyCSS: true,
-      minifyURLs: true,
-    },
-  }),
   // Makes some environment variables available to the JS code, for example:
   // if (process.env.NODE_ENV === 'production') { ... }. See `./env.js`.
   // It is absolutely essential that NODE_ENV was set to production here.
@@ -75,14 +58,17 @@ module.exports = {
   // You can exclude the *.map files from the build during deployment.
   devtool: shouldUseSourceMap ? 'source-map' : false,
   // In production, we only want to load the polyfills and the app code.
-  entry: [paths.appIndexJs],
+  entry: {
+    dial: paths.dialIndexJs,
+    options: paths.optionsIndexJs,
+  },
   output: {
     // The build folder.
     path: paths.appBuild,
     // Generated JS file names (with nested folders).
     // There will be one main bundle, and one file per asynchronous chunk.
     // We don't currently advertise code splitting but Webpack supports it.
-    filename: 'static/js/bundle.js',
+    filename: 'js/[name].js',
     // We inferred the "public path" (such as / or /my-project) from homepage.
     publicPath: paths.servedPath,
     // Point sourcemap entries to original disk location (format as URL on Windows)
@@ -137,16 +123,6 @@ module.exports = {
         // match the requirements. When no loader matches it will fall
         // back to the "file" loader at the end of the loader list.
         oneOf: [
-          // "url" loader works just like "file" loader but it also embeds
-          // assets smaller than specified size as data URLs to avoid requests.
-          {
-            test: [/\.bmp$/, /\.gif$/, /\.jpe?g$/, /\.png$/],
-            loader: require.resolve('url-loader'),
-            options: {
-              limit: 10000,
-              name: 'static/media/[name].[hash:8].[ext]',
-            },
-          },
           // Process JS with Babel.
           {
             test: /\.(js|jsx)$/,
@@ -209,8 +185,10 @@ module.exports = {
             // by webpacks internal loaders.
             exclude: [/\.js$/, /\.html$/, /\.json$/],
             options: {
-              useRelativePath: true,
-              name: 'static/media/[name].[hash:8].[ext]'
+              // Relative path is required to allow hosting html file in different directory
+              outputPath: '../apps/assets/',
+              useRelativePath: false,
+              name: '[name].[hash:8].[ext]',
             },
           },
           // ** STOP ** Are you adding a new loader?

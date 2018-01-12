@@ -4,7 +4,7 @@
     "version": "0.0.3",
     "description": "Shows a speed dial made of bookmarks",
     "chrome_url_overrides": {
-        "newtab": "speed-dial-app/index.html"
+        "newtab": "dial.html"
     },
     "permissions": [
         "bookmarks",
@@ -20,7 +20,7 @@
         "page": "background/background.html"
     },
     "options_ui": {
-        "page": "options-app/index.html",
+        "page": "options.html",
         "open_in_tab": true
     }
 }

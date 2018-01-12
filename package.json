@@ -3,36 +3,12 @@
   "version": "0.1.0",
   "private": true,
   "dependencies": {
-    "acorn": "^5.3.0",
-    "babel-core": "^6.26.0",
-    "babel-eslint": "^8.2.1",
-    "babel-jest": "^22.0.6",
-    "babel-loader": "^7.1.2",
-    "case-sensitive-paths-webpack-plugin": "^2.1.1",
-    "chalk": "^2.3.0",
     "classnames": "^2.2.5",
-    "css-loader": "^0.28.8",
-    "eslint": "^4.15.0",
-    "eslint-config-react-app": "^2.0.1",
-    "eslint-loader": "^1.9.0",
-    "eslint-plugin-import": "^2.8.0",
-    "eslint-plugin-jsx-a11y": "^6.0.3",
-    "eslint-plugin-react": "^7.5.1",
-    "extract-text-webpack-plugin": "^3.0.2",
-    "file-loader": "^1.1.6",
-    "fs-extra": "^5.0.0",
-    "html-webpack-plugin": "^2.30.1",
-    "jest": "^22.0.6",
     "lodash": "^4.17.4",
     "prop-types": "^15.6.0",
-    "raf": "^3.4.0",
     "react": "^16.2.0",
-    "react-dev-utils": "^4.2.1",
     "react-dom": "^16.2.0",
-    "react-portal": "^4.1.2",
-    "style-loader": "^0.19.1",
-    "url-loader": "^0.6.2",
-    "webpack": "^3.10.0"
+    "react-portal": "^4.1.2"
   },
   "scripts": {
     "start": "node scripts/start.js",
@@ -42,17 +18,14 @@
   },
   "jest": {
     "collectCoverageFrom": [
-      "speed-dial-app/src/**/*.{js,jsx}",
-      "options-app/src/**/*.{js,jsx}"
+      "src/**/*.{js,jsx}"
     ],
     "setupFiles": [
       "<rootDir>/scripts/polyfills.js"
     ],
     "testMatch": [
-      "<rootDir>/speed-dial-app/src/**/__tests__/**/*.{js,jsx}",
-      "<rootDir>/speed-dial-app/src/**/?(*.)(spec|test).{js,jsx}",
-      "<rootDir>/options-app/src/**/__tests__/**/*.{js,jsx}",
-      "<rootDir>/options-app/src/**/?(*.)(spec|test).{js,jsx}"
+      "<rootDir>/src/**/__tests__/**/*.{js,jsx}",
+      "<rootDir>/src/**/?(*.)(spec|test).{js,jsx}"
     ],
     "testEnvironment": "node",
     "testURL": "http://localhost",
@@ -79,6 +52,29 @@
     "babel-plugin-transform-react-jsx-self": "^6.22.0",
     "babel-plugin-transform-react-jsx-source": "^6.22.0",
     "eslint-config-airbnb": "^16.1.0",
-    "web-ext": "^2.3.1"
+    "react-dev-utils": "^4.2.1",
+    "web-ext": "^2.3.1",
+    "babel-core": "^6.26.0",
+    "babel-eslint": "^8.2.1",
+    "babel-jest": "^22.0.6",
+    "babel-loader": "^7.1.2",
+    "case-sensitive-paths-webpack-plugin": "^2.1.1",
+    "style-loader": "^0.19.1",
+    "url-loader": "^0.6.2",
+    "webpack": "^3.10.0",
+    "raf": "^3.4.0",
+    "css-loader": "^0.28.8",
+    "eslint": "^4.15.0",
+    "eslint-config-react-app": "^2.0.1",
+    "eslint-loader": "^1.9.0",
+    "eslint-plugin-import": "^2.8.0",
+    "eslint-plugin-jsx-a11y": "^6.0.3",
+    "eslint-plugin-react": "^7.5.1",
+    "extract-text-webpack-plugin": "^3.0.2",
+    "file-loader": "^1.1.6",
+    "fs-extra": "^5.0.0",
+    "jest": "^22.0.6",
+    "acorn": "^5.3.0",
+    "chalk": "^2.3.0"
   }
 }

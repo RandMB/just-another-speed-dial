@@ -7,8 +7,7 @@
 /coverage
 
 # production
-/extension/speed-dial-app
-/extension/options-app
+/extension/apps
 
 # misc
 .DS_Store

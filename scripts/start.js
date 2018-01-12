@@ -13,11 +13,10 @@ process.on('unhandledRejection', err => {
 
 const webpack = require('webpack');
 
-const dialAppConfig = require('../speed-dial-app/config/webpack.config.dev');
-const optionsAppConfig = require('../options-app/config/webpack.config.dev');
+const config = require('./webpack.config.dev');
 const webExt = require('web-ext').default;
 
-const compiler = webpack([dialAppConfig, optionsAppConfig]);
+const compiler = webpack(config);
 
 const compilingPromise = new Promise((resolve, reject) => {
     compiler.run((err, stats) => {

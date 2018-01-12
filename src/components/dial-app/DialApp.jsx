@@ -7,7 +7,7 @@ import FolderPickerContainer from '../folder-picker-container/FolderPickerContai
 
 import browserUtils from '../../utils/browserUtils';
 
-import './App.css';
+import './DialApp.css';
 import backgroundImageUrl from '../../assets/background-default.jpg';
 
 function Container(props) {
@@ -34,7 +34,7 @@ Container.propTypes = {
     browserUtils: PropTypes.object.isRequired,
 };
 
-class App extends Component {
+class DialApp extends Component {
     constructor(props) {
         super(props);
 
@@ -110,4 +110,4 @@ class App extends Component {
     }
 }
 
-export default App;
+export default DialApp;

@@ -1,8 +1,8 @@
 import React, { Component } from 'react';
 
-import './App.css';
+import './OptionsApp.css';
 
-class App extends Component {
+class OptionsApp extends Component {
     static onClick() {
         const clearStorage = browser.storage.local.clear();
         clearStorage.then();
@@ -11,10 +11,10 @@ class App extends Component {
     render() {
         return (
             <form>
-                <button onClick={App.onClick} type="submit">Clear local storage</button>
+                <button onClick={OptionsApp.onClick} type="submit">Clear local storage</button>
             </form>
         );
     }
 }
 
-export default App;
+export default OptionsApp;
