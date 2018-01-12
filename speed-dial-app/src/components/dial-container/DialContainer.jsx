@@ -21,7 +21,6 @@ class DialContainer extends Component {
         this.state = {
             currentPosX: props.xPos,
             currentPosY: props.yPos,
-            transitionDuration: 0,
         };
 
         this.cachedState = null;
@@ -34,7 +33,6 @@ class DialContainer extends Component {
     }
 
     componentWillReceiveProps(newProps) {
-
         const newState = {
             currentPosX: newProps.xPos,
             currentPosY: newProps.yPos,
@@ -48,7 +46,6 @@ class DialContainer extends Component {
 
             this.cachedState = newState;
         }
-
     }
 
     componentDidUpdate() {
@@ -67,7 +64,6 @@ class DialContainer extends Component {
 
     onEditMouseDown(event) {
         event.stopPropagation();
-        console.log('Edit button pressed');
 
         window.addEventListener('mouseup', () => {
             this.props.onEdit(this.props.view.index, this.props.node.id);
@@ -111,18 +107,18 @@ class DialContainer extends Component {
         return (
             <div
                 className={dialClass}
-                style={dialStyle}>
+                style={dialStyle}
+            >
 
                 <DialTile
                     url={url}
                     type={type}
                     onMouseDown={onMouseDown}
                     onEditMouseDown={this.onEditMouseDown}
-                    tileStyle={dialTileStyle}>
+                    tileStyle={dialTileStyle}
+                />
 
-                </DialTile>
-
-                <DialTitle title={title}></DialTitle>
+                <DialTitle title={title} />
             </div>
         );
     }

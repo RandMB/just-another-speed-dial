@@ -16,16 +16,16 @@ function ButtonDanger(props) {
             classes={classes}
             onClick={props.onClick}
             title={props.title}
-            value={props.value}>
-        </Button>
+            value={props.value}
+        />
     );
 }
 
 ButtonDanger.propTypes = {
     classes: PropTypes.object,
-    onClick: PropTypes.func,
+    onClick: PropTypes.func.isRequired,
     title: PropTypes.string,
-    value: PropTypes.string,
+    value: PropTypes.string.isRequired,
 };
 
 export default ButtonDanger;

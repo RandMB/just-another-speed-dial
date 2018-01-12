@@ -10,8 +10,8 @@ function getFolderPickerComponent(bookmarkTree, onFolderSelect, onFolderRequest)
                 <FolderPicker
                     bookmarkTree={bookmarkTree}
                     onFolderSelect={onFolderSelect}
-                    onFolderRequest={onFolderRequest}>
-                </FolderPicker>
+                    onFolderRequest={onFolderRequest}
+                />
             </div>
         );
     } else {
@@ -35,7 +35,6 @@ class FolderPickerContainer extends Component {
 
         this.folderIdMap = new Map();
 
-        this.onNewFolder = this.onNewFolder.bind(this);
         this.onFolderSelect = this.onFolderSelect.bind(this);
         this.onFolderRequest = this.onFolderRequest.bind(this);
         this.onUseFolder = this.onUseFolder.bind(this);
@@ -54,10 +53,6 @@ class FolderPickerContainer extends Component {
         this.setState({
             bookmarkTree: rootFolderNodes,
         });
-    }
-
-    onNewFolder() {
-        console.warn('Not implemented yet');
     }
 
     onFolderSelect(folderId) {
@@ -80,8 +75,6 @@ class FolderPickerContainer extends Component {
     }
 
     async onFolderRequest(folderId) {
-        console.log('Getting children for folder with id ' + folderId);
-
         const folderChildren =
             await this.browserUtils.bookmarks.getSubfolders(folderId, { selected: false });
 
@@ -107,7 +100,7 @@ class FolderPickerContainer extends Component {
 
     render() {
         const bookmarkTree = this.state.bookmarkTree;
-        const isSelected = this.state.selectedFolderId !== null ? true : false;
+        const isSelected = this.state.selectedFolderId !== null;
 
         return (
             <div className="folder-picker-container config-close">
@@ -119,21 +112,23 @@ class FolderPickerContainer extends Component {
                         getFolderPickerComponent(
                             bookmarkTree,
                             this.onFolderSelect,
-                            this.onFolderRequest)
+                            this.onFolderRequest,
+                        )
                     }
                     <div className="new-folder-container">
                         <button
                             className="button-transparent"
                             type="button"
-                            onClick={this.onNewFolder}
-                            disabled>
+                            disabled
+                        >
                             New Folder
                         </button>
                         <button
                             className="button-transparent"
                             type="button"
                             onClick={this.onUseFolder}
-                            disabled={!isSelected}>
+                            disabled={!isSelected}
+                        >
                             Use selected folder
                         </button>
                     </div>

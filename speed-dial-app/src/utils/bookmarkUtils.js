@@ -48,7 +48,7 @@ function get(ids) {
 
 function extractFolders(bookmarkArray, defaultObject = {}) {
     return bookmarkArray
-        .filter((element) => element.title && !element.url)
+        .filter(element => element.title && !element.url)
         .map((element) => {
             return Object.assign({}, defaultObject, {
                 id: element.id,
@@ -88,8 +88,6 @@ async function getFolderChildren(id) {
 
     return filterChildren(children);
 }
-
-
 
 export default {
     get,

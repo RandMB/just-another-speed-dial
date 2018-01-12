@@ -1,12 +1,11 @@
 import React, { Component } from 'react';
 import PropTypes from 'prop-types';
+import _isEmpty from 'lodash/isEmpty';
 
 import SpeedDialContainer from '../speed-dial-container/SpeedDialContainer';
 import FolderPickerContainer from '../folder-picker-container/FolderPickerContainer';
 
 import browserUtils from '../../utils/browserUtils';
-
-import _isEmpty from 'lodash/isEmpty';
 
 import './App.css';
 import backgroundImageUrl from '../../assets/background-default.jpg';
@@ -16,16 +15,15 @@ function Container(props) {
         return (
             <SpeedDialContainer
                 bookmarkTreeId={props.rootBookmarkTreeId}
-                browserUtils={props.browserUtils}>
-            </SpeedDialContainer>
+                browserUtils={props.browserUtils}
+            />
         );
-    }
-    else {
+    } else {
         return (
             <FolderPickerContainer
                 onSelect={props.onFolderSelect}
-                browserUtils={props.browserUtils}>>
-            </FolderPickerContainer>
+                browserUtils={props.browserUtils}
+            />
         );
     }
 }
@@ -94,16 +92,17 @@ class App extends Component {
                         key={rootBookmarkTreeId}
                         onFolderSelect={this.onFolderSelect}
                         rootBookmarkTreeId={rootBookmarkTreeId}
-                        browserUtils={browserUtils}>
-                    </Container>
+                        browserUtils={browserUtils}
+                    />
                 }
 
                 <div
                     className="config-open-button"
-                    onClick={(event) => browser.runtime.openOptionsPage().then()}
-                    tile="Open configuration sidebar">
+                    onClick={() => browser.runtime.openOptionsPage().then()}
+                    tile="Open configuration sidebar"
+                >
 
-                    <i className="fas fa-cog"></i>
+                    <i className="fas fa-cog" />
                 </div>
 
             </React.Fragment>

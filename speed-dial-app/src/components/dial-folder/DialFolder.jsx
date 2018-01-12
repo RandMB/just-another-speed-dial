@@ -1,11 +1,10 @@
 import React, { Component } from 'react';
 import PropTypes from 'prop-types';
 import { Portal } from 'react-portal';
+import _cloneDeep from 'lodash/cloneDeep';
 
 import DraggableTileContainer from '../draggable-tile-container/DraggableTileContainer';
 import TileEditModal from '../common/tile-edit-modal/TileEditModal';
-
-import _cloneDeep from 'lodash/cloneDeep';
 
 import './DialFolder.css';
 
@@ -52,7 +51,7 @@ class DialFolder extends Component {
             const folderData = data[`folder${this.props.folderId}`];
 
             this.setState({
-                folderData: folderData ? folderData : {},
+                folderData: folderData || {},
                 isConfigLoaded: true,
             });
         });
@@ -60,8 +59,8 @@ class DialFolder extends Component {
 
     onDialUpdate(id, url) {
         this.scriptPort.postMessage({
-            id: id,
-            url: url,
+            id,
+            url,
         });
     }
 
@@ -88,20 +87,20 @@ class DialFolder extends Component {
         }
     }
 
-    testCurrentEditTileExists() {
-        const tile = this.props.bookmarks[this.state.configuredTile.index];
-        return tile && tile.treeNode.id === this.state.configuredTile.id;
-    }
-
     onEditModalClose() {
         this.setState({
             configuredTile: null,
         });
     }
 
+    testCurrentEditTileExists() {
+        const tile = this.props.bookmarks[this.state.configuredTile.index];
+        return tile && tile.treeNode.id === this.state.configuredTile.id;
+    }
+
     render() {
         const bookmarkTree = this.props.bookmarks;
-        const configuredTile = this.state.configuredTile;
+        const configuredTile = !!this.state.configuredTile;
         const dialsStyle = {
             width: this.props.width,
             height: this.props.height,
@@ -111,13 +110,14 @@ class DialFolder extends Component {
             <div
                 id="speed-dial"
                 className="speed-dial-view-plane config-close"
-                style={dialsStyle}>
+                style={dialsStyle}
+            >
 
                 {
                     this.state.isConfigLoaded && bookmarkTree.map(({ treeNode, view }, index) => {
                         const dialData = {
                             node: treeNode,
-                            view: view,
+                            view,
                             dialMeta: this.state.folderData[treeNode.id],
                             onUpdate: this.onDialUpdate,
                             onEdit: this.onEdit,
@@ -134,10 +134,8 @@ class DialFolder extends Component {
                                 onClick={this.onClick}
 
                                 key={'' + treeNode.id}
-                                data={dialData}>
-
-                            </DraggableTileContainer>
-
+                                data={dialData}
+                            />
 
                         );
                     })
@@ -145,8 +143,7 @@ class DialFolder extends Component {
 
                 {configuredTile && this.testCurrentEditTileExists() &&
                     <Portal node={document && document.getElementById('modals')}>
-                        <TileEditModal onClose={this.onEditModalClose}>
-                        </TileEditModal>
+                        <TileEditModal onClose={this.onEditModalClose} />
                     </Portal>
                 }
             </div>

@@ -12,7 +12,7 @@ function get(keys) {
 
 function set(items) {
     return new Promise((resolve, reject) => {
-        chrome.storage.local.set(items, (data) => {
+        chrome.storage.local.set(items, () => {
             if (chrome.runtime.lastError) {
                 reject(chrome.runtime.lastError.message);
             } else {

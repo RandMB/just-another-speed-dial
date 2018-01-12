@@ -10,6 +10,10 @@ function computeDistance(startX, startY, endX, endY) {
 const DRAG_DISTANCE_THRESHOLD = 10;
 
 class DraggableDialContainer extends Component {
+    static computeDragPos(dragStart, mouseDragStart, currentMouseDrag) {
+        return (dragStart - (mouseDragStart - currentMouseDrag));
+    }
+
     constructor(props) {
         super(props);
 
@@ -43,28 +47,6 @@ class DraggableDialContainer extends Component {
 
         this.dragReportInterval = null;
         this.dragStartIndex = null;
-    }
-
-    dragAnimate() {
-        if (this.currentDragState.isDraggedCurrently) {
-            this.setState({
-                dragPosX: this.computeDragPos(
-                    this.currentDragState.dragStartPosX,
-                    this.currentDragState.mouseDragStartPosX,
-                    this.currentDragState.currentMousePosX),
-
-                dragPosY: this.computeDragPos(
-                    this.currentDragState.dragStartPosY,
-                    this.currentDragState.mouseDragStartPosY,
-                    this.currentDragState.currentMousePosY),
-            });
-
-            window.requestAnimationFrame(this.dragAnimate);
-        }
-    }
-
-    computeDragPos(dragStart, mouseDragStart, currentMouseDrag) {
-        return (dragStart - (mouseDragStart - currentMouseDrag));
     }
 
     onMouseDown(event) {
@@ -108,25 +90,26 @@ class DraggableDialContainer extends Component {
         this.dragStartIndex = this.props.id;
     }
 
-    onMouseUp(event) {
+    onMouseUp() {
         document.removeEventListener('mousemove', this.onMouseMove);
 
         if (!this.currentDragState.hasDragThresholdCrossed) {
             this.props.onClick(this.props.id);
-        } else {
-            this.props.onDragEnd && this.props.onDragEnd(this.dragStartIndex, this.props.id);
+        } else if (this.props.onDragEnd) {
+            this.props.onDragEnd(this.dragStartIndex, this.props.id);
         }
 
         Object.assign(this.currentDragState, this.dragDefault);
 
-        this.setState({ isDragged: false, });
+        this.setState({ isDragged: false });
         this.dragStartIndex = null;
 
         clearInterval(this.dragReportInterval);
     }
 
     onMouseMove(event) {
-        if (!this.currentDragState.hasDragThresholdCrossed && this.currentDragState.isDraggedCurrently) {
+        if (!this.currentDragState.hasDragThresholdCrossed
+            && this.currentDragState.isDraggedCurrently) {
             const distance = computeDistance(
                 this.currentDragState.mouseDragStartPosX,
                 this.currentDragState.mouseDragStartPosY,
@@ -145,6 +128,26 @@ class DraggableDialContainer extends Component {
         });
     }
 
+    dragAnimate() {
+        if (this.currentDragState.isDraggedCurrently) {
+            this.setState({
+                dragPosX: DraggableDialContainer.computeDragPos(
+                    this.currentDragState.dragStartPosX,
+                    this.currentDragState.mouseDragStartPosX,
+                    this.currentDragState.currentMousePosX,
+                ),
+
+                dragPosY: DraggableDialContainer.computeDragPos(
+                    this.currentDragState.dragStartPosY,
+                    this.currentDragState.mouseDragStartPosY,
+                    this.currentDragState.currentMousePosY,
+                ),
+            });
+
+            window.requestAnimationFrame(this.dragAnimate);
+        }
+    }
+
     render() {
         const {
             xPos,
@@ -161,9 +164,8 @@ class DraggableDialContainer extends Component {
                 yPos={currentPosY}
                 isDragged={this.state.isDragged}
                 onMouseDown={this.onMouseDown}
-                {...data}>
-
-            </DialContainer>
+                {...data}
+            />
         );
     }
 }

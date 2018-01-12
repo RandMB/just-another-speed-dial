@@ -11,23 +11,26 @@ function DialTile(props) {
             className="dial-tile rounded-borders"
             title={props.url}
             onMouseDown={props.onMouseDown}
-            style={props.tileStyle}>
+            style={props.tileStyle}
+        >
 
             {props.type === 'folder' &&
                 <img
                     alt=""
                     draggable="false"
                     src={folderImage}
-                    onDragStart={(event) => { event.preventDefault(); }} />
+                    onDragStart={(event) => { event.preventDefault(); }}
+                />
             }
             {props.type === 'bookmark' &&
-                <a>{new URL(props.url).host}</a>
+                <span>{new URL(props.url).host}</span>
             }
             <div
                 onMouseDown={props.onEditMouseDown}
-                className="tile-edit-button">
+                className="tile-edit-button"
+            >
 
-                <i className="fas fa-edit"></i>
+                <i className="fas fa-edit" />
             </div>
         </div>
     );

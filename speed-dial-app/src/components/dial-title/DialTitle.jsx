@@ -8,9 +8,10 @@ function DialTitle(props) {
         <div className="dial-title-container">
             <div
                 className="dial-title-background"
-                title={props.title}>
+                title={props.title}
+            >
 
-                <a>{props.title}</a>
+                <span>{props.title}</span>
             </div>
         </div>
     );

@@ -2,6 +2,10 @@ function computeDialsWidth(columnCount, dialWidth, betweenDials) {
     return (dialWidth * columnCount) - betweenDials;
 }
 
+function computeRows(tileCount, columnCount) {
+    return Math.ceil(tileCount / columnCount);
+}
+
 function computeDialsHeight(itemCount, columnCount, dialHeight) {
     return dialHeight * computeRows(itemCount, columnCount);
 }
@@ -12,15 +16,11 @@ function computeColumns(dialWidth, widthToLeave) {
     return Math.max(Math.floor(effectiveWidth / dialWidth), 1);
 }
 
-function computeRows(tileCount, columnCount) {
-    return Math.ceil(tileCount / columnCount);
-}
-
 function computeDialIndex(currentPos, columnCount, dialCount, dialWidth, dialHeight) {
     const columnPosition = Math.floor(currentPos.x / dialWidth);
     const rowPosition = Math.floor(currentPos.y / dialHeight);
 
-    return Math.min(Math.max(rowPosition * columnCount + columnPosition, 0), dialCount - 1);
+    return Math.min(Math.max((rowPosition * columnCount) + columnPosition, 0), dialCount - 1);
 }
 
 function computeDialXPos(index, columnCount, dialWidth) {
