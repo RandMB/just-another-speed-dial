@@ -11,9 +11,11 @@
         "prefer-template": "off",
         "prefer-destructuring": "off",
         "arrow-body-style": "off",
+        "no-mixed-operators": "off",
         "no-plusplus": ["error", { "allowForLoopAfterthoughts": true }],
         "no-else-return": "off",
-        "no-console": ["error", { "allow": ["warn", "error"] }],
+        "no-console": "off",
+        "no-unused-vars": "warn",
         "no-restricted-properties": [0, {
             "object": "Math",
             "property": "pow"

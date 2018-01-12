@@ -24,26 +24,13 @@ class DialFolder extends Component {
         };
 
         this.configPromise = browser.storage.local.get(`folder${props.folderId}`);
-        this.scriptPort = browser.runtime.connect();
-
-        this.scriptPort.onMessage.addListener(({ id, ...rest }) => {
-            this.setState((prevState) => {
-                const newFolder = _cloneDeep(prevState.folderData);
-
-                newFolder[id] = rest;
-
-                browser.storage.local.set({ [`folder${props.folderId}`]: newFolder }).then(null, onError);
-
-                return {
-                    folderData: newFolder,
-                };
-            });
-        });
 
         this.onDialUpdate = this.onDialUpdate.bind(this);
         this.onEditModalClose = this.onEditModalClose.bind(this);
         this.onClick = this.onClick.bind(this);
         this.onEdit = this.onEdit.bind(this);
+
+        this.browserUtils = props.browserUtils;
     }
 
     componentWillMount() {
@@ -57,10 +44,19 @@ class DialFolder extends Component {
         });
     }
 
-    onDialUpdate(id, url) {
-        this.scriptPort.postMessage({
-            id,
-            url,
+    async onDialUpdate(id) {
+        const colorData = await this.browserUtils.getColor();
+
+        this.setState((prevState) => {
+            const newFolder = _cloneDeep(prevState.folderData);
+
+            newFolder[id] = colorData;
+
+            browser.storage.local.set({ [`folder${this.props.folderId}`]: newFolder }).then(null, onError);
+
+            return {
+                folderData: newFolder,
+            };
         });
     }
 
@@ -159,6 +155,7 @@ DialFolder.propTypes = {
     onDialDrag: PropTypes.func.isRequired,
     onDragEnd: PropTypes.func,
     folderId: PropTypes.string.isRequired,
+    browserUtils: PropTypes.object.isRequired,
 };
 
 export default DialFolder;

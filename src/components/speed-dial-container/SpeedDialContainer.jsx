@@ -4,7 +4,7 @@ import _debounce from 'lodash/debounce';
 import _cloneDeep from 'lodash/cloneDeep';
 
 import DialFolder from '../dial-folder/DialFolder';
-import DialUtils from '../../utils/dialUtlis';
+import dialUtils from '../../utils/dials';
 
 import './SpeedDialContainer.css';
 
@@ -13,28 +13,27 @@ const DIAL_WIDTH = 250;
 const BETWEEN_DIALS = 30;
 const WIDTH_TO_LEAVE = 60;
 
+function updateChild(child, index, columnCount, itemCount) {
+    Object.assign(
+        child.view,
+        {
+            zIndex: itemCount.length - index,
+            index,
+            dialPosX: dialUtils.computeDialXPos(index, columnCount, DIAL_WIDTH),
+            dialPosY: dialUtils.computeDialYPos(index, columnCount, DIAL_HEIGHT),
+        },
+    );
+}
+
 function updateChildren(children, columnCount) {
     children.forEach((child, index) => {
-        Object.assign(
-            child.view,
-            {
-                zIndex: children.length - index,
-                index,
-                dialPosX: DialUtils.computeDialXPos(index, columnCount, DIAL_WIDTH),
-                dialPosY: DialUtils.computeDialYPos(index, columnCount, DIAL_HEIGHT),
-            },
-        );
+        updateChild(child, index, columnCount, children.length);
     });
 }
 
 function updateChildrenPartial(children, columnCount, start, end) {
     for (let index = start; index <= end; index++) {
-        Object.assign(children[index].view, {
-            zIndex: children.length - index,
-            index,
-            dialPosX: DialUtils.computeDialXPos(index, columnCount, DIAL_WIDTH),
-            dialPosY: DialUtils.computeDialYPos(index, columnCount, DIAL_HEIGHT),
-        });
+        updateChild(children[index], index, columnCount, children.length);
     }
 }
 
@@ -47,7 +46,7 @@ class SpeedDialContainer extends Component {
             prevFolderId: null,
             children: null,
 
-            dialColumns: DialUtils.computeColumns(DIAL_WIDTH, WIDTH_TO_LEAVE),
+            dialColumns: dialUtils.computeColumns(DIAL_WIDTH, WIDTH_TO_LEAVE),
         };
 
         this.openFolder = this.openFolder.bind(this);
@@ -74,11 +73,12 @@ class SpeedDialContainer extends Component {
     }
 
     onResize() {
-        const columns = DialUtils.computeColumns(DIAL_WIDTH, WIDTH_TO_LEAVE);
+        const columns = dialUtils.computeColumns(DIAL_WIDTH, WIDTH_TO_LEAVE);
 
         if (columns !== this.state.dialColumns) {
             this.setState((prevState) => {
                 const newChildren = _cloneDeep(prevState.children);
+                console.log(columns);
                 updateChildren(newChildren, columns);
 
                 return {
@@ -91,14 +91,14 @@ class SpeedDialContainer extends Component {
 
     onDrag(dragData) {
         const normalizedPositions = {
-            x: DialUtils.nomalizePosX(
+            x: dialUtils.nomalizePosX(
                 dragData.dragPosX,
                 this.state.dialColumns,
                 DIAL_WIDTH,
                 BETWEEN_DIALS,
             ),
 
-            y: DialUtils.nomalizePosY(
+            y: dialUtils.nomalizePosY(
                 dragData.dragPosY,
                 this.state.children.length,
                 this.state.dialColumns,
@@ -106,7 +106,7 @@ class SpeedDialContainer extends Component {
             ),
         };
 
-        const newIndex = DialUtils.computeDialIndex(
+        const newIndex = dialUtils.computeDialIndex(
             normalizedPositions,
             this.state.dialColumns,
             this.state.children.length,
@@ -160,11 +160,11 @@ class SpeedDialContainer extends Component {
     }
 
     getDialWidth() {
-        return DialUtils.computeDialsWidth(this.state.dialColumns, DIAL_WIDTH, BETWEEN_DIALS);
+        return dialUtils.computeDialsWidth(this.state.dialColumns, DIAL_WIDTH, BETWEEN_DIALS);
     }
 
     getDialHeight() {
-        return DialUtils.computeDialsHeight(
+        return dialUtils.computeDialsHeight(
             this.state.children.length,
             this.state.dialColumns,
             DIAL_HEIGHT,
@@ -208,8 +208,8 @@ class SpeedDialContainer extends Component {
             view: {
                 index,
                 zIndex: children.length - index,
-                dialPosX: DialUtils.computeDialXPos(index, this.state.dialColumns, DIAL_WIDTH),
-                dialPosY: DialUtils.computeDialYPos(index, this.state.dialColumns, DIAL_HEIGHT),
+                dialPosX: dialUtils.computeDialXPos(index, this.state.dialColumns, DIAL_WIDTH),
+                dialPosY: dialUtils.computeDialYPos(index, this.state.dialColumns, DIAL_HEIGHT),
             },
         }));
     }
@@ -244,6 +244,7 @@ class SpeedDialContainer extends Component {
                             onOpenFolder={this.openFolder}
                             onDialDrag={this.onDrag}
                             onDragEnd={this.onDragEnd}
+                            browserUtils={this.browserUtils}
 
                             width={this.getDialWidth()}
                             height={this.getDialHeight()}

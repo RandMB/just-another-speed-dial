@@ -5,7 +5,7 @@ import _isEmpty from 'lodash/isEmpty';
 import SpeedDialContainer from '../speed-dial-container/SpeedDialContainer';
 import FolderPickerContainer from '../folder-picker-container/FolderPickerContainer';
 
-import browserUtils from '../../utils/browserUtils';
+import browserUtils from '../../utils/browser';
 
 import './DialApp.css';
 import backgroundImageUrl from '../../assets/background-default.jpg';
