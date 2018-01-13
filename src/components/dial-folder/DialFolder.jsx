@@ -47,6 +47,38 @@ class DialFolder extends Component {
         });
     }
 
+    componentWillReceiveProps(nextProps) {
+        // This is code needed to ensure that changing the position of editable tile
+        //    does not close the edit dialog
+        if (this.state.configuredTile) {
+            const book = nextProps.bookmarks.get(this.state.configuredTile.index);
+            // Tile does not exist or it's not the same tile
+            const sameTile = !!book && book.treeNode.id === this.state.configuredTile.id;
+
+            // At set index, tile is not the same
+            if (!sameTile) {
+                // Attempt to find the bookmark in the collection
+                const index = nextProps.bookmarks.findIndex(bookmark =>
+                    bookmark.treeNode.id === this.state.configuredTile.id);
+
+                if (index !== -1) {
+                    // We found the bookmark, update state
+                    this.setState({
+                        configuredTile: {
+                            index,
+                            id: this.state.configuredTile.id,
+                        },
+                    });
+                } else {
+                    // Bookmark no longer exists in this folder
+                    this.setState({
+                        configuredTile: null,
+                    });
+                }
+            }
+        }
+    }
+
     async onDialUpdate(id) {
         const colorData = await browserUtils.getColor();
         const newFolder = this.pendingSave || _cloneDeep(this.state.folderData);
@@ -69,7 +101,7 @@ class DialFolder extends Component {
 
     onEdit(index, id) {
         // Do not allow simultaneous editing of multiple tiles
-        if (!this.state.configuredTile || !this.testCurrentEditTileExists()) {
+        if (!this.state.configuredTile) {
 
             this.setState({
                 configuredTile: {
@@ -92,11 +124,6 @@ class DialFolder extends Component {
         });
 
         browserUtils.localStorage.set({ metaData: newFolder }).then(null, onError);
-    }
-
-    testCurrentEditTileExists() {
-        const tile = this.props.bookmarks.get(this.state.configuredTile.index);
-        return tile && tile.treeNode.id === this.state.configuredTile.id;
     }
 
     render() {
@@ -142,7 +169,7 @@ class DialFolder extends Component {
                     })
                 }
 
-                {editTileExists && this.testCurrentEditTileExists() &&
+                {editTileExists &&
                     <Portal node={document && document.getElementById('modals')}>
                         <TileEditModal onClose={this.onEditModalClose} />
                     </Portal>

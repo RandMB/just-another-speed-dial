@@ -15,14 +15,12 @@ function Container(props) {
         return (
             <SpeedDialContainer
                 bookmarkTreeId={props.rootBookmarkTreeId}
-                browserUtils={props.browserUtils}
             />
         );
     } else {
         return (
             <FolderPickerContainer
                 onSelect={props.onFolderSelect}
-                browserUtils={props.browserUtils}
             />
         );
     }
@@ -31,7 +29,6 @@ function Container(props) {
 Container.propTypes = {
     rootBookmarkTreeId: PropTypes.string,
     onFolderSelect: PropTypes.func.isRequired,
-    browserUtils: PropTypes.object.isRequired,
 };
 
 class DialApp extends Component {
