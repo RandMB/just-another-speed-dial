@@ -2,6 +2,7 @@ import React, { Component } from 'react';
 import PropTypes from 'prop-types';
 import { Portal } from 'react-portal';
 import _cloneDeep from 'lodash/cloneDeep';
+import _throttle from 'lodash/throttle';
 
 import DraggableTileContainer from '../draggable-tile-container/DraggableTileContainer';
 import TileEditModal from '../common/tile-edit-modal/TileEditModal';
@@ -29,8 +30,11 @@ class DialFolder extends Component {
         this.onEditModalClose = this.onEditModalClose.bind(this);
         this.onClick = this.onClick.bind(this);
         this.onEdit = this.onEdit.bind(this);
+        this.saveChanges = this.saveChanges.bind(this);
 
         this.browserUtils = props.browserUtils;
+        this.throttledSave = _throttle(this.saveChanges, 500);
+        this.pendingSave = null;
     }
 
     componentWillMount() {
@@ -46,18 +50,12 @@ class DialFolder extends Component {
 
     async onDialUpdate(id) {
         const colorData = await this.browserUtils.getColor();
+        const newFolder = this.pendingSave || _cloneDeep(this.state.folderData);
 
-        this.setState((prevState) => {
-            const newFolder = _cloneDeep(prevState.folderData);
+        newFolder[id] = colorData;
+        this.pendingSave = newFolder;
 
-            newFolder[id] = colorData;
-
-            browser.storage.local.set({ [`folder${this.props.folderId}`]: newFolder }).then(null, onError);
-
-            return {
-                folderData: newFolder,
-            };
-        });
+        this.throttledSave(this.props.folderId, newFolder);
     }
 
     onClick(index) {
@@ -87,6 +85,14 @@ class DialFolder extends Component {
         this.setState({
             configuredTile: null,
         });
+    }
+
+    saveChanges(folderId, newFolder) {
+        this.setState({
+            folderData: newFolder,
+        });
+
+        browser.storage.local.set({ [`folder${folderId}`]: newFolder }).then(null, onError);
     }
 
     testCurrentEditTileExists() {

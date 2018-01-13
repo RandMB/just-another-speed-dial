@@ -1,4 +1,4 @@
-const colors = ['#0a84ff', '#00feff', '#ff1ad9', '#30e60b', '#ffe900', '#ff0039', '#9400ff', '#ff9400', '##0060df', '#00c8d7', '#ed00b5', '#12bc00', '#d7b600', '#d70022', '#8000d7', '#d76e00', '#ffffff'];
+const colors = ['#0a84ff', '#00feff', '#ff1ad9', '#30e60b', '#ffe900', '#ff0039', '#9400ff', '#ff9400', '#0060df', '#00c8d7', '#ed00b5', '#12bc00', '#d7b600', '#d70022', '#8000d7', '#d76e00'];
 
 // See: https://stackoverflow.com/a/5624139
 function hexToRgb(hex) {
