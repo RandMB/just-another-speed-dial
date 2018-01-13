@@ -1,4 +1,4 @@
-import React, { Component } from 'react';
+import React, { PureComponent } from 'react';
 import PropTypes from 'prop-types';
 import ClassNames from 'classnames';
 
@@ -14,7 +14,7 @@ function extractRGB(a) {
     return `rgb(${a[0]},${a[1]},${a[2]})`;
 }
 
-class DialContainer extends Component {
+class DialContainer extends PureComponent {
     constructor(props) {
         super(props);
 

@@ -1,7 +1,7 @@
 import React, { Component } from 'react';
+import { List } from 'immutable';
 import PropTypes from 'prop-types';
 import _debounce from 'lodash/debounce';
-import _cloneDeep from 'lodash/cloneDeep';
 
 import DialFolder from '../dial-folder/DialFolder';
 import dialUtils from '../../utils/dials';
@@ -23,18 +23,25 @@ function updateChild(child, index, columnCount, itemCount) {
             dialPosY: dialUtils.computeDialYPos(index, columnCount, DIAL_HEIGHT),
         },
     );
+
+    return child;
 }
 
 function updateChildren(children, columnCount) {
-    children.forEach((child, index) => {
-        updateChild(child, index, columnCount, children.length);
+    return children.map((child, index) => {
+        return updateChild(child, index, columnCount, children.count());
     });
 }
 
 function updateChildrenPartial(children, columnCount, start, end) {
+    let newChildren = children;
+
     for (let index = start; index <= end; index++) {
-        updateChild(children[index], index, columnCount, children.length);
+        const updated = updateChild(newChildren.get(index), index, columnCount, children.count());
+        newChildren = newChildren.set(index, updated);
     }
+
+    return newChildren;
 }
 
 class SpeedDialContainer extends Component {
@@ -67,8 +74,10 @@ class SpeedDialContainer extends Component {
         const children =
             await this.browserUtils.bookmarks.getFolderChildren(this.props.bookmarkTreeId);
 
+        const list1 = List(this.transformChildren(children));
+
         this.setState({
-            children: this.transformChildren(children),
+            children: list1,
         });
     }
 
@@ -76,10 +85,8 @@ class SpeedDialContainer extends Component {
         const columns = dialUtils.computeColumns(DIAL_WIDTH, WIDTH_TO_LEAVE);
 
         if (columns !== this.state.dialColumns) {
-            this.setState((prevState) => {
-                const newChildren = _cloneDeep(prevState.children);
-                console.log(columns);
-                updateChildren(newChildren, columns);
+            this.setState(({ children }) => {
+                const newChildren = updateChildren(children, columns);
 
                 return {
                     children: newChildren,
@@ -100,7 +107,7 @@ class SpeedDialContainer extends Component {
 
             y: dialUtils.nomalizePosY(
                 dragData.dragPosY,
-                this.state.children.length,
+                this.state.children.count(),
                 this.state.dialColumns,
                 DIAL_HEIGHT,
             ),
@@ -109,27 +116,26 @@ class SpeedDialContainer extends Component {
         const newIndex = dialUtils.computeDialIndex(
             normalizedPositions,
             this.state.dialColumns,
-            this.state.children.length,
+            this.state.children.count(),
             DIAL_WIDTH,
             DIAL_HEIGHT,
         );
 
         if (newIndex !== dragData.index) {
-            this.setState((prevState) => {
-                const newChildren = _cloneDeep(prevState.children);
+            this.setState(({ children }) => {
+                const removed = children.get(dragData.index);
+                const newchildren = children.splice(dragData.index, 1);
+                const insertedChildren = newchildren.splice(newIndex, 0, removed);
 
-                const [removed] = newChildren.splice(dragData.index, 1);
-                newChildren.splice(newIndex, 0, removed);
-
-                updateChildrenPartial(
-                    newChildren,
+                const updatedChildren = updateChildrenPartial(
+                    insertedChildren,
                     this.state.dialColumns,
                     Math.min(newIndex, dragData.index),
                     Math.max(newIndex, dragData.index),
                 );
 
                 return {
-                    children: newChildren,
+                    children: updatedChildren,
                 };
             });
         }
@@ -140,13 +146,18 @@ class SpeedDialContainer extends Component {
             let indexToMove;
 
             if (newIndex < oldIndex) {
-                indexToMove = this.state.children[newIndex + 1].treeNode.index;
+                indexToMove = this.state.children.get(newIndex + 1).treeNode.index;
             } else {
-                indexToMove = this.state.children[newIndex - 1].treeNode.index;
+                indexToMove = this.state.children.get(newIndex - 1).treeNode.index;
+
+                // Chrome behaves different when moving bookmarks forward
+                if (this.browserUtils.browserType === 'chrome') {
+                    indexToMove += 1;
+                }
             }
 
             await this.browserUtils.bookmarks.move(
-                this.state.children[newIndex].treeNode.id,
+                this.state.children.get(newIndex).treeNode.id,
                 { index: indexToMove },
             );
 
@@ -154,7 +165,7 @@ class SpeedDialContainer extends Component {
                 await this.browserUtils.bookmarks.getFolderChildren(this.state.currFolderId);
 
             this.setState({
-                children: this.transformChildren(children),
+                children: List(this.transformChildren(children)),
             });
         }
     }
@@ -165,7 +176,7 @@ class SpeedDialContainer extends Component {
 
     getDialHeight() {
         return dialUtils.computeDialsHeight(
-            this.state.children.length,
+            this.state.children.count(),
             this.state.dialColumns,
             DIAL_HEIGHT,
         );
@@ -185,7 +196,7 @@ class SpeedDialContainer extends Component {
         const [children, folder] = await Promise.all([childrenNodes, folderNode]);
 
         this.setState(() => ({
-            children: this.transformChildren(children),
+            children: List(this.transformChildren(children)),
             currFolderId: folderId,
             prevFolderId: folder[0].parentId,
         }));
@@ -195,8 +206,10 @@ class SpeedDialContainer extends Component {
         const children =
             await this.browserUtils.bookmarks.getFolderChildren(folderId);
 
+        const list1 = List(this.transformChildren(children));
+
         this.setState(prevState => ({
-            children: this.transformChildren(children),
+            children: list1,
             currFolderId: folderId,
             prevFolderId: prevState.currFolderId,
         }));

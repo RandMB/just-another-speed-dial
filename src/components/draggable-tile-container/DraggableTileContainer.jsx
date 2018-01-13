@@ -1,4 +1,4 @@
-import React, { Component } from 'react';
+import React, { PureComponent } from 'react';
 import PropTypes from 'prop-types';
 
 import DialContainer from '../dial-container/DialContainer';
@@ -9,7 +9,7 @@ function computeDistance(startX, startY, endX, endY) {
 
 const DRAG_DISTANCE_THRESHOLD = 10;
 
-class DraggableDialContainer extends Component {
+class DraggableDialContainer extends PureComponent {
     static computeDragPos(dragStart, mouseDragStart, currentMouseDrag) {
         return (dragStart - (mouseDragStart - currentMouseDrag));
     }

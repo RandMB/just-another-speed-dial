@@ -58,7 +58,7 @@ function isFolder(item) {
 
 function isOpenable(item) {
     // Extensions can't open these urls anyway
-    return !item.url.startsWith('place:') && !item.url.startsWith('about:');
+    return !item.url.startsWith('place:') && !item.url.startsWith('about:') && !item.url.startsWith('data:');
 }
 
 function extractFolders(bookmarkArray, defaultObject = {}) {
@@ -73,13 +73,28 @@ function extractFolders(bookmarkArray, defaultObject = {}) {
 }
 
 function filterChildren(children) {
-    return children.filter((child) => {
-        if (isBookmark(child)) {
-            return isOpenable(child);
+    return children.reduce((acc, child) => {
+        if (isBookmark(child) && isOpenable(child)) {
+            acc.push({
+                id: child.id,
+                index: child.index,
+                url: child.url,
+                title: child.title,
+                type: 'bookmark',
+            });
         }
 
-        return isFolder(child);
-    });
+        if (isFolder(child)) {
+            acc.push({
+                id: child.id,
+                index: child.index,
+                title: child.title,
+                type: 'folder',
+            });
+        }
+
+        return acc;
+    }, []);
 }
 
 async function getRootChildren(defaultObject) {

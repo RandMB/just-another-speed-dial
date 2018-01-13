@@ -59,7 +59,7 @@ class DialFolder extends Component {
     }
 
     onClick(index) {
-        const node = this.props.bookmarks[index].treeNode;
+        const node = this.props.bookmarks.get(index).treeNode;
 
         if (node.type === 'folder') {
             this.props.onOpenFolder(node.id);
@@ -154,7 +154,7 @@ class DialFolder extends Component {
 }
 
 DialFolder.propTypes = {
-    bookmarks: PropTypes.array.isRequired,
+    bookmarks: PropTypes.object.isRequired,
     onOpenFolder: PropTypes.func.isRequired,
     width: PropTypes.number.isRequired,
     height: PropTypes.number.isRequired,
