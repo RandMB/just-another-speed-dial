@@ -128,12 +128,12 @@ DialContainer.propTypes = {
     node: PropTypes.object.isRequired,
     view: PropTypes.object.isRequired,
     dialMeta: PropTypes.object,
-    onUpdate: PropTypes.func.isRequired,
     xPos: PropTypes.number.isRequired,
     yPos: PropTypes.number.isRequired,
     isDragged: PropTypes.bool.isRequired,
     onMouseDown: PropTypes.func.isRequired,
     onEdit: PropTypes.func.isRequired,
+    onUpdate: PropTypes.func.isRequired,
 };
 
 export default DialContainer;

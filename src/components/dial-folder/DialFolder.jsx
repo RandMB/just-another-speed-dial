@@ -16,6 +16,7 @@ function onError(error) {
 class DialFolder extends Component {
     constructor(props) {
         super(props);
+        this.browserUtils = props.browserUtils;
 
         this.state = {
             folderData: {},
@@ -24,7 +25,7 @@ class DialFolder extends Component {
             configuredTile: null,
         };
 
-        this.configPromise = browser.storage.local.get('metaData');
+        this.configPromise = this.browserUtils.localStorage.get('metaData');
 
         this.onDialUpdate = this.onDialUpdate.bind(this);
         this.onEditModalClose = this.onEditModalClose.bind(this);
@@ -32,7 +33,6 @@ class DialFolder extends Component {
         this.onEdit = this.onEdit.bind(this);
         this.saveChanges = this.saveChanges.bind(this);
 
-        this.browserUtils = props.browserUtils;
         this.throttledSave = _throttle(this.saveChanges, 500);
         this.pendingSave = null;
     }
@@ -92,7 +92,7 @@ class DialFolder extends Component {
             folderData: newFolder,
         });
 
-        browser.storage.local.set({ metaData: newFolder }).then(null, onError);
+        this.browserUtils.localStorage.set({ metaData: newFolder }).then(null, onError);
     }
 
     testCurrentEditTileExists() {
