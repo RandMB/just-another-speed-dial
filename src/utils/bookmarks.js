@@ -46,9 +46,24 @@ function get(ids) {
     });
 }
 
+function isBookmark(item) {
+    // An item is a bookmark if it has a url
+    return !!item.url;
+}
+
+function isFolder(item) {
+    // An item is a folder if it has a title but no url
+    return item.title && !item.url;
+}
+
+function isOpenable(item) {
+    // Extensions can't open these urls anyway
+    return !item.url.startsWith('place:') && !item.url.startsWith('about:');
+}
+
 function extractFolders(bookmarkArray, defaultObject = {}) {
     return bookmarkArray
-        .filter(element => element.title && !element.url)
+        .filter(element => isFolder(element))
         .map((element) => {
             return Object.assign({}, defaultObject, {
                 id: element.id,
@@ -59,14 +74,11 @@ function extractFolders(bookmarkArray, defaultObject = {}) {
 
 function filterChildren(children) {
     return children.filter((child) => {
-        // Is a bookmark
-        if (child.title && child.url) {
-            // Extensions can't open these urls anyway
-            return !(child.url.startsWith('place:') || child.url.startsWith('about:'));
+        if (isBookmark(child)) {
+            return isOpenable(child);
         }
 
-        // Is a folder
-        return child.title && !child.url;
+        return isFolder(child);
     });
 }
 

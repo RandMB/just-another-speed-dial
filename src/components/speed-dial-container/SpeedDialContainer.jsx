@@ -220,10 +220,10 @@ class SpeedDialContainer extends Component {
 
         return (
             <div
-                className="speed-dials config-close"
+                className="speed-dials"
                 onDragOver={event => event.preventDefault()}
             >
-                <div className="dial-container-top config-close">
+                <div className="dial-container-top">
                     {!isRoot &&
                         <button
                             className="button-transparent"
@@ -235,7 +235,7 @@ class SpeedDialContainer extends Component {
                     }
                 </div>
 
-                <div className="dial-container config-close">
+                <div className="dial-container">
                     {children &&
                         <DialFolder
                             key={this.state.currFolderId}

@@ -11,6 +11,7 @@
         "prefer-template": "off",
         "prefer-destructuring": "off",
         "arrow-body-style": "off",
+        "dot-notation": "off",
         "no-mixed-operators": "off",
         "no-plusplus": ["error", { "allowForLoopAfterthoughts": true }],
         "no-else-return": "off",

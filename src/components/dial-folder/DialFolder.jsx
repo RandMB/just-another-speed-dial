@@ -24,7 +24,7 @@ class DialFolder extends Component {
             configuredTile: null,
         };
 
-        this.configPromise = browser.storage.local.get(`folder${props.folderId}`);
+        this.configPromise = browser.storage.local.get('metaData');
 
         this.onDialUpdate = this.onDialUpdate.bind(this);
         this.onEditModalClose = this.onEditModalClose.bind(this);
@@ -39,7 +39,7 @@ class DialFolder extends Component {
 
     componentWillMount() {
         this.configPromise.then((data) => {
-            const folderData = data[`folder${this.props.folderId}`];
+            const folderData = data['metaData'];
 
             this.setState({
                 folderData: folderData || {},
@@ -92,7 +92,7 @@ class DialFolder extends Component {
             folderData: newFolder,
         });
 
-        browser.storage.local.set({ [`folder${folderId}`]: newFolder }).then(null, onError);
+        browser.storage.local.set({ metaData: newFolder }).then(null, onError);
     }
 
     testCurrentEditTileExists() {
