@@ -17,7 +17,7 @@ function updateChild(child, index, columnCount, itemCount) {
     Object.assign(
         child.view,
         {
-            zIndex: itemCount.length - index,
+            zIndex: itemCount - index,
             index,
             dialPosX: dialUtils.computeDialXPos(index, columnCount, DIAL_WIDTH),
             dialPosY: dialUtils.computeDialYPos(index, columnCount, DIAL_HEIGHT),

@@ -7,7 +7,7 @@ import DialTile from '../dial-tile/DialTile';
 
 import './DialContainer.css';
 
-const DRAG_ZINDEX = 500;
+const DRAG_ZINDEX = 5000;
 const TRANSITION_DURATION = 0.25;
 
 function extractRGB(a) {
@@ -39,7 +39,7 @@ class DialContainer extends Component {
         };
 
         // If the element is being dragged, skip the workaround, as it creates janky transition
-        if (this.state.isDragged) {
+        if (this.props.isDragged) {
             this.setState(newState);
         } else if (newState.currentPosX !== this.state.currentPosX ||
             newState.currentPosY !== this.state.currentPosY) {
