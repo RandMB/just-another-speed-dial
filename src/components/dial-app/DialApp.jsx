@@ -92,7 +92,6 @@ class DialApp extends Component {
                         key={rootBookmarkTreeId}
                         onFolderSelect={this.onFolderSelect}
                         rootBookmarkTreeId={rootBookmarkTreeId}
-                        browserUtils={browserUtils}
                     />
                 }
 

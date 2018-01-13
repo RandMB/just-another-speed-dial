@@ -97,6 +97,7 @@ class DialContainer extends PureComponent {
 
         let dialTileStyle = {};
 
+        // During initial render dialMeta can be undefined
         if (dialMeta) {
             dialTileStyle = {
                 background: extractRGB(dialMeta.background),

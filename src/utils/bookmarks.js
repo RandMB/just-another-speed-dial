@@ -116,6 +116,10 @@ async function getFolderChildren(id) {
     return filterChildren(children);
 }
 
+function onMoved(func) {
+    chrome.bookmarks.onMoved.addListener(func);
+}
+
 export default {
     get,
     getTree,
@@ -124,4 +128,5 @@ export default {
     getSubfolders,
     getFolderChildren,
     move,
+    onMoved,
 };

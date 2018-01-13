@@ -6,6 +6,7 @@ import _throttle from 'lodash/throttle';
 
 import DraggableTileContainer from '../draggable-tile-container/DraggableTileContainer';
 import TileEditModal from '../common/tile-edit-modal/TileEditModal';
+import browserUtils from '../../utils/browser';
 
 import './DialFolder.css';
 
@@ -16,8 +17,6 @@ function onError(error) {
 class DialFolder extends Component {
     constructor(props) {
         super(props);
-        this.browserUtils = props.browserUtils;
-
         this.state = {
             folderData: {},
             isConfigLoaded: false,
@@ -25,7 +24,7 @@ class DialFolder extends Component {
             configuredTile: null,
         };
 
-        this.configPromise = this.browserUtils.localStorage.get('metaData');
+        this.configPromise = browserUtils.localStorage.get('metaData');
 
         this.onDialUpdate = this.onDialUpdate.bind(this);
         this.onEditModalClose = this.onEditModalClose.bind(this);
@@ -49,7 +48,7 @@ class DialFolder extends Component {
     }
 
     async onDialUpdate(id) {
-        const colorData = await this.browserUtils.getColor();
+        const colorData = await browserUtils.getColor();
         const newFolder = this.pendingSave || _cloneDeep(this.state.folderData);
 
         newFolder[id] = colorData;
@@ -92,17 +91,17 @@ class DialFolder extends Component {
             folderData: newFolder,
         });
 
-        this.browserUtils.localStorage.set({ metaData: newFolder }).then(null, onError);
+        browserUtils.localStorage.set({ metaData: newFolder }).then(null, onError);
     }
 
     testCurrentEditTileExists() {
-        const tile = this.props.bookmarks[this.state.configuredTile.index];
+        const tile = this.props.bookmarks.get(this.state.configuredTile.index);
         return tile && tile.treeNode.id === this.state.configuredTile.id;
     }
 
     render() {
         const bookmarkTree = this.props.bookmarks;
-        const configuredTile = !!this.state.configuredTile;
+        const editTileExists = this.state.configuredTile !== null;
         const dialsStyle = {
             width: this.props.width,
             height: this.props.height,
@@ -111,7 +110,7 @@ class DialFolder extends Component {
         return (
             <div
                 id="speed-dial"
-                className="speed-dial-view-plane config-close"
+                className="speed-dial-view-plane"
                 style={dialsStyle}
             >
 
@@ -143,7 +142,7 @@ class DialFolder extends Component {
                     })
                 }
 
-                {configuredTile && this.testCurrentEditTileExists() &&
+                {editTileExists && this.testCurrentEditTileExists() &&
                     <Portal node={document && document.getElementById('modals')}>
                         <TileEditModal onClose={this.onEditModalClose} />
                     </Portal>
@@ -161,7 +160,6 @@ DialFolder.propTypes = {
     onDialDrag: PropTypes.func.isRequired,
     onDragEnd: PropTypes.func,
     folderId: PropTypes.string.isRequired,
-    browserUtils: PropTypes.object.isRequired,
 };
 
 export default DialFolder;

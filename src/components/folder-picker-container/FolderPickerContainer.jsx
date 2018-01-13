@@ -3,6 +3,8 @@ import PropTypes from 'prop-types';
 import FolderPicker from '../folder-picker/FolderPicker';
 import './FolderPickerContainer.css';
 
+import browserUtils from '../../utils/browser';
+
 function getFolderPickerComponent(bookmarkTree, onFolderSelect, onFolderRequest) {
     if (bookmarkTree) {
         return (
@@ -38,13 +40,11 @@ class FolderPickerContainer extends Component {
         this.onFolderSelect = this.onFolderSelect.bind(this);
         this.onFolderRequest = this.onFolderRequest.bind(this);
         this.onUseFolder = this.onUseFolder.bind(this);
-
-        this.browserUtils = props.browserUtils;
     }
 
     async componentWillMount() {
         const rootFolderNodes =
-            await this.browserUtils.bookmarks.getRootChildren({ selected: false });
+            await browserUtils.bookmarks.getRootChildren({ selected: false });
 
         rootFolderNodes.forEach((element) => {
             this.folderIdMap.set(element.id, element);
@@ -76,7 +76,7 @@ class FolderPickerContainer extends Component {
 
     async onFolderRequest(folderId) {
         const folderChildren =
-            await this.browserUtils.bookmarks.getSubfolders(folderId, { selected: false });
+            await browserUtils.bookmarks.getSubfolders(folderId, { selected: false });
 
         folderChildren.forEach((element) => {
             this.folderIdMap.set(element.id, element);
@@ -140,7 +140,6 @@ class FolderPickerContainer extends Component {
 
 FolderPickerContainer.propTypes = {
     onSelect: PropTypes.func.isRequired,
-    browserUtils: PropTypes.object.isRequired,
 };
 
 export default FolderPickerContainer;
