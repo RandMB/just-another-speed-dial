@@ -120,6 +120,18 @@ function onMoved(func) {
     chrome.bookmarks.onMoved.addListener(func);
 }
 
+function onCreated(func) {
+    chrome.bookmarks.onCreated.addListener(func);
+}
+
+function onRemoved(func) {
+    chrome.bookmarks.onRemoved.addListener(func);
+}
+
+function onChanged(func) {
+    chrome.bookmarks.onChanged.addListener(func);
+}
+
 export default {
     get,
     getTree,
@@ -129,4 +141,7 @@ export default {
     getFolderChildren,
     move,
     onMoved,
+    onCreated,
+    onRemoved,
+    onChanged,
 };

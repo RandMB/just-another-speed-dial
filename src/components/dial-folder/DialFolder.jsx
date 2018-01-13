@@ -158,9 +158,7 @@ class DialFolder extends Component {
                                 id={index}
                                 onDrag={this.props.onDialDrag}
                                 onDragEnd={this.props.onDragEnd}
-
                                 onClick={this.onClick}
-
                                 key={'' + treeNode.id}
                                 data={dialData}
                             />

@@ -15,17 +15,19 @@ const BETWEEN_DIALS = 30;
 const WIDTH_TO_LEAVE = 60;
 
 function updateChild(child, index, columnCount, itemCount) {
-    Object.assign(
-        child.view,
-        {
-            zIndex: itemCount - index,
-            index,
-            dialPosX: dialUtils.computeDialXPos(index, columnCount, DIAL_WIDTH),
-            dialPosY: dialUtils.computeDialYPos(index, columnCount, DIAL_HEIGHT),
-        },
-    );
-
-    return child;
+    return {
+        treeNode: Object.assign({}, child.treeNode),
+        view: Object.assign(
+            {},
+            child.view,
+            {
+                zIndex: itemCount - index,
+                index,
+                dialPosX: dialUtils.computeDialXPos(index, columnCount, DIAL_WIDTH),
+                dialPosY: dialUtils.computeDialYPos(index, columnCount, DIAL_HEIGHT),
+            },
+        ),
+    };
 }
 
 function updateChildren(children, columnCount) {
@@ -76,6 +78,40 @@ class SpeedDialContainer extends Component {
                 moveInfo.oldParentId === this.state.currFolderId) {
 
                 this.updateList();
+            }
+        });
+
+        browserUtils.bookmarks.onCreated((id, bookmarkInfo) => {
+            if (bookmarkInfo.parentId === this.state.currFolderId) {
+                this.updateList();
+            }
+        });
+
+        browserUtils.bookmarks.onRemoved((id, removedInfo) => {
+            if (removedInfo.parentId === this.state.currFolderId) {
+                this.updateList();
+            }
+        });
+
+        browserUtils.bookmarks.onChanged((id, changeInfo) => {
+            // Attempt to find the bookmark in the collection
+            const index = this.state.children.findIndex(bookmark =>
+                bookmark.treeNode.id === id);
+
+            if (index !== -1) {
+                const { treeNode, view } = this.state.children.get(index);
+                const newObject = {
+                    treeNode: Object.assign({}, treeNode, changeInfo),
+                    view: {
+                        ...view,
+                    },
+                };
+
+                const newChildren = this.state.children.set(index, newObject);
+
+                this.setState({
+                    children: newChildren,
+                });
             }
         });
     }
@@ -130,10 +166,8 @@ class SpeedDialContainer extends Component {
         const children =
             await browserUtils.bookmarks.getFolderChildren(this.state.currFolderId);
 
-        const list1 = List(this.transformChildren(children));
-
         this.setState({
-            children: list1,
+            children: List(this.transformChildren(children)),
         });
     }
 
