@@ -7,7 +7,7 @@
     cursor: pointer;
     width: 100%;
     flex: 1;
-    background: white;
+    background: lightgray;
     color: black;
     -moz-user-select: none;
     -webkit-user-select: none;

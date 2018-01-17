@@ -1,5 +1,5 @@
 import React, { Component } from 'react';
-import { List } from 'immutable';
+import { Map, fromJS } from 'immutable';
 import PropTypes from 'prop-types';
 import _debounce from 'lodash/debounce';
 
@@ -14,37 +14,25 @@ const DIAL_WIDTH = 250;
 const BETWEEN_DIALS = 30;
 const WIDTH_TO_LEAVE = 60;
 
-function updateChild(child, index, columnCount, itemCount) {
-    return {
-        treeNode: Object.assign({}, child.treeNode),
-        view: Object.assign(
-            {},
-            child.view,
-            {
-                zIndex: itemCount - index,
-                index,
-                dialPosX: dialUtils.computeDialXPos(index, columnCount, DIAL_WIDTH),
-                dialPosY: dialUtils.computeDialYPos(index, columnCount, DIAL_HEIGHT),
-            },
-        ),
-    };
-}
-
-function updateChildren(children, columnCount) {
-    return children.map((child, index) => {
-        return updateChild(child, index, columnCount, children.count());
-    });
+function updateChild(children, index, columnCount, itemCount) {
+    return children.setIn([index, 'view', 'zIndex'], itemCount - index)
+        .setIn([index, 'view', 'index'], index)
+        .setIn([index, 'view', 'dialPosX'], dialUtils.computeDialXPos(index, columnCount, DIAL_WIDTH))
+        .setIn([index, 'view', 'dialPosY'], dialUtils.computeDialYPos(index, columnCount, DIAL_HEIGHT));
 }
 
 function updateChildrenPartial(children, columnCount, start, end) {
-    let newChildren = children;
+    let updated = children;
 
     for (let index = start; index <= end; index++) {
-        const updated = updateChild(newChildren.get(index), index, columnCount, children.count());
-        newChildren = newChildren.set(index, updated);
+        updated = updateChild(updated, index, columnCount, children.count());
     }
 
-    return newChildren;
+    return updated;
+}
+
+function updateChildren(children, columnCount) {
+    return updateChildrenPartial(children, columnCount, 0, children.count() - 1);
 }
 
 class SpeedDialContainer extends Component {
@@ -71,46 +59,64 @@ class SpeedDialContainer extends Component {
     }
 
     async componentWillMount() {
-        this.updateList();
+        const newChildren =
+            await browserUtils.bookmarks.getFolderChildren(this.state.currFolderId);
 
-        browserUtils.bookmarks.onMoved((id, moveInfo) => {
+        this.updateList(newChildren);
+
+        browserUtils.bookmarks.onMoved(async (id, moveInfo) => {
             if (moveInfo.parentId === this.state.currFolderId ||
                 moveInfo.oldParentId === this.state.currFolderId) {
 
-                this.updateList();
+                const children =
+                    await browserUtils.bookmarks.getFolderChildren(this.state.currFolderId);
+
+                this.updateList(children);
             }
         });
 
-        browserUtils.bookmarks.onCreated((id, bookmarkInfo) => {
+        browserUtils.bookmarks.onCreated(async (id, bookmarkInfo) => {
             if (bookmarkInfo.parentId === this.state.currFolderId) {
-                this.updateList();
+                const children =
+                    await browserUtils.bookmarks.getFolderChildren(this.state.currFolderId);
+
+                this.updateList(children);
             }
         });
 
-        browserUtils.bookmarks.onRemoved((id, removedInfo) => {
+        browserUtils.bookmarks.onRemoved(async (id, removedInfo) => {
             if (removedInfo.parentId === this.state.currFolderId) {
-                this.updateList();
+                const children =
+                    await browserUtils.bookmarks.getFolderChildren(this.state.currFolderId);
+
+                this.updateList(children);
             }
         });
 
         browserUtils.bookmarks.onChanged((id, changeInfo) => {
             // Attempt to find the bookmark in the collection
             const index = this.state.children.findIndex(bookmark =>
-                bookmark.treeNode.id === id);
+                bookmark.getIn(['treeNode', 'id']) === id);
 
             if (index !== -1) {
-                const { treeNode, view } = this.state.children.get(index);
-                const newObject = {
-                    treeNode: Object.assign({}, treeNode, changeInfo),
-                    view: {
-                        ...view,
-                    },
-                };
+                let updated = this.state.children;
 
-                const newChildren = this.state.children.set(index, newObject);
+                if (changeInfo.title) {
+                    updated = updated.updateIn(
+                        [index, 'treeNode'],
+                        (node) => node.set('title', changeInfo.title),
+                    );
+                }
+
+                if (changeInfo.url) {
+                    updated = updated.updateIn(
+                        [index, 'treeNode'],
+                        (node) => node.set('url', changeInfo.url),
+                    );
+                }
 
                 this.setState({
-                    children: newChildren,
+                    children: updated,
                 });
             }
         });
@@ -162,12 +168,20 @@ class SpeedDialContainer extends Component {
         );
     }
 
-    async updateList() {
-        const children =
-            await browserUtils.bookmarks.getFolderChildren(this.state.currFolderId);
+    updateList(children, additionalState) {
+        // We need a different structure than just an plain array
+        const newChildren = fromJS(children).map(child => {
+            return Map({
+                treeNode: Map(child),
+                view: Map({}),
+            });
+        });
+
+        const updatedChildren = updateChildren(newChildren, this.state.dialColumns);
 
         this.setState({
-            children: List(this.transformChildren(children)),
+            children: updatedChildren,
+            ...additionalState,
         });
     }
 
@@ -184,36 +198,22 @@ class SpeedDialContainer extends Component {
 
         const [children, folder] = await Promise.all([childrenNodes, folderNode]);
 
-        this.setState(() => ({
-            children: List(this.transformChildren(children)),
+        this.updateList(children, {
             currFolderId: folderId,
             prevFolderId: folder[0].parentId,
-        }));
+        });
     }
 
     async openFolder(folderId) {
         const children =
             await browserUtils.bookmarks.getFolderChildren(folderId);
 
-        const list1 = List(this.transformChildren(children));
+        const prevFolder = this.state.currFolderId;
 
-        this.setState(prevState => ({
-            children: list1,
+        this.updateList(children, {
             currFolderId: folderId,
-            prevFolderId: prevState.currFolderId,
-        }));
-    }
-
-    transformChildren(children) {
-        return children.map((child, index) => ({
-            treeNode: child,
-            view: {
-                index,
-                zIndex: children.length - index,
-                dialPosX: dialUtils.computeDialXPos(index, this.state.dialColumns, DIAL_WIDTH),
-                dialPosY: dialUtils.computeDialYPos(index, this.state.dialColumns, DIAL_HEIGHT),
-            },
-        }));
+            prevFolderId: prevFolder,
+        });
     }
 
     render() {

@@ -53,13 +53,13 @@ class DialFolder extends Component {
         if (this.state.configuredTile) {
             const book = nextProps.bookmarks.get(this.state.configuredTile.index);
             // Tile does not exist or it's not the same tile
-            const sameTile = !!book && book.treeNode.id === this.state.configuredTile.id;
+            const sameTile = !!book && book.getIn(['treeNode', 'id']) === this.state.configuredTile.id;
 
             // At set index, tile is not the same
             if (!sameTile) {
                 // Attempt to find the bookmark in the collection
                 const index = nextProps.bookmarks.findIndex(bookmark =>
-                    bookmark.treeNode.id === this.state.configuredTile.id);
+                    bookmark.getIn(['treeNode', 'id']) === this.state.configuredTile.id);
 
                 if (index !== -1) {
                     // We found the bookmark, update state
@@ -90,12 +90,12 @@ class DialFolder extends Component {
     }
 
     onClick(index) {
-        const node = this.props.bookmarks.get(index).treeNode;
+        const node = this.props.bookmarks.getIn([index, 'treeNode']);
 
-        if (node.type === 'folder') {
-            this.props.onOpenFolder(node.id);
-        } else if (node.type === 'bookmark') {
-            window.location.href = node.url;
+        if (node.get('type') === 'folder') {
+            this.props.onOpenFolder(node.get('id'));
+        } else if (node.get('type') === 'bookmark') {
+            window.location.href = node.get('url');
         }
     }
 
@@ -142,24 +142,24 @@ class DialFolder extends Component {
             >
 
                 {
-                    this.state.isConfigLoaded && bookmarkTree.map(({ treeNode, view }, index) => {
+                    this.state.isConfigLoaded && bookmarkTree.map((child, index) => {
                         const dialData = {
-                            node: treeNode,
-                            view,
-                            dialMeta: this.state.folderData[treeNode.id],
+                            node: child.get('treeNode'),
+                            view: child.get('view'),
+                            dialMeta: this.state.folderData[child.getIn(['treeNode', 'id'])],
                             onUpdate: this.onDialUpdate,
                             onEdit: this.onEdit,
                         };
 
                         return (
                             <DraggableTileContainer
-                                xPos={view.dialPosX}
-                                yPos={view.dialPosY}
+                                xPos={child.getIn(['view', 'dialPosX'])}
+                                yPos={child.getIn(['view', 'dialPosY'])}
                                 id={index}
                                 onDrag={this.props.onDialDrag}
                                 onDragEnd={this.props.onDragEnd}
                                 onClick={this.onClick}
-                                key={'' + treeNode.id}
+                                key={'' + child.getIn(['treeNode', 'id'])}
                                 data={dialData}
                             />
 

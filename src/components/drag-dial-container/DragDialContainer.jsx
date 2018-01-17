@@ -54,9 +54,9 @@ class SpeedDialContainer extends Component {
             let indexToMove;
 
             if (newIndex < oldIndex) {
-                indexToMove = this.props.bookmarks.get(newIndex + 1).treeNode.index;
+                indexToMove = this.props.bookmarks.getIn([newIndex + 1, 'treeNode', 'index']);
             } else {
-                indexToMove = this.props.bookmarks.get(newIndex - 1).treeNode.index;
+                indexToMove = this.props.bookmarks.getIn([newIndex - 1, 'treeNode', 'index']);
 
                 // Chrome behaves different when moving bookmarks forward
                 if (browserUtils.browserType === 'chrome') {
@@ -65,7 +65,7 @@ class SpeedDialContainer extends Component {
             }
 
             browserUtils.bookmarks.move(
-                this.props.bookmarks.get(newIndex).treeNode.id,
+                this.props.bookmarks.getIn([newIndex, 'treeNode', 'id']),
                 { index: indexToMove },
             ).then(/* Don't do aything */);
         }

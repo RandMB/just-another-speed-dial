@@ -25,8 +25,8 @@ class DialContainer extends PureComponent {
 
         this.cachedState = null;
 
-        if (!props.dialMeta && props.node.type !== 'folder') {
-            this.props.onUpdate(props.node.id, props.node.url);
+        if (!props.dialMeta && props.node.get('type') !== 'folder') {
+            this.props.onUpdate(props.node.get('id'), props.node.get('url'));
         }
 
         this.onEditMouseDown = this.onEditMouseDown.bind(this);
@@ -66,7 +66,7 @@ class DialContainer extends PureComponent {
         event.stopPropagation();
 
         window.addEventListener('mouseup', () => {
-            this.props.onEdit(this.props.view.index, this.props.node.id);
+            this.props.onEdit(this.props.view.get('index'), this.props.node.get('id'));
         }, { once: true });
     }
 
@@ -80,7 +80,10 @@ class DialContainer extends PureComponent {
         } = this.props;
 
         const { currentPosX, currentPosY } = this.state;
-        const { title, type, url } = node;
+
+        const title = node.get('title');
+        const type = node.get('type');
+        const url = node.get('url');
 
         const transitionDuration = isDragged ? 0 : TRANSITION_DURATION;
 
@@ -92,7 +95,7 @@ class DialContainer extends PureComponent {
         const dialStyle = {
             transform: `translate3D(${currentPosX}px,${currentPosY}px,0)`,
             transitionDuration: `${transitionDuration}s`,
-            zIndex: isDragged ? DRAG_ZINDEX : view.zIndex,
+            zIndex: isDragged ? DRAG_ZINDEX : view.get('zIndex'),
         };
 
         let dialTileStyle = {};
