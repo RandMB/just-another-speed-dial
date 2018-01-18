@@ -1,7 +1,9 @@
 import React, { PureComponent } from 'react';
+import { Portal } from 'react-portal';
 import PropTypes from 'prop-types';
 import ClassNames from 'classnames';
 
+import TileEditModal from '../common/tile-edit-modal/TileEditModal';
 import DialTitle from '../dial-title/DialTitle';
 import DialTile from '../dial-tile/DialTile';
 
@@ -21,6 +23,8 @@ class DialContainer extends PureComponent {
         this.state = {
             currentPosX: props.xPos,
             currentPosY: props.yPos,
+
+            isEdited: false,
         };
 
         if (!props.dialMeta && props.node.get('type') !== 'folder') {
@@ -30,6 +34,7 @@ class DialContainer extends PureComponent {
         this.willUnmount = false;
 
         this.onEditMouseDown = this.onEditMouseDown.bind(this);
+        this.onEditModalClose = this.onEditModalClose.bind(this);
     }
 
     componentWillReceiveProps(newProps) {
@@ -63,8 +68,12 @@ class DialContainer extends PureComponent {
         event.stopPropagation();
 
         window.addEventListener('mouseup', () => {
-            this.props.onEdit(this.props.view.get('index'), this.props.node.get('id'));
+            this.setState({ isEdited: true });
         }, { once: true });
+    }
+
+    onEditModalClose() {
+        this.setState({ isEdited: false });
     }
 
     render() {
@@ -120,6 +129,12 @@ class DialContainer extends PureComponent {
                 />
 
                 <DialTitle title={title} />
+
+                {this.state.isEdited &&
+                    <Portal node={document && document.getElementById('modals')}>
+                        <TileEditModal onClose={this.onEditModalClose} />
+                    </Portal>
+                }
             </div>
         );
     }
@@ -133,7 +148,6 @@ DialContainer.propTypes = {
     yPos: PropTypes.number.isRequired,
     isDragged: PropTypes.bool.isRequired,
     onMouseDown: PropTypes.func.isRequired,
-    onEdit: PropTypes.func.isRequired,
     onUpdate: PropTypes.func.isRequired,
 };
 

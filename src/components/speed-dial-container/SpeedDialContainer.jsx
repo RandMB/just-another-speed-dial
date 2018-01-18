@@ -1,12 +1,10 @@
 import React, { Component } from 'react';
 import { Map, List } from 'immutable';
 import PropTypes from 'prop-types';
-import { Portal } from 'react-portal';
 import _debounce from 'lodash/debounce';
 import _throttle from 'lodash/throttle';
 
 import DragDialContainer from '../drag-dial-container/DragDialContainer';
-import TileEditModal from '../common/tile-edit-modal/TileEditModal';
 import dialUtils from '../../utils/dials';
 import browserUtils from '../../utils/browser';
 
@@ -47,7 +45,6 @@ class SpeedDialContainer extends Component {
             prevFolderId: null,
             children: null,
             data: {},
-            configuredTile: null,
             isConfigLoaded: false,
 
             dialColumns: dialUtils.computeColumns(DIAL_WIDTH, WIDTH_TO_LEAVE),
@@ -58,9 +55,7 @@ class SpeedDialContainer extends Component {
         this.onResize = this.onResize.bind(this);
         this.onItemMoved = this.onItemMoved.bind(this);
         this.onDialUpdate = this.onDialUpdate.bind(this);
-        this.onEditModalClose = this.onEditModalClose.bind(this);
         this.onOpen = this.onOpen.bind(this);
-        this.onEdit = this.onEdit.bind(this);
 
         this.throttledSave = _throttle(this.saveChanges, 500);
 
@@ -128,15 +123,14 @@ class SpeedDialContainer extends Component {
             }
         });
 
-        const newChildren =
-            await browserUtils.bookmarks.getFolderChildren(this.state.currFolderId);
+        const childrenPromise =
+            browserUtils.bookmarks.getFolderChildren(this.state.currFolderId);
+        const dataPromise = browserUtils.localStorage.get('metaData');
 
-        this.updateList(newChildren);
-
-        const data = await browserUtils.localStorage.get('metaData');
+        const [children, data] = await Promise.all([childrenPromise, dataPromise]);
         const dialData = data['metaData'];
 
-        this.setState({
+        this.updateList(children, {
             data: dialData || {},
             isConfigLoaded: true,
         });
@@ -149,12 +143,9 @@ class SpeedDialContainer extends Component {
             this.setState(({ children }) => {
                 const newChildren = updateChildren(children, columns);
 
-                const updatedTile = this.updateEditTile(newChildren);
-
                 return {
                     children: newChildren,
                     dialColumns: columns,
-                    configuredTile: updatedTile,
                 };
             });
         }
@@ -173,11 +164,8 @@ class SpeedDialContainer extends Component {
                 Math.max(newIndex, oldIndex),
             );
 
-            const updatedTile = this.updateEditTile(updatedChildren);
-
             return {
                 children: updatedChildren,
-                configuredTile: updatedTile,
             };
         });
     }
@@ -190,24 +178,6 @@ class SpeedDialContainer extends Component {
         } else if (node.get('type') === 'bookmark') {
             window.location.href = node.get('url');
         }
-    }
-
-    onEdit(index, id) {
-        // Do not allow simultaneous editing of multiple tiles
-        if (!this.state.configuredTile) {
-            this.setState({
-                configuredTile: {
-                    index,
-                    id,
-                },
-            });
-        }
-    }
-
-    onEditModalClose() {
-        this.setState({
-            configuredTile: null,
-        });
     }
 
     async onDialUpdate(id) {
@@ -236,36 +206,6 @@ class SpeedDialContainer extends Component {
         browserUtils.localStorage.set({ metaData: this.state.data }).then();
     }
 
-    updateEditTile(newChildren) {
-        // This is code needed to ensure that changing the position of editable tile
-        //    does not close the edit dialog
-        if (this.state.configuredTile) {
-            const book = newChildren.get(this.state.configuredTile.index);
-            // Tile does not exist or it's not the same tile
-            const sameTile = book && book.getIn(['treeNode', 'id']) === this.state.configuredTile.id;
-
-            // At set index, tile is not the same
-            if (!sameTile) {
-                // Attempt to find the bookmark in the collection
-                const index = newChildren.findIndex(bookmark =>
-                    bookmark.getIn(['treeNode', 'id']) === this.state.configuredTile.id);
-
-                if (index !== -1) {
-                    // We found the bookmark, update state
-                    return {
-                        index,
-                        id: this.state.configuredTile.id,
-                    };
-                } else {
-                    // Bookmark no longer exists in this folder
-                    return null;
-                }
-            }
-        }
-
-        return this.state.configuredTile;
-    }
-
     updateList(children, additionalState) {
         // We need a different structure than just an plain array
         const newChildren = List(children).map(child => {
@@ -277,12 +217,9 @@ class SpeedDialContainer extends Component {
 
         const updatedChildren = updateChildren(newChildren, this.state.dialColumns);
 
-        const updatedTile = this.updateEditTile(updatedChildren);
-
         this.setState({
             children: updatedChildren,
             ...additionalState,
-            configuredTile: updatedTile,
         });
     }
 
@@ -321,7 +258,6 @@ class SpeedDialContainer extends Component {
         const children = this.state.children;
         const data = this.state.data;
         const isRoot = this.state.currFolderId === this.props.bookmarkTreeId;
-        const editTileExists = this.state.configuredTile !== null;
 
         const dialsStyle = {
             width: this.getDialWidth(),
@@ -361,12 +297,6 @@ class SpeedDialContainer extends Component {
                         />
 
                     </div>
-                }
-
-                {editTileExists &&
-                    <Portal node={document && document.getElementById('modals')}>
-                        <TileEditModal onClose={this.onEditModalClose} />
-                    </Portal>
                 }
             </div>
         );

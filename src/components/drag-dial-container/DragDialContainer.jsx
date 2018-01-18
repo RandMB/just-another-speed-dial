@@ -79,7 +79,6 @@ class SpeedDialContainer extends Component {
                     view: child.get('view'),
                     dialMeta: this.props.data[child.getIn(['treeNode', 'id'])],
                     onUpdate: this.props.onDialUpdate,
-                    onEdit: this.props.onEdit,
                 };
 
                 return (
@@ -106,7 +105,6 @@ SpeedDialContainer.propTypes = {
     onItemMoved: PropTypes.func.isRequired,
     onDialUpdate: PropTypes.func.isRequired,
     onOpen: PropTypes.func.isRequired,
-    onEdit: PropTypes.func.isRequired,
     data: PropTypes.object.isRequired,
 };
 

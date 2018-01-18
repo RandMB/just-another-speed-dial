@@ -23,7 +23,7 @@ function ButtonDanger(props) {
 
 ButtonDanger.propTypes = {
     classes: PropTypes.object,
-    onClick: PropTypes.func.isRequired,
+    onClick: PropTypes.func,
     title: PropTypes.string,
     value: PropTypes.string.isRequired,
 };

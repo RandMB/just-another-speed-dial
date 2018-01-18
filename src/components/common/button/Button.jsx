@@ -5,7 +5,7 @@ import ClassNames from 'classnames';
 import './Button.css';
 
 function Button(props) {
-    const classes = props.classes ? ClassNames({ ...props.classes }) : {};
+    const classes = props.classes ? ClassNames({ ...props.classes }) : '';
 
     return (
         <button
@@ -21,7 +21,7 @@ function Button(props) {
 
 Button.propTypes = {
     classes: PropTypes.object,
-    onClick: PropTypes.func.isRequired,
+    onClick: PropTypes.func,
     title: PropTypes.string,
     value: PropTypes.string.isRequired,
 };
