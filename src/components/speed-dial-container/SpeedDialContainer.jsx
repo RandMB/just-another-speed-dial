@@ -1,9 +1,11 @@
 import React, { Component } from 'react';
 import { Map, List } from 'immutable';
 import PropTypes from 'prop-types';
+import { Portal } from 'react-portal';
 import _debounce from 'lodash/debounce';
 
 import DragDialContainer from '../drag-dial-container/DragDialContainer';
+import TileEditModal from '../common/tile-edit-modal/TileEditModal';
 import dialUtils from '../../utils/dials';
 import browserUtils from '../../utils/browser';
 
@@ -43,6 +45,7 @@ class SpeedDialContainer extends Component {
             currFolderId: props.bookmarkTreeId,
             prevFolderId: null,
             children: null,
+            configuredTile: null,
 
             dialColumns: dialUtils.computeColumns(DIAL_WIDTH, WIDTH_TO_LEAVE),
         };
@@ -51,6 +54,9 @@ class SpeedDialContainer extends Component {
         this.goBack = this.goBack.bind(this);
         this.onResize = this.onResize.bind(this);
         this.onItemMoved = this.onItemMoved.bind(this);
+        this.onEditModalClose = this.onEditModalClose.bind(this);
+        this.onOpen = this.onOpen.bind(this);
+        this.onEdit = this.onEdit.bind(this);
 
         window.addEventListener(
             'resize',
@@ -129,9 +135,12 @@ class SpeedDialContainer extends Component {
             this.setState(({ children }) => {
                 const newChildren = updateChildren(children, columns);
 
+                const updatedTile = this.updateEditTile(newChildren);
+
                 return {
                     children: newChildren,
                     dialColumns: columns,
+                    configuredTile: updatedTile,
                 };
             });
         }
@@ -150,9 +159,40 @@ class SpeedDialContainer extends Component {
                 Math.max(newIndex, oldIndex),
             );
 
+            const updatedTile = this.updateEditTile(updatedChildren);
+
             return {
                 children: updatedChildren,
+                configuredTile: updatedTile,
             };
+        });
+    }
+
+    onOpen(index) {
+        const node = this.state.children.getIn([index, 'treeNode']);
+
+        if (node.get('type') === 'folder') {
+            this.openFolder(node.get('id'));
+        } else if (node.get('type') === 'bookmark') {
+            window.location.href = node.get('url');
+        }
+    }
+
+    onEdit(index, id) {
+        // Do not allow simultaneous editing of multiple tiles
+        if (!this.state.configuredTile) {
+            this.setState({
+                configuredTile: {
+                    index,
+                    id,
+                },
+            });
+        }
+    }
+
+    onEditModalClose() {
+        this.setState({
+            configuredTile: null,
         });
     }
 
@@ -168,6 +208,36 @@ class SpeedDialContainer extends Component {
         );
     }
 
+    updateEditTile(newChildren) {
+        // This is code needed to ensure that changing the position of editable tile
+        //    does not close the edit dialog
+        if (this.state.configuredTile) {
+            const book = newChildren.get(this.state.configuredTile.index);
+            // Tile does not exist or it's not the same tile
+            const sameTile = book && book.getIn(['treeNode', 'id']) === this.state.configuredTile.id;
+
+            // At set index, tile is not the same
+            if (!sameTile) {
+                // Attempt to find the bookmark in the collection
+                const index = newChildren.findIndex(bookmark =>
+                    bookmark.getIn(['treeNode', 'id']) === this.state.configuredTile.id);
+
+                if (index !== -1) {
+                    // We found the bookmark, update state
+                    return {
+                        index,
+                        id: this.state.configuredTile.id,
+                    };
+                } else {
+                    // Bookmark no longer exists in this folder
+                    return null;
+                }
+            }
+        }
+
+        return this.state.configuredTile;
+    }
+
     updateList(children, additionalState) {
         // We need a different structure than just an plain array
         const newChildren = List(children).map(child => {
@@ -179,9 +249,12 @@ class SpeedDialContainer extends Component {
 
         const updatedChildren = updateChildren(newChildren, this.state.dialColumns);
 
+        const updatedTile = this.updateEditTile(updatedChildren);
+
         this.setState({
             children: updatedChildren,
             ...additionalState,
+            configuredTile: updatedTile,
         });
     }
 
@@ -219,6 +292,7 @@ class SpeedDialContainer extends Component {
     render() {
         const children = this.state.children;
         const isRoot = this.state.currFolderId === this.props.bookmarkTreeId;
+        const editTileExists = this.state.configuredTile !== null;
 
         return (
             <div
@@ -244,14 +318,21 @@ class SpeedDialContainer extends Component {
                             folderId={this.state.currFolderId}
                             bookmarks={children}
                             columnCount={this.state.dialColumns}
-                            onOpenFolder={this.openFolder}
+                            onOpen={this.onOpen}
                             onItemMoved={this.onItemMoved}
+                            onEdit={this.onEdit}
 
                             width={this.getDialWidth()}
                             height={this.getDialHeight()}
                         />
                     }
                 </div>
+
+                {editTileExists &&
+                    <Portal node={document && document.getElementById('modals')}>
+                        <TileEditModal onClose={this.onEditModalClose} />
+                    </Portal>
+                }
             </div>
         );
     }
