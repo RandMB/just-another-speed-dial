@@ -3,6 +3,7 @@ import { Map, List } from 'immutable';
 import PropTypes from 'prop-types';
 import { Portal } from 'react-portal';
 import _debounce from 'lodash/debounce';
+import _throttle from 'lodash/throttle';
 
 import DragDialContainer from '../drag-dial-container/DragDialContainer';
 import TileEditModal from '../common/tile-edit-modal/TileEditModal';
@@ -45,7 +46,9 @@ class SpeedDialContainer extends Component {
             currFolderId: props.bookmarkTreeId,
             prevFolderId: null,
             children: null,
+            data: {},
             configuredTile: null,
+            isConfigLoaded: false,
 
             dialColumns: dialUtils.computeColumns(DIAL_WIDTH, WIDTH_TO_LEAVE),
         };
@@ -54,9 +57,12 @@ class SpeedDialContainer extends Component {
         this.goBack = this.goBack.bind(this);
         this.onResize = this.onResize.bind(this);
         this.onItemMoved = this.onItemMoved.bind(this);
+        this.onDialUpdate = this.onDialUpdate.bind(this);
         this.onEditModalClose = this.onEditModalClose.bind(this);
         this.onOpen = this.onOpen.bind(this);
         this.onEdit = this.onEdit.bind(this);
+
+        this.throttledSave = _throttle(this.saveChanges, 500);
 
         window.addEventListener(
             'resize',
@@ -65,11 +71,6 @@ class SpeedDialContainer extends Component {
     }
 
     async componentWillMount() {
-        const newChildren =
-            await browserUtils.bookmarks.getFolderChildren(this.state.currFolderId);
-
-        this.updateList(newChildren);
-
         browserUtils.bookmarks.onMoved(async (id, moveInfo) => {
             if (moveInfo.parentId === this.state.currFolderId ||
                 moveInfo.oldParentId === this.state.currFolderId) {
@@ -125,6 +126,19 @@ class SpeedDialContainer extends Component {
                     children: updated,
                 });
             }
+        });
+
+        const newChildren =
+            await browserUtils.bookmarks.getFolderChildren(this.state.currFolderId);
+
+        this.updateList(newChildren);
+
+        const data = await browserUtils.localStorage.get('metaData');
+        const dialData = data['metaData'];
+
+        this.setState({
+            data: dialData || {},
+            isConfigLoaded: true,
         });
     }
 
@@ -196,16 +210,30 @@ class SpeedDialContainer extends Component {
         });
     }
 
+    async onDialUpdate(id) {
+        const colorData = await browserUtils.getColor();
+        this.state.data[id] = colorData;
+
+        this.forceUpdate();
+        this.throttledSave();
+    }
+
     getDialWidth() {
         return dialUtils.computeDialsWidth(this.state.dialColumns, DIAL_WIDTH, BETWEEN_DIALS);
     }
 
     getDialHeight() {
+        const count = this.state.children ? this.state.children.count() : 0;
+
         return dialUtils.computeDialsHeight(
-            this.state.children.count(),
+            count,
             this.state.dialColumns,
             DIAL_HEIGHT,
         );
+    }
+
+    saveChanges() {
+        browserUtils.localStorage.set({ metaData: this.state.data }).then();
     }
 
     updateEditTile(newChildren) {
@@ -291,8 +319,14 @@ class SpeedDialContainer extends Component {
 
     render() {
         const children = this.state.children;
+        const data = this.state.data;
         const isRoot = this.state.currFolderId === this.props.bookmarkTreeId;
         const editTileExists = this.state.configuredTile !== null;
+
+        const dialsStyle = {
+            width: this.getDialWidth(),
+            height: this.getDialHeight(),
+        };
 
         return (
             <div
@@ -311,22 +345,23 @@ class SpeedDialContainer extends Component {
                     }
                 </div>
 
-                <div className="dial-container">
-                    {children &&
+                {this.state.isConfigLoaded && children &&
+                    <div className="dial-container" style={dialsStyle}>
+
                         <DragDialContainer
                             key={this.state.currFolderId}
                             folderId={this.state.currFolderId}
                             bookmarks={children}
+                            data={data}
                             columnCount={this.state.dialColumns}
                             onOpen={this.onOpen}
                             onItemMoved={this.onItemMoved}
                             onEdit={this.onEdit}
-
-                            width={this.getDialWidth()}
-                            height={this.getDialHeight()}
+                            onDialUpdate={this.onDialUpdate}
                         />
-                    }
-                </div>
+
+                    </div>
+                }
 
                 {editTileExists &&
                     <Portal node={document && document.getElementById('modals')}>

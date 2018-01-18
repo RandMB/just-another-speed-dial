@@ -2,10 +2,8 @@
     /* This is needed, oherwise scrolling doesn't work */
     position: relative;
 
-    display: flex;
-    flex-flow: row wrap;
-    justify-content: center;
-    align-content: flex-start;
+    margin-left: auto;
+    margin-right: auto;
 }
 
 .dial-container-top {

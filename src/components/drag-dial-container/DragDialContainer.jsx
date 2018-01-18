@@ -1,11 +1,9 @@
 import React, { Component } from 'react';
 import PropTypes from 'prop-types';
 
-import DialFolder from '../dial-folder/DialFolder';
+import DraggableTileContainer from '../draggable-tile-container/DraggableTileContainer';
 import dialUtils from '../../utils/dials';
 import browserUtils from '../../utils/browser';
-
-import './DragDialContainer.css';
 
 const DIAL_HEIGHT = 239;
 const DIAL_WIDTH = 250;
@@ -72,18 +70,32 @@ class SpeedDialContainer extends Component {
     }
 
     render() {
-        const {
-            columnCount,
-            onItemMoved,
-            ...rest
-        } = this.props;
+        const bookmarkTree = this.props.bookmarks;
 
         return (
-            <DialFolder
-                onDialDrag={this.onDrag}
-                onDragEnd={this.onDragEnd}
-                {...rest}
-            />
+            bookmarkTree.map((child, index) => {
+                const dialData = {
+                    node: child.get('treeNode'),
+                    view: child.get('view'),
+                    dialMeta: this.props.data[child.getIn(['treeNode', 'id'])],
+                    onUpdate: this.props.onDialUpdate,
+                    onEdit: this.props.onEdit,
+                };
+
+                return (
+                    <DraggableTileContainer
+                        xPos={child.getIn(['view', 'dialPosX'])}
+                        yPos={child.getIn(['view', 'dialPosY'])}
+                        id={index}
+                        onDrag={this.onDrag}
+                        onDragEnd={this.onDragEnd}
+                        onClick={this.props.onOpen}
+                        key={'' + child.getIn(['treeNode', 'id'])}
+                        data={dialData}
+                    />
+
+                );
+            })
         );
     }
 }
@@ -92,6 +104,10 @@ SpeedDialContainer.propTypes = {
     bookmarks: PropTypes.object.isRequired,
     columnCount: PropTypes.number.isRequired,
     onItemMoved: PropTypes.func.isRequired,
+    onDialUpdate: PropTypes.func.isRequired,
+    onOpen: PropTypes.func.isRequired,
+    onEdit: PropTypes.func.isRequired,
+    data: PropTypes.object.isRequired,
 };
 
 export default SpeedDialContainer;
