@@ -49,6 +49,14 @@ class DraggableDialContainer extends PureComponent {
         this.dragStartIndex = null;
     }
 
+    componentWillUnmount() {
+        // Prevent calling setState on component which is going to unmount
+        this.currentDragState.isDraggedCurrently = false;
+        // General cleanup
+        clearInterval(this.dragReportInterval);
+        document.removeEventListener('mousemove', this.onMouseMove);
+    }
+
     onMouseDown(event) {
         // 0 button means left click
         if (event.nativeEvent.button !== 0) {

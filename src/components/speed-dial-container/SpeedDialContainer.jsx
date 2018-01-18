@@ -1,5 +1,5 @@
 import React, { Component } from 'react';
-import { Map, fromJS } from 'immutable';
+import { Map, List } from 'immutable';
 import PropTypes from 'prop-types';
 import _debounce from 'lodash/debounce';
 
@@ -170,7 +170,7 @@ class SpeedDialContainer extends Component {
 
     updateList(children, additionalState) {
         // We need a different structure than just an plain array
-        const newChildren = fromJS(children).map(child => {
+        const newChildren = List(children).map(child => {
             return Map({
                 treeNode: Map(child),
                 view: Map({}),

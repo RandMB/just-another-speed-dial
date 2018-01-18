@@ -23,11 +23,11 @@ class DialContainer extends PureComponent {
             currentPosY: props.yPos,
         };
 
-        this.cachedState = null;
-
         if (!props.dialMeta && props.node.get('type') !== 'folder') {
             this.props.onUpdate(props.node.get('id'), props.node.get('url'));
         }
+
+        this.willUnmount = false;
 
         this.onEditMouseDown = this.onEditMouseDown.bind(this);
     }
@@ -43,23 +43,20 @@ class DialContainer extends PureComponent {
             this.setState(newState);
         } else if (newState.currentPosX !== this.state.currentPosX ||
             newState.currentPosY !== this.state.currentPosY) {
-
-            this.cachedState = newState;
+            // HACK: React remounts DOM node, skipping transition.
+            // Delay the state change to allow the browser to process and paint stuff
+            setTimeout(() => {
+                if (!this.willUnmount) {
+                    window.requestAnimationFrame(() => {
+                        this.setState(newState);
+                    });
+                }
+            }, 10);
         }
     }
 
-    componentDidUpdate() {
-        // HACK: React remounts the component, skipping transition.
-        // Delay the state change to allow the browser to process and paint stuff
-        if (this.cachedState) {
-            const state = this.cachedState;
-            this.cachedState = null;
-            setTimeout(() => {
-                window.requestAnimationFrame(() => {
-                    this.setState(state);
-                });
-            }, 10);
-        }
+    componentWillUnmount() {
+        this.willUnmount = true;
     }
 
     onEditMouseDown(event) {
