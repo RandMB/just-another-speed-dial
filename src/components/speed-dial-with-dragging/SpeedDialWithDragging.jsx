@@ -1,7 +1,7 @@
 import React, { Component } from 'react';
 import PropTypes from 'prop-types';
 
-import DraggableTileContainer from '../draggable-tile-container/DraggableTileContainer';
+import DraggableDial from '../draggable-dial/DraggableDial';
 import dialUtils from '../../utils/dials';
 import browserUtils from '../../utils/browser';
 
@@ -9,7 +9,7 @@ const DIAL_HEIGHT = 239;
 const DIAL_WIDTH = 250;
 const BETWEEN_DIALS = 30;
 
-class SpeedDialContainer extends Component {
+class SpeedDialWithDragging extends Component {
     constructor(props) {
         super(props);
 
@@ -82,7 +82,7 @@ class SpeedDialContainer extends Component {
                 };
 
                 return (
-                    <DraggableTileContainer
+                    <DraggableDial
                         xPos={child.getIn(['view', 'dialPosX'])}
                         yPos={child.getIn(['view', 'dialPosY'])}
                         id={index}
@@ -99,7 +99,7 @@ class SpeedDialContainer extends Component {
     }
 }
 
-SpeedDialContainer.propTypes = {
+SpeedDialWithDragging.propTypes = {
     bookmarks: PropTypes.object.isRequired,
     columnCount: PropTypes.number.isRequired,
     onItemMoved: PropTypes.func.isRequired,
@@ -108,4 +108,4 @@ SpeedDialContainer.propTypes = {
     data: PropTypes.object.isRequired,
 };
 
-export default SpeedDialContainer;
+export default SpeedDialWithDragging;

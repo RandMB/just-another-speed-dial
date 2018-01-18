@@ -2,7 +2,7 @@ import React, { Component } from 'react';
 import PropTypes from 'prop-types';
 import _isEmpty from 'lodash/isEmpty';
 
-import SpeedDialContainer from '../speed-dial-container/SpeedDialContainer';
+import SpeedDial from '../speed-dial/SpeedDial';
 import FolderPickerContainer from '../folder-picker-container/FolderPickerContainer';
 
 import browserUtils from '../../utils/browser';
@@ -13,7 +13,7 @@ import backgroundImageUrl from '../../assets/background-default.jpg';
 function Container(props) {
     if (props.rootBookmarkTreeId) {
         return (
-            <SpeedDialContainer
+            <SpeedDial
                 bookmarkTreeId={props.rootBookmarkTreeId}
             />
         );

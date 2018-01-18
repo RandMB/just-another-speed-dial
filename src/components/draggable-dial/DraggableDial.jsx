@@ -1,7 +1,7 @@
 import React, { PureComponent } from 'react';
 import PropTypes from 'prop-types';
 
-import DialContainer from '../dial-container/DialContainer';
+import Dial from '../dial/Dial';
 
 function computeDistance(startX, startY, endX, endY) {
     return Math.sqrt(Math.pow(endX - startX, 2) + Math.pow(endY - startY, 2));
@@ -9,7 +9,7 @@ function computeDistance(startX, startY, endX, endY) {
 
 const DRAG_DISTANCE_THRESHOLD = 10;
 
-class DraggableDialContainer extends PureComponent {
+class DraggableDial extends PureComponent {
     static computeDragPos(dragStart, mouseDragStart, currentMouseDrag) {
         return (dragStart - (mouseDragStart - currentMouseDrag));
     }
@@ -139,13 +139,13 @@ class DraggableDialContainer extends PureComponent {
     dragAnimate() {
         if (this.currentDragState.isDraggedCurrently) {
             this.setState({
-                dragPosX: DraggableDialContainer.computeDragPos(
+                dragPosX: DraggableDial.computeDragPos(
                     this.currentDragState.dragStartPosX,
                     this.currentDragState.mouseDragStartPosX,
                     this.currentDragState.currentMousePosX,
                 ),
 
-                dragPosY: DraggableDialContainer.computeDragPos(
+                dragPosY: DraggableDial.computeDragPos(
                     this.currentDragState.dragStartPosY,
                     this.currentDragState.mouseDragStartPosY,
                     this.currentDragState.currentMousePosY,
@@ -167,7 +167,7 @@ class DraggableDialContainer extends PureComponent {
         const currentPosY = this.currentDragState.isDraggedCurrently ? this.state.dragPosY : yPos;
 
         return (
-            <DialContainer
+            <Dial
                 xPos={currentPosX}
                 yPos={currentPosY}
                 isDragged={this.state.isDragged}
@@ -178,7 +178,7 @@ class DraggableDialContainer extends PureComponent {
     }
 }
 
-DraggableDialContainer.propTypes = {
+DraggableDial.propTypes = {
     xPos: PropTypes.number.isRequired,
     yPos: PropTypes.number.isRequired,
     id: PropTypes.any.isRequired,
@@ -188,4 +188,4 @@ DraggableDialContainer.propTypes = {
     onClick: PropTypes.func.isRequired,
 };
 
-export default DraggableDialContainer;
+export default DraggableDial;

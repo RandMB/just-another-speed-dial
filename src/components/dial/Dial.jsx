@@ -7,7 +7,7 @@ import TileEditModal from '../common/tile-edit-modal/TileEditModal';
 import DialTitle from '../dial-title/DialTitle';
 import DialTile from '../dial-tile/DialTile';
 
-import './DialContainer.css';
+import './Dial.css';
 
 const DRAG_ZINDEX = 5000;
 const TRANSITION_DURATION = 0.25;
@@ -16,7 +16,7 @@ function extractRGB(a) {
     return `rgb(${a[0]},${a[1]},${a[2]})`;
 }
 
-class DialContainer extends PureComponent {
+class Dial extends PureComponent {
     constructor(props) {
         super(props);
 
@@ -140,7 +140,7 @@ class DialContainer extends PureComponent {
     }
 }
 
-DialContainer.propTypes = {
+Dial.propTypes = {
     node: PropTypes.object.isRequired,
     view: PropTypes.object.isRequired,
     dialMeta: PropTypes.object,
@@ -151,4 +151,4 @@ DialContainer.propTypes = {
     onUpdate: PropTypes.func.isRequired,
 };
 
-export default DialContainer;
+export default Dial;

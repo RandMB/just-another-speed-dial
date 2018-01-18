@@ -4,11 +4,11 @@ import PropTypes from 'prop-types';
 import _debounce from 'lodash/debounce';
 import _throttle from 'lodash/throttle';
 
-import DragDialContainer from '../drag-dial-container/DragDialContainer';
+import SpeedDialWithDragging from '../speed-dial-with-dragging/SpeedDialWithDragging';
 import dialUtils from '../../utils/dials';
 import browserUtils from '../../utils/browser';
 
-import './SpeedDialContainer.css';
+import './SpeedDial.css';
 
 const DIAL_HEIGHT = 239;
 const DIAL_WIDTH = 250;
@@ -36,7 +36,7 @@ function updateChildren(children, columnCount) {
     return updateChildrenPartial(children, columnCount, 0, children.count() - 1);
 }
 
-class SpeedDialContainer extends Component {
+class SpeedDial extends Component {
     constructor(props) {
         super(props);
 
@@ -284,7 +284,7 @@ class SpeedDialContainer extends Component {
                 {this.state.isConfigLoaded && children &&
                     <div className="dial-container" style={dialsStyle}>
 
-                        <DragDialContainer
+                        <SpeedDialWithDragging
                             key={this.state.currFolderId}
                             folderId={this.state.currFolderId}
                             bookmarks={children}
@@ -303,8 +303,8 @@ class SpeedDialContainer extends Component {
     }
 }
 
-SpeedDialContainer.propTypes = {
+SpeedDial.propTypes = {
     bookmarkTreeId: PropTypes.string.isRequired,
 };
 
-export default SpeedDialContainer;
+export default SpeedDial;
