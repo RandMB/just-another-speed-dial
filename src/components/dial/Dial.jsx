@@ -116,6 +116,7 @@ class Dial extends PureComponent {
 
         return (
             <div
+                ref={this.props.elementRef}
                 className={dialClass}
                 style={dialStyle}
             >
@@ -143,6 +144,7 @@ class Dial extends PureComponent {
 Dial.propTypes = {
     node: PropTypes.object.isRequired,
     view: PropTypes.object.isRequired,
+    elementRef: PropTypes.func,
     dialMeta: PropTypes.object,
     xPos: PropTypes.number.isRequired,
     yPos: PropTypes.number.isRequired,

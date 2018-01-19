@@ -74,13 +74,6 @@ class SpeedDialWithDragging extends Component {
 
         return (
             bookmarkTree.map((child, index) => {
-                const dialData = {
-                    node: child.get('treeNode'),
-                    view: child.get('view'),
-                    dialMeta: this.props.data[child.getIn(['treeNode', 'id'])],
-                    onUpdate: this.props.onDialUpdate,
-                };
-
                 return (
                     <DraggableDial
                         xPos={child.getIn(['view', 'dialPosX'])}
@@ -90,7 +83,11 @@ class SpeedDialWithDragging extends Component {
                         onDragEnd={this.onDragEnd}
                         onClick={this.props.onOpen}
                         key={'' + child.getIn(['treeNode', 'id'])}
-                        data={dialData}
+
+                        node={child.get('treeNode')}
+                        view={child.get('view')}
+                        dialMeta={this.props.data[child.getIn(['treeNode', 'id'])]}
+                        onUpdate={this.props.onDialUpdate}
                     />
 
                 );

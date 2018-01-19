@@ -17,13 +17,6 @@ class DraggableDial extends PureComponent {
     constructor(props) {
         super(props);
 
-        this.state = {
-            dragPosX: 0,
-            dragPosY: 0,
-
-            isDragged: false,
-        };
-
         this.dragDefault = {
             dragStartPosX: 0,
             dragStartPosY: 0,
@@ -31,8 +24,8 @@ class DraggableDial extends PureComponent {
             mouseDragStartPosX: 0,
             mouseDragStartPosY: 0,
 
-            currentMousePosX: 0,
-            currentMousePosY: 0,
+            currentDragPosX: 0,
+            currentDragPosY: 0,
 
             hasDragThresholdCrossed: false,
             isDraggedCurrently: false,
@@ -47,6 +40,8 @@ class DraggableDial extends PureComponent {
 
         this.dragReportInterval = null;
         this.dragStartIndex = null;
+
+        this.elementRef = null;
     }
 
     componentWillUnmount() {
@@ -68,31 +63,30 @@ class DraggableDial extends PureComponent {
 
         const nativeEvent = event.nativeEvent;
 
-        this.currentDragState = {
+        this.currentDragState = Object.assign(this.currentDragState, {
             mouseDragStartPosX: nativeEvent.clientX,
             mouseDragStartPosY: nativeEvent.clientY,
-
-            currentMousePosX: nativeEvent.clientX,
-            currentMousePosY: nativeEvent.clientY,
 
             dragStartPosX: this.props.xPos,
             dragStartPosY: this.props.yPos,
 
             isDraggedCurrently: true,
-        };
 
-        this.dragReportInterval = setInterval(() => {
-            this.props.onDrag({
-                index: this.props.id,
-                dragPosX: this.state.dragPosX,
-                dragPosY: this.state.dragPosY,
-            });
-        }, 100);
-
-        this.setState({
-            isDragged: true,
+            currentDragPosX: this.props.xPos,
+            currentDragPosY: this.props.yPos,
         });
 
+        this.dragReportInterval = setInterval(() => {
+            if (this.currentDragState.isDraggedCurrently) {
+                this.props.onDrag({
+                    index: this.props.id,
+                    dragPosX: this.currentDragState.currentDragPosX,
+                    dragPosY: this.currentDragState.currentDragPosY,
+                });
+            }
+        }, 100);
+
+        this.forceUpdate();
         this.dragAnimate();
 
         this.dragStartIndex = this.props.id;
@@ -109,7 +103,6 @@ class DraggableDial extends PureComponent {
 
         Object.assign(this.currentDragState, this.dragDefault);
 
-        this.setState({ isDragged: false });
         this.dragStartIndex = null;
 
         clearInterval(this.dragReportInterval);
@@ -130,29 +123,40 @@ class DraggableDial extends PureComponent {
             }
         }
 
-        Object.assign(this.currentDragState, {
-            currentMousePosX: event.clientX,
-            currentMousePosY: event.clientY,
-        });
+        this.currentDragState.currentDragPosX = DraggableDial.computeDragPos(
+            this.currentDragState.dragStartPosX,
+            this.currentDragState.mouseDragStartPosX,
+            event.clientX,
+        );
+
+        this.currentDragState.currentDragPosY = DraggableDial.computeDragPos(
+            this.currentDragState.dragStartPosY,
+            this.currentDragState.mouseDragStartPosY,
+            event.clientY,
+        );
     }
 
     dragAnimate() {
         if (this.currentDragState.isDraggedCurrently) {
-            this.setState({
-                dragPosX: DraggableDial.computeDragPos(
-                    this.currentDragState.dragStartPosX,
-                    this.currentDragState.mouseDragStartPosX,
-                    this.currentDragState.currentMousePosX,
-                ),
+            const dragPosX = this.currentDragState.currentDragPosX;
+            const dragPosY = this.currentDragState.currentDragPosY;
 
-                dragPosY: DraggableDial.computeDragPos(
-                    this.currentDragState.dragStartPosY,
-                    this.currentDragState.mouseDragStartPosY,
-                    this.currentDragState.currentMousePosY,
-                ),
-            });
+            // If we have an element, apply the syles, otherwise, force an update
+            //  animation with dom node is not in 'react' way , but is more efficient
+            //  and has more chances to achieve desired 60 fps
+            if (this.elementRef) {
+                this.elementRef.style.transform = `translate3D(${dragPosX}px,${dragPosY}px,0)`;
+                this.elementRef.style.transitionDuration = '0s';
+            } else {
+                this.forceUpdate();
+            }
 
             window.requestAnimationFrame(this.dragAnimate);
+        } else if (this.elementRef) {
+            // Make sure we update the dom after finishing the animation,
+            //   otherwise it migth end up floating somewhere
+            this.elementRef.style.transform = `translate3D(${this.props.xPos}px,${this.props.yPos}px,0)`;
+            this.forceUpdate();
         }
     }
 
@@ -160,19 +164,29 @@ class DraggableDial extends PureComponent {
         const {
             xPos,
             yPos,
-            data,
+            onDrag,
+            onDragEnd,
+            onClick,
+            id,
+            ...rest
         } = this.props;
 
-        const currentPosX = this.currentDragState.isDraggedCurrently ? this.state.dragPosX : xPos;
-        const currentPosY = this.currentDragState.isDraggedCurrently ? this.state.dragPosY : yPos;
+        let currentPosX = xPos;
+        let currentPosY = yPos;
+
+        if (this.currentDragState.isDraggedCurrently) {
+            currentPosX = this.currentDragState.currentDragPosX;
+            currentPosY = this.currentDragState.currentDragPosY;
+        }
 
         return (
             <Dial
                 xPos={currentPosX}
                 yPos={currentPosY}
-                isDragged={this.state.isDragged}
+                isDragged={this.currentDragState.isDraggedCurrently}
                 onMouseDown={this.onMouseDown}
-                {...data}
+                elementRef={el => this.elementRef = el}
+                {...rest}
             />
         );
     }
@@ -182,7 +196,6 @@ DraggableDial.propTypes = {
     xPos: PropTypes.number.isRequired,
     yPos: PropTypes.number.isRequired,
     id: PropTypes.any.isRequired,
-    data: PropTypes.object.isRequired,
     onDrag: PropTypes.func.isRequired,
     onDragEnd: PropTypes.func,
     onClick: PropTypes.func.isRequired,
