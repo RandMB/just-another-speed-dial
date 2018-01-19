@@ -72,25 +72,35 @@ function extractFolders(bookmarkArray, defaultObject = {}) {
         });
 }
 
+function filterChild(child) {
+    if (isBookmark(child) && isOpenable(child)) {
+        return {
+            id: child.id,
+            index: child.index,
+            url: child.url,
+            title: child.title,
+            type: 'bookmark',
+        };
+    }
+
+    if (isFolder(child)) {
+        return {
+            id: child.id,
+            index: child.index,
+            title: child.title,
+            type: 'folder',
+        };
+    }
+
+    return null;
+}
+
 function filterChildren(children) {
     return children.reduce((acc, child) => {
-        if (isBookmark(child) && isOpenable(child)) {
-            acc.push({
-                id: child.id,
-                index: child.index,
-                url: child.url,
-                title: child.title,
-                type: 'bookmark',
-            });
-        }
+        const filtered = filterChild(child);
 
-        if (isFolder(child)) {
-            acc.push({
-                id: child.id,
-                index: child.index,
-                title: child.title,
-                type: 'folder',
-            });
+        if (filtered) {
+            acc.push(filtered);
         }
 
         return acc;
@@ -116,21 +126,45 @@ async function getFolderChildren(id) {
     return filterChildren(children);
 }
 
-function onMoved(func) {
+function OnMoved() { return this; }
+
+OnMoved.prototype.addEventListener = function onMovedAddEventListener(func) {
     chrome.bookmarks.onMoved.addListener(func);
-}
+};
 
-function onCreated(func) {
+OnMoved.prototype.removeEventListener = function onMovedRemoveEventListener(func) {
+    chrome.bookmarks.onMoved.removeListener(func);
+};
+
+function OnCreated() {}
+
+OnCreated.prototype.addEventListener = function onCreatedAddEventListener(func) {
     chrome.bookmarks.onCreated.addListener(func);
-}
+};
 
-function onRemoved(func) {
+OnCreated.prototype.removeEventListener = function onCreatedRemoveEventListener(func) {
+    chrome.bookmarks.onCreated.removeListener(func);
+};
+
+function OnRemoved() {}
+
+OnRemoved.prototype.addEventListener = function onRemovedAddEventListener(func) {
     chrome.bookmarks.onRemoved.addListener(func);
-}
+};
 
-function onChanged(func) {
+OnRemoved.prototype.removeEventListener = function onRemovedRemoveEventListener(func) {
+    chrome.bookmarks.onRemoved.removeListener(func);
+};
+
+function OnChanged() {}
+
+OnChanged.prototype.addEventListener = function onChangedAddEventListener(func) {
     chrome.bookmarks.onChanged.addListener(func);
-}
+};
+
+OnChanged.prototype.removeEventListener = function onChangedRemoveEventListener(func) {
+    chrome.bookmarks.onChanged.removeListener(func);
+};
 
 export default {
     get,
@@ -140,8 +174,12 @@ export default {
     getSubfolders,
     getFolderChildren,
     move,
-    onMoved,
-    onCreated,
-    onRemoved,
-    onChanged,
+    onMoved: new OnMoved(),
+    onCreated: new OnCreated(),
+    onRemoved: new OnRemoved(),
+    onChanged: new OnChanged(),
+    filterChild,
+    isBookmark,
+    isFolder,
+    isOpenable,
 };

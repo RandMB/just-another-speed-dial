@@ -23,7 +23,7 @@ function DialTile(props) {
                 />
             }
             {props.type === 'bookmark' &&
-                <span>{new URL(props.url).host}</span>
+                <span draggable="false">{new URL(props.url).host}</span>
             }
             <div
                 onMouseDown={props.onEditMouseDown}

@@ -55,6 +55,11 @@ class SpeedDial extends Component {
         this.onResize = this.onResize.bind(this);
         this.onItemMoved = this.onItemMoved.bind(this);
         this.onDialUpdate = this.onDialUpdate.bind(this);
+        this.onBookmarkMoved = this.onBookmarkMoved.bind(this);
+        this.onBookmarkCreated = this.onBookmarkCreated.bind(this);
+        this.onBookmarkRemoved = this.onBookmarkRemoved.bind(this);
+        this.onBookmarkChanged = this.onBookmarkChanged.bind(this);
+        this.moveBookmark = this.moveBookmark.bind(this);
         this.onOpen = this.onOpen.bind(this);
 
         this.throttledSave = _throttle(this.saveChanges, 500);
@@ -66,62 +71,10 @@ class SpeedDial extends Component {
     }
 
     async componentWillMount() {
-        browserUtils.bookmarks.onMoved(async (id, moveInfo) => {
-            if (moveInfo.parentId === this.state.currFolderId ||
-                moveInfo.oldParentId === this.state.currFolderId) {
-
-                const children =
-                    await browserUtils.bookmarks.getFolderChildren(this.state.currFolderId);
-
-                this.updateList(children);
-            }
-        });
-
-        browserUtils.bookmarks.onCreated(async (id, bookmarkInfo) => {
-            if (bookmarkInfo.parentId === this.state.currFolderId) {
-                const children =
-                    await browserUtils.bookmarks.getFolderChildren(this.state.currFolderId);
-
-                this.updateList(children);
-            }
-        });
-
-        browserUtils.bookmarks.onRemoved(async (id, removedInfo) => {
-            if (removedInfo.parentId === this.state.currFolderId) {
-                const children =
-                    await browserUtils.bookmarks.getFolderChildren(this.state.currFolderId);
-
-                this.updateList(children);
-            }
-        });
-
-        browserUtils.bookmarks.onChanged((id, changeInfo) => {
-            // Attempt to find the bookmark in the collection
-            const index = this.state.children.findIndex(bookmark =>
-                bookmark.getIn(['treeNode', 'id']) === id);
-
-            if (index !== -1) {
-                let updated = this.state.children;
-
-                if (changeInfo.title) {
-                    updated = updated.updateIn(
-                        [index, 'treeNode'],
-                        (node) => node.set('title', changeInfo.title),
-                    );
-                }
-
-                if (changeInfo.url) {
-                    updated = updated.updateIn(
-                        [index, 'treeNode'],
-                        (node) => node.set('url', changeInfo.url),
-                    );
-                }
-
-                this.setState({
-                    children: updated,
-                });
-            }
-        });
+        browserUtils.bookmarks.onMoved.addEventListener(this.onBookmarkMoved);
+        browserUtils.bookmarks.onCreated.addEventListener(this.onBookmarkCreated);
+        browserUtils.bookmarks.onRemoved.addEventListener(this.onBookmarkRemoved);
+        browserUtils.bookmarks.onChanged.addEventListener(this.onBookmarkChanged);
 
         const childrenPromise =
             browserUtils.bookmarks.getFolderChildren(this.state.currFolderId);
@@ -134,6 +87,52 @@ class SpeedDial extends Component {
             data: dialData || {},
             isConfigLoaded: true,
         });
+    }
+
+    componentWillUnmount() {
+        browserUtils.bookmarks.onMoved.removeEventListener(this.onBookmarkMoved);
+        browserUtils.bookmarks.onCreated.removeEventListener(this.onBookmarkCreated);
+        browserUtils.bookmarks.onRemoved.removeEventListener(this.onBookmarkRemoved);
+        browserUtils.bookmarks.onChanged.removeEventListener(this.onBookmarkChanged);
+    }
+
+    async onBookmarkChanged(id) {
+        const bookmark = await browserUtils.bookmarks.get(id);
+
+        if (bookmark[0].parentId === this.state.currFolderId) {
+            const children =
+                await browserUtils.bookmarks.getFolderChildren(this.state.currFolderId);
+
+            this.updateList(children);
+        }
+    }
+
+    async onBookmarkRemoved(id, removedInfo) {
+        if (removedInfo.parentId === this.state.currFolderId) {
+            const children =
+                await browserUtils.bookmarks.getFolderChildren(this.state.currFolderId);
+
+            this.updateList(children);
+        }
+    }
+
+    async onBookmarkCreated(id, bookmark) {
+        if (bookmark.parentId === this.state.currFolderId) {
+            const children =
+                await browserUtils.bookmarks.getFolderChildren(this.state.currFolderId);
+
+            this.updateList(children);
+        }
+    }
+
+    async onBookmarkMoved(id, moveInfo) {
+        if (moveInfo.parentId === this.state.currFolderId ||
+            moveInfo.oldParentId === this.state.currFolderId) {
+            const children =
+                await browserUtils.bookmarks.getFolderChildren(this.state.currFolderId);
+
+            this.updateList(children);
+        }
     }
 
     onResize() {
@@ -202,6 +201,34 @@ class SpeedDial extends Component {
         );
     }
 
+    moveBookmark(oldIndex, newIndex, indexToMove) {
+        browserUtils.bookmarks.move(
+            this.state.children.getIn([newIndex, 'treeNode', 'id']),
+            { index: indexToMove },
+        ).then(/* Don't do aything */);
+
+        let children = this.state.children.setIn([newIndex, 'treeNode', 'index'], indexToMove);
+
+        if (newIndex > oldIndex) {
+            // The bookmark was moved forward
+            // Decrement items indexes form oldIndex to index - 1, inclusive
+            // The start is at zero as because we don't really know where to start from
+            //   as filtered elements make gaps in our indexes
+            for (let i = oldIndex; i < newIndex; i++) {
+                children = children.updateIn([i, 'treeNode', 'index'], index => index - 1);
+            }
+        } else if (newIndex < oldIndex) {
+            // The bookmark was moved backwards
+            // Increment items indexes form newIndex + 1 to oldIndex, inclusive
+            // Start from the next one ahead of changed one
+            for (let i = newIndex + 1; i <= oldIndex; i++) {
+                children = children.updateIn([i, 'treeNode', 'index'], index => index + 1);
+            }
+        }
+
+        this.setState({ children });
+    }
+
     saveChanges() {
         browserUtils.localStorage.set({ metaData: this.state.data }).then();
     }
@@ -267,6 +294,7 @@ class SpeedDial extends Component {
         return (
             <div
                 className="speed-dials"
+                draggable="false"
                 onDragOver={event => event.preventDefault()}
             >
                 <div className="dial-container-top">
@@ -294,6 +322,7 @@ class SpeedDial extends Component {
                             onItemMoved={this.onItemMoved}
                             onEdit={this.onEdit}
                             onDialUpdate={this.onDialUpdate}
+                            moveBookmark={this.moveBookmark}
                         />
 
                     </div>

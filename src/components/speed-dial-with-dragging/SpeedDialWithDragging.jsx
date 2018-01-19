@@ -62,10 +62,7 @@ class SpeedDialWithDragging extends Component {
                 }
             }
 
-            browserUtils.bookmarks.move(
-                this.props.bookmarks.getIn([newIndex, 'treeNode', 'id']),
-                { index: indexToMove },
-            ).then(/* Don't do aything */);
+            this.props.moveBookmark(oldIndex, newIndex, indexToMove);
         }
     }
 
@@ -103,6 +100,7 @@ SpeedDialWithDragging.propTypes = {
     onDialUpdate: PropTypes.func.isRequired,
     onOpen: PropTypes.func.isRequired,
     data: PropTypes.object.isRequired,
+    moveBookmark: PropTypes.func.isRequired,
 };
 
 export default SpeedDialWithDragging;

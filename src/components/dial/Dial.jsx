@@ -119,6 +119,7 @@ class Dial extends PureComponent {
                 ref={this.props.elementRef}
                 className={dialClass}
                 style={dialStyle}
+                draggable="false"
             >
 
                 <DialTile
