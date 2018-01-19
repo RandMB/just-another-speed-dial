@@ -8,6 +8,7 @@ function DialTile(props) {
     return (
         <div
             draggable="false"
+            onDragStart={(event) => { event.preventDefault(); }}
             className="dial-tile rounded-borders"
             title={props.url}
             onMouseDown={props.onMouseDown}

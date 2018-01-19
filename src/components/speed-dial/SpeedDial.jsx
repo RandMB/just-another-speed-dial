@@ -68,6 +68,8 @@ class SpeedDial extends Component {
             'resize',
             _debounce(this.onResize, 200, { trailing: true }),
         );
+
+        this.scheduledUpdate = [];
     }
 
     async componentWillMount() {
@@ -126,6 +128,17 @@ class SpeedDial extends Component {
     }
 
     async onBookmarkMoved(id, moveInfo) {
+        if (moveInfo.parentId === this.state.currFolderId &&
+            moveInfo.oldParentId === this.state.currFolderId) {
+            const index = this.scheduledUpdate.findIndex(el => el === id);
+
+            // If we have this move before, skip full update
+            if (index !== -1) {
+                this.scheduledUpdate.splice(index, 1);
+                return;
+            }
+        }
+
         if (moveInfo.parentId === this.state.currFolderId ||
             moveInfo.oldParentId === this.state.currFolderId) {
             const children =
@@ -202,8 +215,11 @@ class SpeedDial extends Component {
     }
 
     moveBookmark(oldIndex, newIndex, indexToMove) {
+        const id = this.state.children.getIn([newIndex, 'treeNode', 'id']);
+        this.scheduledUpdate.push(id);
+
         browserUtils.bookmarks.move(
-            this.state.children.getIn([newIndex, 'treeNode', 'id']),
+            id,
             { index: indexToMove },
         ).then(/* Don't do aything */);
 
