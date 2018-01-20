@@ -91,16 +91,6 @@ class DialApp extends Component {
                         rootBookmarkTreeId={rootBookmarkTreeId}
                     />
                 }
-
-                <div
-                    className="config-open-button"
-                    onClick={() => browser.runtime.openOptionsPage().then()}
-                    tile="Open configuration sidebar"
-                >
-
-                    <i className="fas fa-cog" />
-                </div>
-
             </React.Fragment>
         );
     }

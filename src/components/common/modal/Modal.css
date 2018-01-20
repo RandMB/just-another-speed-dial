@@ -1,18 +1,33 @@
 .modal-container {
-    position: absolute;
-    z-index: 1000000;
     background-color: white;
     width: 40vw;
-    height: 70vh;
+    height: auto;
+    min-height: 400px;
     margin: auto;
-    left: 0;
-    right: 0;
-    bottom: 0;
-    top: 0;
     box-shadow: 0 0 8px gray;
-
-    border-radius: 8px;
-
+    border-radius: 4px;
     display: flex;
     flex-direction: column;
+}
+
+.modal-appear {
+    opacity: 0;
+    transform: translateY(5%);
+}
+
+.modal-appear.modal-appear-active {
+    opacity: 1;
+    transition: opacity 150ms ease-in, transform 150ms ease-in;
+    transform: translateY(0);
+}
+
+.modal-exit {
+    opacity: 1;
+    transform: translateY(0);
+}
+
+.modal-exit.modal-exit-active {
+    opacity: 0.01;
+    transition: opacity 150ms ease-in, transform 150ms ease-in;
+    transform: translateY(5%);
 }

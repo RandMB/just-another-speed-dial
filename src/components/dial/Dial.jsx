@@ -3,7 +3,8 @@ import { Portal } from 'react-portal';
 import PropTypes from 'prop-types';
 import ClassNames from 'classnames';
 
-import TileEditModal from '../common/tile-edit-modal/TileEditModal';
+import TileEditModal from '../tile-edit-modal/TileEditModal';
+import ModalWithOverlay from '../common/modal-with-overlay/ModalWithOverlay';
 import DialTitle from '../dial-title/DialTitle';
 import DialTile from '../dial-tile/DialTile';
 
@@ -25,6 +26,7 @@ class Dial extends PureComponent {
             currentPosY: props.yPos,
 
             isEdited: false,
+            isModalShown: false,
         };
 
         if (!props.dialMeta && props.node.get('type') !== 'folder') {
@@ -34,7 +36,6 @@ class Dial extends PureComponent {
         this.willUnmount = false;
 
         this.onEditMouseDown = this.onEditMouseDown.bind(this);
-        this.onEditModalClose = this.onEditModalClose.bind(this);
     }
 
     componentWillReceiveProps(newProps) {
@@ -68,12 +69,11 @@ class Dial extends PureComponent {
         event.stopPropagation();
 
         window.addEventListener('mouseup', () => {
-            this.setState({ isEdited: true });
+            this.setState({
+                isEdited: true,
+                isModalShown: true,
+            });
         }, { once: true });
-    }
-
-    onEditModalClose() {
-        this.setState({ isEdited: false });
     }
 
     render() {
@@ -134,7 +134,13 @@ class Dial extends PureComponent {
 
                 {this.state.isEdited &&
                     <Portal node={document && document.getElementById('modals')}>
-                        <TileEditModal onClose={this.onEditModalClose} />
+                        <ModalWithOverlay in={this.state.isModalShown}>
+                            <TileEditModal
+                                in={this.state.isModalShown}
+                                onClose={() => this.setState({ isModalShown: false })}
+                                onExited={() => this.setState({ isEdited: false })}
+                            />
+                        </ModalWithOverlay>
                     </Portal>
                 }
             </div>

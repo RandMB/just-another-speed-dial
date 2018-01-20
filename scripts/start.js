@@ -12,11 +12,16 @@ process.on('unhandledRejection', err => {
 });
 
 const webpack = require('webpack');
-
+const fs = require('fs-extra');
+const paths = require('./paths');
 const config = require('./webpack.config.dev');
 const webExt = require('web-ext').default;
 
 const compiler = webpack(config);
+
+// Remove all content but keep the directory so that
+// if you're in it, you don't end up in Trash
+fs.removeSync(paths.appBuild);
 
 const compilingPromise = new Promise((resolve, reject) => {
     compiler.run((err, stats) => {

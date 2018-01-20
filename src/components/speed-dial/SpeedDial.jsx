@@ -132,7 +132,7 @@ class SpeedDial extends Component {
             moveInfo.oldParentId === this.state.currFolderId) {
             const index = this.scheduledUpdate.findIndex(el => el === id);
 
-            // If we have this move before, skip full update
+            // If we have done this move before, skip full update
             if (index !== -1) {
                 this.scheduledUpdate.splice(index, 1);
                 return;
@@ -279,6 +279,9 @@ class SpeedDial extends Component {
 
         const [children, folder] = await Promise.all([childrenNodes, folderNode]);
 
+        // Reset
+        this.scheduledUpdate = [];
+
         this.updateList(children, {
             currFolderId: folderId,
             prevFolderId: folder[0].parentId,
@@ -290,6 +293,9 @@ class SpeedDial extends Component {
             await browserUtils.bookmarks.getFolderChildren(folderId);
 
         const prevFolder = this.state.currFolderId;
+
+        // Reset
+        this.scheduledUpdate = [];
 
         this.updateList(children, {
             currFolderId: folderId,
@@ -314,15 +320,28 @@ class SpeedDial extends Component {
                 onDragOver={event => event.preventDefault()}
             >
                 <div className="dial-container-top">
-                    {!isRoot &&
-                        <button
-                            className="button-transparent"
-                            type="button"
-                            onClick={this.goBack}
+                    <div className="dial-container-start" />
+                    <div className="dial-container-middle" >
+                        {!isRoot &&
+                            <button
+                                className="button-transparent"
+                                type="button"
+                                onClick={this.goBack}
+                            >
+                                &lt;&lt; Back
+                            </button>
+                        }
+                    </div>
+                    <div className="dial-container-end" >
+                        <div
+                            className="config-open-button"
+                            onClick={() => chrome.runtime.openOptionsPage()}
+                            tile="Open configuration sidebar"
                         >
-                            &lt;&lt; Back
-                        </button>
-                    }
+                            <i className="fas fa-cog" />
+                        </div>
+                    </div>
+
                 </div>
 
                 {this.state.isConfigLoaded && children &&

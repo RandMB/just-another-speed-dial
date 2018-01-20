@@ -126,7 +126,7 @@ async function getFolderChildren(id) {
     return filterChildren(children);
 }
 
-function OnMoved() { return this; }
+function OnMoved() {}
 
 OnMoved.prototype.addEventListener = function onMovedAddEventListener(func) {
     chrome.bookmarks.onMoved.addListener(func);

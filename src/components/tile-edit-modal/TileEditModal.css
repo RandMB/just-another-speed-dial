@@ -37,3 +37,36 @@
     flex-direction: row;
     justify-content: space-between;
 }
+
+.input-group label {
+    width: 100%;
+    display: inline-block;
+    color: #0c0c0d;
+    padding-bottom: 4px;
+    font-size: 0.9rem;
+}
+
+.input-group input {
+    color: #0c0c0d;
+    border-radius: 2px;
+    height: 32px;
+    width: 100%;
+    padding: 8px;
+    border-width: 1px;
+    border-style: solid;
+    font-size: 1rem;
+    border-color: rgba(12, 12, 13, 0.3);
+}
+
+.input-group input:hover {
+    border-color: rgba(12, 12, 13, 0.5);
+}
+
+.input-group input:focus {
+    border-color: #0a84ff;
+    box-shadow: 0 0 10px rgba(10, 132, 255, 0.2);
+}
+
+.input-group {
+    margin-bottom: 8px;
+}

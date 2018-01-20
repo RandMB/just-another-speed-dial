@@ -5,7 +5,7 @@ import ClassNames from 'classnames';
 import './Button.css';
 
 function Button(props) {
-    const classes = props.classes ? ClassNames({ ...props.classes }) : '';
+    const classes = props.classes ? ClassNames({ ...props.classes }) : 'button-default';
 
     return (
         <button
@@ -23,7 +23,7 @@ Button.propTypes = {
     classes: PropTypes.object,
     onClick: PropTypes.func,
     title: PropTypes.string,
-    value: PropTypes.string.isRequired,
+    value: PropTypes.node.isRequired,
 };
 
 export default Button;

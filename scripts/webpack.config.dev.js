@@ -102,13 +102,18 @@ module.exports = {
           {
             test: /\.css$/,
             use: [
-              require.resolve('style-loader'),
+              {
+                loader: require.resolve('style-loader'),
+                options: {
+                  hmr: false,
+                },
+              },
               {
                 loader: require.resolve('css-loader'),
                 options: {
                   importLoaders: 1,
                 },
-              },
+              }
             ],
           },
           // "file" loader makes sure those assets get served by WebpackDevServer.
