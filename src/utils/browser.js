@@ -15,7 +15,7 @@ if (/Chrome\/([0-9.]+)/.exec(navigator.userAgent)) {
 }
 
 export default {
-    getColor: color,
+    colors: color,
     localStorage,
     bookmarks,
     browserType: browserVer,

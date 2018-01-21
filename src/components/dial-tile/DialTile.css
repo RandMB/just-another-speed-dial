@@ -6,6 +6,7 @@
     align-content: center;
     cursor: pointer;
     width: 100%;
+    padding: 8px;
     flex: 1;
     background: lightgray;
     color: black;
@@ -13,6 +14,7 @@
     -webkit-user-select: none;
     -ms-user-select: none;
     user-select: none;
+    box-shadow: 0 0 2px rgba(0, 0, 0, .65);
 }
 
 .tile-edit-button {
@@ -46,4 +48,16 @@
 
 .dial-dragged .dial-tile:hover .tile-edit-button {
     opacity: 0;
+}
+
+.dial-tile p {
+    margin-bottom: 0;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    max-width: 100%;
+}
+
+.dial-dragged .dial-tile, .dial-tile:hover {
+    box-shadow: 0 0 10px rgba(0, 0, 0, .65);
 }

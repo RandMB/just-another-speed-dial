@@ -19,27 +19,28 @@ function getRandomPhotonColor() {
 }
 
 function getTextColor(bgColor) {
+    const color = hexToRgb(bgColor);
     // See: https://stackoverflow.com/a/1855903
     // Counting the perceptive luminance - human eye favors green color...
-    const a = 1 - (0.299 * bgColor.r + 0.587 * bgColor.g + 0.114 * bgColor.b) / 255;
+    const a = 1 - (0.299 * color.r + 0.587 * color.g + 0.114 * color.b) / 255;
 
     if (a < 0.5) {
-        return [0, 0, 0]; // bright colors - black font
+        return '#000000'; // bright colors - black font
     } else {
-        return [255, 255, 255]; // dark colors - white font
+        return '#ffffff'; // dark colors - white font
     }
 }
 
 function getColors() {
     return new Promise((resolve) => {
-        const color = hexToRgb(getRandomPhotonColor());
-        const textColor = getTextColor(color);
+        const bgColor = getRandomPhotonColor();
+        const textColor = getTextColor(bgColor);
 
         resolve({
-            background: [color.r, color.g, color.b],
-            text: textColor,
+            background: bgColor,
+            color: textColor,
         });
     });
 }
 
-export default getColors;
+export default { getColors, getTextColor };

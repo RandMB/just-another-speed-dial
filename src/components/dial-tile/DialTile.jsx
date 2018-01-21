@@ -5,6 +5,19 @@ import './DialTile.css';
 import folderImage from '../../assets/folder.png';
 
 function DialTile(props) {
+    let url = props.url;
+
+    try {
+        url = new URL(props.url).host;
+    } catch (error) {
+        // Nothing to do, url is not a valid url, just display full url
+    }
+
+    // Chrome doesn't throw if url invalid... Workaround
+    if (!url) {
+        url = props.url;
+    }
+
     return (
         <div
             draggable="false"
@@ -23,9 +36,11 @@ function DialTile(props) {
                     onDragStart={(event) => { event.preventDefault(); }}
                 />
             }
+
             {props.type === 'bookmark' &&
-                <span draggable="false">{new URL(props.url).host}</span>
+                <p draggable="false">{url}</p>
             }
+
             <div
                 onMouseDown={props.onEditMouseDown}
                 className="tile-edit-button"
@@ -40,9 +55,9 @@ function DialTile(props) {
 DialTile.propTypes = {
     url: PropTypes.string,
     type: PropTypes.string.isRequired,
-    onMouseDown: PropTypes.func.isRequired,
-    onEditMouseDown: PropTypes.func.isRequired,
     tileStyle: PropTypes.object,
+    onMouseDown: PropTypes.func,
+    onEditMouseDown: PropTypes.func,
 };
 
 export default DialTile;

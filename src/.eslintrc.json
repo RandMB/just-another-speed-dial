@@ -14,6 +14,7 @@
         "arrow-parens": "off",
         "dot-notation": "off",
         "class-methods-use-this": "warn",
+        "object-curly-newline": ["error", { "consistent": true }],
         "no-mixed-operators": "off",
         "no-plusplus": ["error", { "allowForLoopAfterthoughts": true }],
         "no-else-return": "off",

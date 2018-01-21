@@ -7,6 +7,8 @@ body {
     padding: 0;
     overflow: hidden;
     z-index: 0;
+    /* Needed for Chrome, which adds 75% for unknown reason */
+    font-size: 1rem;
 }
 
 * {

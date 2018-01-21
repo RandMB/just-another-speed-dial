@@ -3,7 +3,7 @@ import { Portal } from 'react-portal';
 import PropTypes from 'prop-types';
 import ClassNames from 'classnames';
 
-import TileEditModal from '../tile-edit-modal/TileEditModal';
+import DialEditModal from '../dial-edit-modal/DialEditModal';
 import ModalWithOverlay from '../common/modal-with-overlay/ModalWithOverlay';
 import DialTitle from '../dial-title/DialTitle';
 import DialTile from '../dial-tile/DialTile';
@@ -13,10 +13,6 @@ import './Dial.css';
 
 const DRAG_ZINDEX = 5000;
 const TRANSITION_DURATION = 0.25;
-
-function extractRGB(a) {
-    return `rgb(${a[0]},${a[1]},${a[2]})`;
-}
 
 class Dial extends PureComponent {
     constructor(props) {
@@ -30,14 +26,17 @@ class Dial extends PureComponent {
             isModalShown: false,
         };
 
-        if (!props.dialMeta && props.node.get('type') !== 'folder') {
-            this.props.onUpdate(props.node.get('id'), props.node.get('url'));
-        }
-
         this.willUnmount = false;
 
         this.onEditMouseDown = this.onEditMouseDown.bind(this);
         this.onSave = this.onSave.bind(this);
+    }
+
+    async componentWillMount() {
+        if (!this.props.dialMeta.background && this.props.node.get('type') !== 'folder') {
+            const colorData = await browserUtils.colors.getColors();
+            this.props.onUpdate(this.props.node.get('id'), colorData);
+        }
     }
 
     componentWillReceiveProps(newProps) {
@@ -98,6 +97,10 @@ class Dial extends PureComponent {
             );
         }
 
+        if (value.hasOwnProperty('tileStyle')) {
+            this.props.onUpdate(this.props.node.get('id'), value.tileStyle);
+        }
+
         this.setState({ isModalShown: false });
     }
 
@@ -129,15 +132,10 @@ class Dial extends PureComponent {
             zIndex: isDragged ? DRAG_ZINDEX : view.get('zIndex'),
         };
 
-        let dialTileStyle = {};
-
-        // During initial render dialMeta can be undefined
-        if (dialMeta) {
-            dialTileStyle = {
-                background: extractRGB(dialMeta.background),
-                color: extractRGB(dialMeta.text),
-            };
-        }
+        const dialTileStyle = {
+            background: dialMeta.background || '#ffffff',
+            color: dialMeta.color || '#000000',
+        };
 
         return (
             <div
@@ -160,9 +158,11 @@ class Dial extends PureComponent {
                 {this.state.isEdited &&
                     <Portal node={document && document.getElementById('modals')}>
                         <ModalWithOverlay in={this.state.isModalShown}>
-                            <TileEditModal
+                            <DialEditModal
                                 in={this.state.isModalShown}
+                                type={type}
                                 title={title}
+                                tileStyle={dialTileStyle}
                                 url={url}
                                 onClose={() => this.setState({ isModalShown: false })}
                                 onExited={() => this.setState({ isEdited: false })}

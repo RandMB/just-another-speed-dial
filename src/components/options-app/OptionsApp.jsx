@@ -4,7 +4,7 @@ import './OptionsApp.css';
 
 class OptionsApp extends Component {
     static onClick() {
-        const clearStorage = browser.storage.local.clear();
+        const clearStorage = chrome.storage.local.clear();
         clearStorage.then();
     }
 

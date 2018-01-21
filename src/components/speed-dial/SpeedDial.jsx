@@ -192,8 +192,7 @@ class SpeedDial extends Component {
         }
     }
 
-    async onDialUpdate(id) {
-        const colorData = await browserUtils.getColor();
+    async onDialUpdate(id, colorData) {
         this.state.data[id] = colorData;
 
         this.forceUpdate();
