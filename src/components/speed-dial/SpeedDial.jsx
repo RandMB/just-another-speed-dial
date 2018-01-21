@@ -221,7 +221,7 @@ class SpeedDial extends Component {
         browserUtils.bookmarks.move(
             id,
             { index: indexToMove },
-        ).then(/* Don't do aything */);
+        );
 
         let children = this.state.children.setIn([newIndex, 'treeNode', 'index'], indexToMove);
 

@@ -7,6 +7,7 @@ import TileEditModal from '../tile-edit-modal/TileEditModal';
 import ModalWithOverlay from '../common/modal-with-overlay/ModalWithOverlay';
 import DialTitle from '../dial-title/DialTitle';
 import DialTile from '../dial-tile/DialTile';
+import browserUtils from '../../utils/browser';
 
 import './Dial.css';
 
@@ -36,6 +37,7 @@ class Dial extends PureComponent {
         this.willUnmount = false;
 
         this.onEditMouseDown = this.onEditMouseDown.bind(this);
+        this.onSave = this.onSave.bind(this);
     }
 
     componentWillReceiveProps(newProps) {
@@ -52,11 +54,13 @@ class Dial extends PureComponent {
             // HACK: React remounts DOM node, skipping transition.
             // Delay the state change to allow the browser to process and paint stuff
             setTimeout(() => {
-                if (!this.willUnmount) {
-                    window.requestAnimationFrame(() => {
+                window.requestAnimationFrame(() => {
+                    // Don't call if the component is going to be unmounted
+                    if (!this.willUnmount) {
                         this.setState(newState);
-                    });
-                }
+                    }
+                });
+
             }, 10);
         }
     }
@@ -74,6 +78,27 @@ class Dial extends PureComponent {
                 isModalShown: true,
             });
         }, { once: true });
+    }
+
+    onSave(value) {
+        if (value.hasOwnProperty('title') || value.hasOwnProperty('url')) {
+            const changed = {};
+
+            if (value.hasOwnProperty('title')) {
+                changed.title = value.title;
+            }
+
+            if (value.hasOwnProperty('url')) {
+                changed.url = value.url;
+            }
+
+            browserUtils.bookmarks.update(
+                this.props.node.get('id'),
+                changed,
+            );
+        }
+
+        this.setState({ isModalShown: false });
     }
 
     render() {
@@ -137,8 +162,11 @@ class Dial extends PureComponent {
                         <ModalWithOverlay in={this.state.isModalShown}>
                             <TileEditModal
                                 in={this.state.isModalShown}
+                                title={title}
+                                url={url}
                                 onClose={() => this.setState({ isModalShown: false })}
                                 onExited={() => this.setState({ isEdited: false })}
+                                onSave={this.onSave}
                             />
                         </ModalWithOverlay>
                     </Portal>

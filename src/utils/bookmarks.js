@@ -23,15 +23,7 @@ function getChildren(id) {
 }
 
 function move(id, destination = {}) {
-    return new Promise((resolve, reject) => {
-        chrome.bookmarks.move(id, destination, () => {
-            if (chrome.runtime.lastError) {
-                reject(chrome.runtime.lastError.message);
-            } else {
-                resolve();
-            }
-        });
-    });
+    chrome.bookmarks.move(id, destination);
 }
 
 function get(ids) {
@@ -44,6 +36,10 @@ function get(ids) {
             }
         });
     });
+}
+
+function update(id, changes) {
+    chrome.bookmarks.update(id, changes);
 }
 
 function isBookmark(item) {
@@ -174,6 +170,7 @@ export default {
     getSubfolders,
     getFolderChildren,
     move,
+    update,
     onMoved: new OnMoved(),
     onCreated: new OnCreated(),
     onRemoved: new OnRemoved(),

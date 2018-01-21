@@ -13,12 +13,14 @@
         "arrow-body-style": "off",
         "arrow-parens": "off",
         "dot-notation": "off",
+        "class-methods-use-this": "warn",
         "no-mixed-operators": "off",
         "no-plusplus": ["error", { "allowForLoopAfterthoughts": true }],
         "no-else-return": "off",
         "no-console": "off",
         "no-unused-vars": "warn",
         "no-return-assign": "off",
+        "no-prototype-builtins": "off",
         "no-restricted-properties": [0, {
             "object": "Math",
             "property": "pow"
