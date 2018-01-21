@@ -7,7 +7,7 @@ function computeDistance(startX, startY, endX, endY) {
     return Math.sqrt(Math.pow(endX - startX, 2) + Math.pow(endY - startY, 2));
 }
 
-const DRAG_DISTANCE_THRESHOLD = 10;
+const DRAG_DISTANCE_THRESHOLD = 15;
 
 class DraggableDial extends PureComponent {
     static computeDragPos(dragStart, mouseDragStart, currentMouseDrag) {

@@ -3,10 +3,10 @@
     background-color: #ff0039;
 }
 
-.button-danger:hover {
+.button-danger:hover:enabled {
     background-color: #d70022;
 }
 
-.button-danger:active {
+.button-danger:active:enabled {
     background-color: #a4000f;
 }

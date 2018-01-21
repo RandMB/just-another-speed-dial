@@ -1,7 +1,6 @@
 import React, { Component } from 'react';
 import PropTypes from 'prop-types';
 import './FolderPicker.css';
-import folderImage from '../../assets/folder.png';
 
 class FolderPicker extends Component {
     static isFolderNotLoaded(folder) {
@@ -34,7 +33,7 @@ class FolderPicker extends Component {
                 >
 
                     <div className="folder-icon">
-                        <img height="32" width="32" src={folderImage} alt="" />
+                        <i className="far fa-folder fa-2x" />
                     </div>
 
                     <div className="folder-title">

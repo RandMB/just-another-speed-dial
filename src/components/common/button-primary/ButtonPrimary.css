@@ -3,10 +3,10 @@
     background-color: #0060df;
 }
 
-.button-primary:hover {
+.button-primary:hover:enabled {
     background-color: #003eaa;
 }
 
-.button-primary:active {
+.button-primary:active:enabled {
     background-color: #002275;
 }

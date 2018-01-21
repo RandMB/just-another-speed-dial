@@ -102,6 +102,8 @@ class FolderPickerContainer extends Component {
         const bookmarkTree = this.state.bookmarkTree;
         const isSelected = this.state.selectedFolderId !== null;
 
+        console.log(isSelected);
+
         return (
             <div className="folder-picker-container config-close">
                 <div className="folder-picker-wrapper rounded-borders">

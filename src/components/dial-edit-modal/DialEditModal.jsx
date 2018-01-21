@@ -95,24 +95,22 @@ class DialEditModal extends Component {
                     />
 
                     {this.props.type !== 'folder' &&
-                        <React.Fragment>
-                            <Input
-                                name="url"
-                                title="Url address"
-                                type="text"
-                                onChange={(value) => this.setState({ url: value })}
-                                value={this.props.url}
-                            />
-
-                            <Input
-                                name="color"
-                                title="Choose a background color"
-                                type="color"
-                                onChange={this.onColorChange}
-                                value={this.props.tileStyle.background}
-                            />
-                        </React.Fragment>
+                        <Input
+                            name="url"
+                            title="Url address"
+                            type="text"
+                            onChange={(value) => this.setState({ url: value })}
+                            value={this.props.url}
+                        />
                     }
+
+                    <Input
+                        name="color"
+                        title="Choose a background color"
+                        type="color"
+                        onChange={this.onColorChange}
+                        value={this.props.tileStyle.background}
+                    />
                 </div>
                 <div className="modal-footer">
                     <DangerButton title="Delete bookmark" value="Delete bookmark" />

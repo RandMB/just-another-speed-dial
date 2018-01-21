@@ -2,7 +2,6 @@ import React from 'react';
 import PropTypes from 'prop-types';
 
 import './DialTile.css';
-import folderImage from '../../assets/folder.png';
 
 function DialTile(props) {
     let url = props.url;
@@ -29,12 +28,7 @@ function DialTile(props) {
         >
 
             {props.type === 'folder' &&
-                <img
-                    alt=""
-                    draggable="false"
-                    src={folderImage}
-                    onDragStart={(event) => { event.preventDefault(); }}
-                />
+                <i className="far fa-folder fa-6x" />
             }
 
             {props.type === 'bookmark' &&
