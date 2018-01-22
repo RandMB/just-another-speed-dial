@@ -17,6 +17,10 @@ class DraggableDial extends PureComponent {
     constructor(props) {
         super(props);
 
+        this.state = {
+            isDragged: false,
+        };
+
         this.dragDefault = {
             dragStartPosX: 0,
             dragStartPosY: 0,
@@ -40,6 +44,7 @@ class DraggableDial extends PureComponent {
 
         this.dragReportInterval = null;
         this.dragStartIndex = null;
+        this.willUnmount = false;
 
         this.elementRef = null;
     }
@@ -47,6 +52,7 @@ class DraggableDial extends PureComponent {
     componentWillUnmount() {
         // Prevent calling setState on component which is going to unmount
         this.currentDragState.isDraggedCurrently = false;
+        this.willUnmount = true;
         // General cleanup
         clearInterval(this.dragReportInterval);
         document.removeEventListener('mousemove', this.onMouseMove);
@@ -86,7 +92,7 @@ class DraggableDial extends PureComponent {
             }
         }, 100);
 
-        this.forceUpdate();
+        this.setState({ isDragged: true });
         this.dragAnimate();
 
         this.dragStartIndex = this.props.id;
@@ -141,22 +147,21 @@ class DraggableDial extends PureComponent {
             const dragPosX = this.currentDragState.currentDragPosX;
             const dragPosY = this.currentDragState.currentDragPosY;
 
-            // If we have an element, apply the syles, otherwise, force an update
-            //  animation with dom node is not in 'react' way , but is more efficient
+            // If we have an element, apply the syles, otherwise, force an update.
+            //  Animation with dom node is not in 'react' way , but is more efficient
             //  and has more chances to achieve desired 60 fps
             if (this.elementRef) {
                 this.elementRef.style.transform = `translate3D(${dragPosX}px,${dragPosY}px,0)`;
                 this.elementRef.style.transitionDuration = '0s';
             } else {
+                // Sometimes we don't have a DOM node
                 this.forceUpdate();
             }
 
             window.requestAnimationFrame(this.dragAnimate);
-        } else if (this.elementRef) {
-            // Make sure we update the dom after finishing the animation,
-            //   otherwise it migth end up floating somewhere
-            this.elementRef.style.transform = `translate3D(${this.props.xPos}px,${this.props.yPos}px,0)`;
-            this.forceUpdate();
+        } else if (!this.willUnmount) {
+            // Tell the dial it's not being dragged anymore, unless we are being unmounted
+            this.setState({ isDragged: false });
         }
     }
 
@@ -183,7 +188,7 @@ class DraggableDial extends PureComponent {
             <Dial
                 xPos={currentPosX}
                 yPos={currentPosY}
-                isDragged={this.currentDragState.isDraggedCurrently}
+                isDragged={this.state.isDragged}
                 onMouseDown={this.onMouseDown}
                 elementRef={el => this.elementRef = el}
                 {...rest}

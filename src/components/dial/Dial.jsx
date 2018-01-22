@@ -26,10 +26,12 @@ class Dial extends PureComponent {
             isModalShown: false,
         };
 
-        this.willUnmount = false;
+        this.refNode = null;
 
         this.onEditMouseDown = this.onEditMouseDown.bind(this);
+        this.onNodeMounted = this.onNodeMounted.bind(this);
         this.onSave = this.onSave.bind(this);
+        this.animate = this.animate.bind(this);
     }
 
     async componentWillMount() {
@@ -39,33 +41,40 @@ class Dial extends PureComponent {
         }
     }
 
-    componentWillReceiveProps(newProps) {
-        const newState = {
-            currentPosX: newProps.xPos,
-            currentPosY: newProps.yPos,
-        };
+    componentDidUpdate(prevProps) {
+        // See: https://medium.com/developers-writing/animating-the-unanimatable-1346a5aab3cd
+        if (!this.props.isDragged) {
+            // Extract the coordinates, as they can change between updates
+            const newX = this.props.xPos;
+            const newY = this.props.yPos;
 
-        // If the element is being dragged, skip the workaround, as it creates janky transition
-        if (this.props.isDragged) {
-            this.setState(newState);
-        } else if (newState.currentPosX !== this.state.currentPosX ||
-            newState.currentPosY !== this.state.currentPosY) {
-            // HACK: React remounts DOM node, skipping transition.
-            // Delay the state change to allow the browser to process and paint stuff
-            setTimeout(() => {
-                window.requestAnimationFrame(() => {
-                    // Don't call if the component is going to be unmounted
-                    if (!this.willUnmount) {
-                        this.setState(newState);
-                    }
+            // If the coordinates changed, no point in animating if tey didn't
+            if (prevProps.xPos !== this.props.xPos || prevProps.yPos !== this.props.yPos) {
+                requestAnimationFrame(() => {
+                    // Set the dial to it's previous position. We do this in order to
+                    //   avoid dial teleportig to it's new position because
+                    //   the DOM node can get remounted, skipping transitions
+                    this.animate(prevProps.xPos, prevProps.yPos, 0);
+
+                    requestAnimationFrame(() => {
+                        // Set the dial to it's new postion in the DOM, with transition
+                        this.animate(newX, newY, TRANSITION_DURATION);
+                    });
                 });
-
-            }, 10);
+            } else if (this.props.isDragged === false && prevProps.isDragged === true) {
+                // When dragging ends, the dial can end up floatng in the middle of nowhere
+                //    because at that point coordiantes do not change
+                // The dial has stopped being dragged. Update position again
+                requestAnimationFrame(() => {
+                    this.animate(newX, newY, TRANSITION_DURATION);
+                });
+            }
         }
     }
 
-    componentWillUnmount() {
-        this.willUnmount = true;
+    onNodeMounted(node) {
+        this.refNode = node;
+        this.props.elementRef(node);
     }
 
     onEditMouseDown(event) {
@@ -104,6 +113,11 @@ class Dial extends PureComponent {
         this.setState({ isModalShown: false });
     }
 
+    animate(x, y, duration) {
+        this.refNode.style.transform = `translate3D(${x}px,${y}px,0)`;
+        this.refNode.style.transitionDuration = `${duration}s`;
+    }
+
     render() {
         const {
             node,
@@ -139,7 +153,7 @@ class Dial extends PureComponent {
 
         return (
             <div
-                ref={this.props.elementRef}
+                ref={(n) => this.onNodeMounted(n)}
                 className={dialClass}
                 style={dialStyle}
                 draggable="false"
