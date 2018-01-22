@@ -1,20 +1,22 @@
-/* eslint react/no-unused-state: 0 */
-// The rule above is disabled because eslint fails to detect state usage
 import React, { Component } from 'react';
 import PropTypes from 'prop-types';
+import { Portal } from 'react-portal';
 import _pickBy from 'lodash/pickBy';
 
 import Modal from '../common/modal/Modal';
-import PrimaryButton from '../common/button-primary/ButtonPrimary';
-import DangerButton from '../common/button-danger/ButtonDanger';
+import ButtonPrimary from '../common/button-primary/ButtonPrimary';
+import ButtonDanger from '../common/button-danger/ButtonDanger';
 import Button from '../common/button/Button';
 import Input from '../common/input/Input';
 import DialTile from '../dial-tile/DialTile';
 
+
 import browserUtils from '../../utils/browser';
 
 import './DialEditModal.css';
+import ConfirmDialog from '../common/confirm-dialog/ConfirmDialog';
 
+const CONFIRM_TEXT = 'Are you sure you want to delete this bookmark? This action cannot be undone';
 
 function getCloseButtonValue() {
     return (
@@ -35,6 +37,9 @@ class DialEditModal extends Component {
             type: props.node.get('type'),
             node: props.node,
             data: props.data,
+
+            confirmDelete: false,
+            isModalShown: false,
         };
 
         this.initialState = Object.assign({}, this.state);
@@ -42,12 +47,14 @@ class DialEditModal extends Component {
         this.onSave = this.onSave.bind(this);
         this.onColorChange = this.onColorChange.bind(this);
         this.onValueChange = this.onValueChange.bind(this);
+        this.showConfirmDialog = this.showConfirmDialog.bind(this);
+        this.deleteBookmark = this.deleteBookmark.bind(this);
     }
 
     onSave() {
         // Only select changed properties
         const changedProps = _pickBy(this.state, (value, key) => value !== this.initialState[key]);
-        
+
         // Only used for preview, don't emit it.
         //   It is safe to attempt to delete non existant properties
         delete changedProps.node;
@@ -74,6 +81,18 @@ class DialEditModal extends Component {
         this.setState({ data });
     }
 
+    showConfirmDialog() {
+        this.setState({ isModalShown: true, confirmDelete: true });
+    }
+
+    deleteBookmark() {
+        if (this.state.type === 'bookmark') {
+            chrome.bookmarks.remove(this.props.node.get('id'));
+        } else {
+            chrome.bookmarks.removeTree(this.props.node.get('id'));
+        }
+    }
+
     render() {
         const headerText =
             this.state.type === 'bookmark' ? 'Edit a bookmark' : 'Edit a folder';
@@ -83,57 +102,78 @@ class DialEditModal extends Component {
                 in={this.props.in}
                 onExited={this.props.onExited}
             >
-                <div className="modal-header">
-                    <p>{headerText}</p>
-                    <Button
-                        onClick={this.props.onClose}
-                        value={getCloseButtonValue()}
-                    />
-                </div>
-                <div className="modal-body">
-                    <div className="modal-edit-preview">
-                        <DialTile
-                            data={this.state.data}
-                            node={this.state.node}
-                            type={this.state.type}
+                <div className="modal-edit-dial">
+                    <div className="modal-header">
+                        <p>{headerText}</p>
+                        <Button
+                            onClick={this.props.onClose}
+                            value={getCloseButtonValue()}
                         />
-                        <div className="modal-edit-preview-overlay" />
                     </div>
+                    <div className="modal-body">
+                        <div className="modal-edit-preview">
+                            <DialTile
+                                data={this.state.data}
+                                node={this.state.node}
+                                type={this.state.type}
+                            />
+                            <div className="modal-edit-preview-overlay" />
+                        </div>
 
-                    <Input
-                        name="title"
-                        title="Title"
-                        type="text"
-                        onChange={(value) => this.onValueChange('title', value)}
-                        value={this.state.title}
-                    />
-
-                    {this.state.type !== 'folder' &&
                         <Input
-                            name="url"
-                            title="Url address"
+                            name="title"
+                            title="Title"
                             type="text"
-                            onChange={(value) => this.onValueChange('url', value)}
-                            value={this.state.url}
+                            onChange={(value) => this.onValueChange('title', value)}
+                            value={this.state.title}
                         />
-                    }
 
-                    <Input
-                        name="color"
-                        title="Choose a background color"
-                        type="color"
-                        onChange={this.onColorChange}
-                        value={this.state.data.background}
-                    />
+                        {this.state.type !== 'folder' &&
+                            <Input
+                                name="url"
+                                title="Url address"
+                                type="text"
+                                onChange={(value) => this.onValueChange('url', value)}
+                                value={this.state.url}
+                            />
+                        }
+
+                        <Input
+                            name="color"
+                            title="Choose a background color"
+                            type="color"
+                            onChange={this.onColorChange}
+                            value={this.state.data.background}
+                        />
+                    </div>
+                    <div className="modal-footer">
+                        <ButtonDanger
+                            title="Delete bookmark"
+                            value="Delete bookmark"
+                            onClick={this.showConfirmDialog}
+                        />
+                        <ButtonPrimary
+                            onClick={this.onSave}
+                            title="Save changes"
+                            value="Save"
+                        />
+                    </div>
                 </div>
-                <div className="modal-footer">
-                    <DangerButton title="Delete bookmark" value="Delete bookmark" />
-                    <PrimaryButton
-                        onClick={this.onSave}
-                        title="Save changes"
-                        value="Save"
-                    />
-                </div>
+
+
+                {this.state.confirmDelete &&
+                    <Portal node={document && document.getElementById('modals')}>
+                        <ConfirmDialog
+                            in={this.state.isModalShown}
+                            text={CONFIRM_TEXT}
+                            onConfirm={() => this.deleteBookmark()}
+                            onCancel={() => this.setState({ isModalShown: false })}
+                            onExited={() => this.setState({ confirmDelete: false })}
+                            onSave={this.onSave}
+                        />
+                    </Portal>
+                }
+
             </Modal>
         );
     }

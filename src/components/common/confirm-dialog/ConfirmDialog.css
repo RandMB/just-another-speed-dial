@@ -1,0 +1,53 @@
+.modal-confirm {
+    height: auto;
+    min-height: 200px;
+    width: 400px;
+
+    display: flex;
+    flex-direction: column;
+}
+
+.modal-confirm .modal-body {
+    flex-grow: 1;
+}
+
+.modal-confirm .modal-header {
+    padding-top: 8px;
+    padding-left: 8px;
+    padding-right: 8px;
+    padding-bottom: 4px;
+
+    border-bottom: 1px solid lightgray;
+
+    display: flex;
+    flex-direction: row;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.modal-confirm .modal-body {
+    padding-top: 8px;
+    padding-left: 16px;
+    padding-right: 16px;
+    padding-bottom: 8px;
+}
+
+.modal-confirm .modal-footer {
+    display: flex;
+    flex-direction: row;
+}
+
+.modal-confirm .modal-footer button {
+    width: 50%;
+
+    border-top-left-radius: 0;
+    border-top-right-radius: 0;
+}
+
+.modal-confirm .modal-footer button:first-child {
+    border-bottom-right-radius: 0;
+}
+
+.modal-confirm .modal-footer button:nth-child(2) {
+    border-bottom-left-radius: 0;
+}

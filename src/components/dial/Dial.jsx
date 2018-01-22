@@ -4,7 +4,6 @@ import PropTypes from 'prop-types';
 import ClassNames from 'classnames';
 
 import DialEditModal from '../dial-edit-modal/DialEditModal';
-import ModalWithOverlay from '../common/modal-with-overlay/ModalWithOverlay';
 import DialTile from '../dial-tile/DialTile';
 import browserUtils from '../../utils/browser';
 
@@ -34,9 +33,16 @@ class Dial extends PureComponent {
     }
 
     async componentWillMount() {
-        if (!this.props.dialMeta.background && this.props.node.get('type') !== 'folder') {
-            const colorData = await browserUtils.colors.getColors();
-            this.props.onUpdate(this.props.node.get('id'), colorData);
+        if (!this.props.dialMeta.background) {
+            if (this.props.node.get('type') === 'bookmark') {
+                const colorData = await browserUtils.colors.getColors();
+                this.props.onUpdate(this.props.node.get('id'), colorData);
+            } else if (this.props.node.get('type') === 'folder') {
+                this.props.onUpdate(this.props.node.get('id'), {
+                    background: '#ffffff',
+                    color: '#000000',
+                });
+            }
         }
     }
 
@@ -158,16 +164,14 @@ class Dial extends PureComponent {
 
                 {this.state.isEdited &&
                     <Portal node={document && document.getElementById('modals')}>
-                        <ModalWithOverlay in={this.state.isModalShown}>
-                            <DialEditModal
-                                in={this.state.isModalShown}
-                                data={dialMeta}
-                                node={node}
-                                onClose={() => this.setState({ isModalShown: false })}
-                                onExited={() => this.setState({ isEdited: false })}
-                                onSave={this.onSave}
-                            />
-                        </ModalWithOverlay>
+                        <DialEditModal
+                            in={this.state.isModalShown}
+                            data={dialMeta}
+                            node={node}
+                            onClose={() => this.setState({ isModalShown: false })}
+                            onExited={() => this.setState({ isEdited: false })}
+                            onSave={this.onSave}
+                        />
                     </Portal>
                 }
             </div>

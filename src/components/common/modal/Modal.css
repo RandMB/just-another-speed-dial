@@ -1,13 +1,12 @@
 .modal-container {
-    background-color: white;
-    width: 40vw;
+    width: auto;
     height: auto;
-    min-height: 400px;
     margin: auto;
     box-shadow: 0 0 8px gray;
     border-radius: var(--border-radius);
     display: flex;
     flex-direction: column;
+    background-color: white;
 }
 
 .modal-appear {
@@ -30,4 +29,39 @@
     opacity: 0.01;
     transition: opacity 150ms ease-in, transform 150ms ease-in;
     transform: translateY(5%);
+}
+
+.modal-overlay {
+    z-index: 1000000;
+    position: absolute;
+    height: 100vh;
+    width: 100vw;
+    background-color: rgba(12, 12, 13, 0.6);
+    top: 0;
+    left: 0;
+    display: flex;
+
+    overflow-y: auto;
+}
+
+.modal-overlay-appear {
+    opacity: 0;
+}
+
+.modal-overlay-appear.modal-overlay-appear-active {
+    opacity: 1;
+    transition: opacity 150ms ease-in;
+}
+
+.modal-overlay-exit {
+    opacity: 1;
+}
+
+.modal-overlay-exit.modal-overlay-exit-active {
+    opacity: 0.01;
+    transition: opacity 150ms ease-in;
+}
+
+.modal-container p {
+    margin: 0;
 }

@@ -1,12 +1,14 @@
-.modal-header p, .modal-body p, .modal-footer p {
-    margin: 0;
-}
-
-.modal-body {
+.modal-edit-dial .modal-body {
     flex-grow: 1;
 }
 
-.modal-header {
+.modal-edit-dial {
+    width: 40vw;
+    height: auto;
+    min-height: 400px;
+}
+
+.modal-edit-dial .modal-header {
     padding-top: 8px;
     padding-left: 8px;
     padding-right: 8px;
@@ -20,14 +22,14 @@
     align-items: center;
 }
 
-.modal-body {
+.modal-edit-dial .modal-body {
     padding-top: 8px;
     padding-left: 16px;
     padding-right: 16px;
     padding-bottom: 8px;
 }
 
-.modal-footer {
+.modal-edit-dial .modal-footer {
     padding-top: 8px;
     padding-left: 8px;
     padding-right: 8px;

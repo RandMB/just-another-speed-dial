@@ -10,11 +10,20 @@ function Modal(props) {
             in={props.in}
             timeout={250}
             appear={true}
-            classNames="modal"
-            onExited={props.onExited}
+            classNames="modal-overlay"
         >
-            <div className="modal-container">
-                {props.children}
+            <div className="modal-overlay">
+                <CSSTransition
+                    in={props.in}
+                    timeout={250}
+                    appear={true}
+                    classNames="modal"
+                    onExited={props.onExited}
+                >
+                    <div className="modal-container">
+                        {props.children}
+                    </div>
+                </CSSTransition>
             </div>
         </CSSTransition>
     );
