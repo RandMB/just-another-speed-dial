@@ -1,0 +1,7 @@
+select {
+    border-radius: var(--border-radius);
+    border-width: 1px;
+    border-style: solid;
+    border-color: rgba(12, 12, 13, 0.3);
+    padding: 4px;
+}

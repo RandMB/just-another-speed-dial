@@ -10,11 +10,9 @@ import Button from '../common/button/Button';
 import Input from '../common/input/Input';
 import DialTile from '../dial-tile/DialTile';
 
-
-import browserUtils from '../../utils/browser';
-
 import './DialEditModal.css';
 import ConfirmDialog from '../common/confirm-dialog/ConfirmDialog';
+import DialBackgroundSelector from '../dial-background-selector/DialBackgroundSelector';
 
 const CONFIRM_TEXT = 'Are you sure you want to delete this bookmark? This action cannot be undone';
 
@@ -45,8 +43,8 @@ class DialEditModal extends Component {
         this.initialState = Object.assign({}, this.state);
 
         this.onSave = this.onSave.bind(this);
-        this.onColorChange = this.onColorChange.bind(this);
         this.onValueChange = this.onValueChange.bind(this);
+        this.onBackgroundChange = this.onBackgroundChange.bind(this);
         this.showConfirmDialog = this.showConfirmDialog.bind(this);
         this.deleteBookmark = this.deleteBookmark.bind(this);
     }
@@ -71,14 +69,10 @@ class DialEditModal extends Component {
         });
     }
 
-    async onColorChange(bgColor) {
-        const textColor = await browserUtils.colors.getTextColor(bgColor);
-        const data = {
-            background: bgColor,
-            color: textColor,
-        };
+    onBackgroundChange(data) {
+        const newValue = Object.assign({}, this.state.data, data);
 
-        this.setState({ data });
+        this.setState({ data: newValue });
     }
 
     showConfirmDialog() {
@@ -138,12 +132,10 @@ class DialEditModal extends Component {
                             />
                         }
 
-                        <Input
-                            name="color"
-                            title="Choose a background color"
-                            type="color"
-                            onChange={this.onColorChange}
-                            value={this.state.data.background}
+                        <DialBackgroundSelector
+                            type={this.state.type}
+                            data={this.state.data}
+                            onBackgroundChange={this.onBackgroundChange}
                         />
                     </div>
                     <div className="modal-footer">

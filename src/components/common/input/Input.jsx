@@ -1,5 +1,6 @@
 import React, { Component } from 'react';
 import PropTypes from 'prop-types';
+import ClassNames from 'classnames';
 
 import _debounce from 'lodash/debounce';
 
@@ -24,12 +25,18 @@ class Input extends Component {
     }
 
     render() {
-        const { name, title, value, type } = this.props;
+        const { name, title, value, type, classes } = this.props;
+
+        const inputClass = ClassNames({
+            'input-group': true,
+            ...classes,
+        });
 
         return (
             <div className="input-group">
                 <label htmlFor={name}>{title}</label>
                 <input
+                    className={inputClass}
                     onInput={this.handleChange}
                     name={name}
                     defaultValue={value}
@@ -40,9 +47,15 @@ class Input extends Component {
     }
 }
 
+Input.defaultProps = {
+    classes: {},
+    value: '',
+};
+
 Input.propTypes = {
     name: PropTypes.string.isRequired,
     title: PropTypes.string.isRequired,
+    classes: PropTypes.object,
     value: PropTypes.string,
     type: PropTypes.string.isRequired,
     onChange: PropTypes.func.isRequired,
