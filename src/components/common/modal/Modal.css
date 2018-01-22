@@ -5,7 +5,7 @@
     min-height: 400px;
     margin: auto;
     box-shadow: 0 0 8px gray;
-    border-radius: 4px;
+    border-radius: var(--border-radius);
     display: flex;
     flex-direction: column;
 }

@@ -62,3 +62,7 @@ body {
 .input-group {
     margin-bottom: 8px;
 }
+
+:root{
+    --border-radius: 4px;
+}

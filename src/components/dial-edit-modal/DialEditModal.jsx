@@ -10,7 +10,6 @@ import DangerButton from '../common/button-danger/ButtonDanger';
 import Button from '../common/button/Button';
 import Input from '../common/input/Input';
 import DialTile from '../dial-tile/DialTile';
-import DialTitle from '../dial-title/DialTitle';
 
 import browserUtils from '../../utils/browser';
 
@@ -31,34 +30,53 @@ class DialEditModal extends Component {
         super(props);
 
         this.state = {
-            title: props.title,
-            url: props.url,
-            tileStyle: props.tileStyle,
+            title: props.node.get('title'),
+            url: props.node.get('url'),
+            type: props.node.get('type'),
+            node: props.node,
+            data: props.data,
         };
+
+        this.initialState = Object.assign({}, this.state);
 
         this.onSave = this.onSave.bind(this);
         this.onColorChange = this.onColorChange.bind(this);
+        this.onValueChange = this.onValueChange.bind(this);
     }
 
     onSave() {
         // Only select changed properties
-        const changedProps = _pickBy(this.state, (value, key) => value !== this.props[key]);
+        const changedProps = _pickBy(this.state, (value, key) => value !== this.initialState[key]);
+        
+        // Only used for preview, don't emit it.
+        //   It is safe to attempt to delete non existant properties
+        delete changedProps.node;
 
         this.props.onSave(changedProps);
     }
 
+    onValueChange(key, value) {
+        const newNode = this.state.node.set(key, value);
+
+        this.setState({
+            [key]: value,
+            node: newNode,
+        });
+    }
+
     async onColorChange(bgColor) {
         const textColor = await browserUtils.colors.getTextColor(bgColor);
-        const tileStyle = {
+        const data = {
             background: bgColor,
             color: textColor,
         };
 
-        this.setState({ tileStyle });
+        this.setState({ data });
     }
 
     render() {
-        const headerText = this.props.type === 'bookmark' ? 'Edit a bookmark' : 'Edit a folder';
+        const headerText =
+            this.state.type === 'bookmark' ? 'Edit a bookmark' : 'Edit a folder';
 
         return (
             <Modal
@@ -75,13 +93,9 @@ class DialEditModal extends Component {
                 <div className="modal-body">
                     <div className="modal-edit-preview">
                         <DialTile
-                            url={this.state.url}
-                            type={this.props.type}
-                            tileStyle={this.state.tileStyle}
-                        />
-
-                        <DialTitle
-                            title={this.state.title}
+                            data={this.state.data}
+                            node={this.state.node}
+                            type={this.state.type}
                         />
                         <div className="modal-edit-preview-overlay" />
                     </div>
@@ -90,17 +104,17 @@ class DialEditModal extends Component {
                         name="title"
                         title="Title"
                         type="text"
-                        onChange={(value) => this.setState({ title: value })}
-                        value={this.props.title}
+                        onChange={(value) => this.onValueChange('title', value)}
+                        value={this.state.title}
                     />
 
-                    {this.props.type !== 'folder' &&
+                    {this.state.type !== 'folder' &&
                         <Input
                             name="url"
                             title="Url address"
                             type="text"
-                            onChange={(value) => this.setState({ url: value })}
-                            value={this.props.url}
+                            onChange={(value) => this.onValueChange('url', value)}
+                            value={this.state.url}
                         />
                     }
 
@@ -109,7 +123,7 @@ class DialEditModal extends Component {
                         title="Choose a background color"
                         type="color"
                         onChange={this.onColorChange}
-                        value={this.props.tileStyle.background}
+                        value={this.state.data.background}
                     />
                 </div>
                 <div className="modal-footer">
@@ -131,10 +145,8 @@ DialEditModal.propTypes = {
     in: PropTypes.bool.isRequired,
     onExited: PropTypes.func.isRequired,
 
-    title: PropTypes.string.isRequired,
-    url: PropTypes.string,
-    type: PropTypes.string.isRequired,
-    tileStyle: PropTypes.object.isRequired,
+    data: PropTypes.object.isRequired,
+    node: PropTypes.object.isRequired,
 };
 
 export default DialEditModal;

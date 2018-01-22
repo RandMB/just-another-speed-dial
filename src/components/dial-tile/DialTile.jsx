@@ -2,54 +2,62 @@ import React from 'react';
 import PropTypes from 'prop-types';
 
 import './DialTile.css';
+import DialFolder from '../dial-folder/DialFolder';
+import DialBookmark from '../dial-bookmark/DialBookmark';
+import DialTitle from '../dial-title/DialTitle';
 
 function DialTile(props) {
-    let url = props.url;
+    const title = props.node.get('title');
+    const type = props.node.get('type');
+    const fullUrl = props.node.get('url');
+
+    let url = fullUrl;
 
     try {
-        url = new URL(props.url).host;
+        url = new URL(fullUrl).host;
     } catch (error) {
         // Nothing to do, url is not a valid url, just display full url
     }
 
     // Chrome doesn't throw if url invalid... Workaround
     if (!url) {
-        url = props.url;
+        url = fullUrl;
     }
 
     return (
-        <div
-            draggable="false"
-            onDragStart={(event) => { event.preventDefault(); }}
-            className="dial-tile rounded-borders"
-            title={props.url}
-            onMouseDown={props.onMouseDown}
-            style={props.tileStyle}
-        >
-
-            {props.type === 'folder' &&
-                <i className="far fa-folder fa-6x" />
-            }
-
-            {props.type === 'bookmark' &&
-                <p draggable="false">{url}</p>
-            }
-
+        <React.Fragment>
             <div
-                onMouseDown={props.onEditMouseDown}
-                className="tile-edit-button"
+                draggable="false"
+                onDragStart={(event) => { event.preventDefault(); }}
+                className="dial-tile rounded-borders"
+                title={fullUrl}
+                onMouseDown={props.onMouseDown}
             >
 
-                <i className="fas fa-edit" />
+                {type === 'folder' &&
+                    <DialFolder data={props.data} />
+                }
+
+                {type === 'bookmark' &&
+                    <DialBookmark url={url} data={props.data} />
+                }
+
+                <div
+                    onMouseDown={props.onEditMouseDown}
+                    className="tile-edit-button"
+                >
+                    <i className="fas fa-edit" />
+                </div>
             </div>
-        </div>
+
+            <DialTitle title={title} />
+        </React.Fragment>
     );
 }
 
 DialTile.propTypes = {
-    url: PropTypes.string,
-    type: PropTypes.string.isRequired,
-    tileStyle: PropTypes.object,
+    data: PropTypes.object.isRequired,
+    node: PropTypes.object.isRequired,
     onMouseDown: PropTypes.func,
     onEditMouseDown: PropTypes.func,
 };

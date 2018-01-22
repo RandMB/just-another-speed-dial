@@ -5,7 +5,6 @@ import ClassNames from 'classnames';
 
 import DialEditModal from '../dial-edit-modal/DialEditModal';
 import ModalWithOverlay from '../common/modal-with-overlay/ModalWithOverlay';
-import DialTitle from '../dial-title/DialTitle';
 import DialTile from '../dial-tile/DialTile';
 import browserUtils from '../../utils/browser';
 
@@ -48,7 +47,7 @@ class Dial extends PureComponent {
             const newX = this.props.xPos;
             const newY = this.props.yPos;
 
-            // If the coordinates changed, no point in animating if tey didn't
+            // If the coordinates changed, no point in animating if they didn't
             if (prevProps.xPos !== this.props.xPos || prevProps.yPos !== this.props.yPos) {
                 requestAnimationFrame(() => {
                     // Set the dial to it's previous position. We do this in order to
@@ -63,7 +62,7 @@ class Dial extends PureComponent {
                 });
             } else if (this.props.isDragged === false && prevProps.isDragged === true) {
                 // When dragging ends, the dial can end up floatng in the middle of nowhere
-                //    because at that point coordiantes do not change
+                //    because at that point coordinates do not change
                 // The dial has stopped being dragged. Update position again
                 requestAnimationFrame(() => {
                     this.animate(newX, newY, TRANSITION_DURATION);
@@ -106,8 +105,8 @@ class Dial extends PureComponent {
             );
         }
 
-        if (value.hasOwnProperty('tileStyle')) {
-            this.props.onUpdate(this.props.node.get('id'), value.tileStyle);
+        if (value.hasOwnProperty('data')) {
+            this.props.onUpdate(this.props.node.get('id'), value.data);
         }
 
         this.setState({ isModalShown: false });
@@ -129,10 +128,6 @@ class Dial extends PureComponent {
 
         const { currentPosX, currentPosY } = this.state;
 
-        const title = node.get('title');
-        const type = node.get('type');
-        const url = node.get('url');
-
         const transitionDuration = isDragged ? 0 : TRANSITION_DURATION;
 
         const dialClass = ClassNames({
@@ -146,11 +141,6 @@ class Dial extends PureComponent {
             zIndex: isDragged ? DRAG_ZINDEX : view.get('zIndex'),
         };
 
-        const dialTileStyle = {
-            background: dialMeta.background || '#ffffff',
-            color: dialMeta.color || '#000000',
-        };
-
         return (
             <div
                 ref={(n) => this.onNodeMounted(n)}
@@ -160,24 +150,19 @@ class Dial extends PureComponent {
             >
 
                 <DialTile
-                    url={url}
-                    type={type}
+                    data={dialMeta}
+                    node={node}
                     onMouseDown={onMouseDown}
                     onEditMouseDown={this.onEditMouseDown}
-                    tileStyle={dialTileStyle}
                 />
-
-                <DialTitle title={title} />
 
                 {this.state.isEdited &&
                     <Portal node={document && document.getElementById('modals')}>
                         <ModalWithOverlay in={this.state.isModalShown}>
                             <DialEditModal
                                 in={this.state.isModalShown}
-                                type={type}
-                                title={title}
-                                tileStyle={dialTileStyle}
-                                url={url}
+                                data={dialMeta}
+                                node={node}
                                 onClose={() => this.setState({ isModalShown: false })}
                                 onExited={() => this.setState({ isEdited: false })}
                                 onSave={this.onSave}
