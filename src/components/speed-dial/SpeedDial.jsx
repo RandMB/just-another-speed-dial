@@ -353,7 +353,7 @@ class SpeedDial extends Component {
                     <div className="dial-container-end" >
                         <div
                             className="config-open-button"
-                            onClick={() => chrome.runtime.openOptionsPage()}
+                            onClick={() => chrome.tabs.create({ url: browserUtils.runtime.getURL('options.html') })}
                             tile="Open configuration sidebar"
                         >
                             <i className="fas fa-cog" />

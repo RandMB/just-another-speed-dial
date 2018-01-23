@@ -15,7 +15,7 @@
         });
     }
 
-    function getUrl(url) {
+    function getURL(url) {
         return chrome.runtime.getURL(url);
     }
 
@@ -32,7 +32,7 @@
     const exported = {
         sendMessage,
         onMessage: new OnMessage(),
-        getUrl,
+        getURL,
     };
 
     if ( typeof module !== "undefined" ) { 

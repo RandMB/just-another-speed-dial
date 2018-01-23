@@ -1,7 +1,7 @@
 'use strict';
 
 (function w() {
-    const fullUrl = window.runtime.getUrl('background/public_suffix_list.dat');
+    const fullUrl = window.runtime.getURL('background/public_suffix_list.dat');
 
     fetch(fullUrl).then((response) => {
         return response.text();
