@@ -9,20 +9,7 @@ import DialTitle from '../dial-title/DialTitle';
 function DialTile(props) {
     const title = props.node.get('title');
     const type = props.node.get('type');
-    const fullUrl = props.node.get('url');
-
-    let url = fullUrl;
-
-    try {
-        url = new URL(fullUrl).host;
-    } catch (error) {
-        // Nothing to do, url is not a valid url, just display full url
-    }
-
-    // Chrome doesn't throw if url invalid... Workaround
-    if (!url) {
-        url = fullUrl;
-    }
+    const url = props.node.get('url');
 
     return (
         <React.Fragment>
@@ -30,7 +17,7 @@ function DialTile(props) {
                 draggable="false"
                 onDragStart={(event) => { event.preventDefault(); }}
                 className="dial-tile rounded-borders"
-                title={fullUrl}
+                title={url}
                 onMouseDown={props.onMouseDown}
             >
 
@@ -39,7 +26,11 @@ function DialTile(props) {
                 }
 
                 {type === 'bookmark' &&
-                    <DialBookmark url={url} data={props.data} />
+                    <DialBookmark
+                        url={url}
+                        data={props.data}
+                        onUpdate={props.onUpdate}
+                    />
                 }
 
                 <div
@@ -60,6 +51,7 @@ DialTile.propTypes = {
     node: PropTypes.object.isRequired,
     onMouseDown: PropTypes.func,
     onEditMouseDown: PropTypes.func,
+    onUpdate: PropTypes.func,
 };
 
 export default DialTile;

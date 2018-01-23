@@ -48,8 +48,8 @@ class DialBackgroundSelector extends Component {
         ));
     }
 
-    async handleColorChange(bgColor) {
-        const textColor = await browserUtils.colors.getTextColor(bgColor);
+    handleColorChange(bgColor) {
+        const textColor = browserUtils.colors.getTextColor(bgColor);
 
         const newValue = {
             background: bgColor,

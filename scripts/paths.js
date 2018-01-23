@@ -12,6 +12,7 @@ module.exports = {
   dialIndexJs: resolveApp('../src/dial.js'),
   optionsIndexJs: resolveApp('../src/options.js'),
   appPackageJson: resolveApp('../package.json'),
+  appRoot: resolveApp('../'),
   appSrc: resolveApp('../src'),
   yarnLockFile: resolveApp('../yarn.lock'),
   testsSetup: resolveApp('../src/setupTests.js'),

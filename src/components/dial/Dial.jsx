@@ -28,20 +28,28 @@ class Dial extends PureComponent {
 
         this.onEditMouseDown = this.onEditMouseDown.bind(this);
         this.onNodeMounted = this.onNodeMounted.bind(this);
-        this.onSave = this.onSave.bind(this);
+        this.onUpdate = this.onUpdate.bind(this);
         this.animate = this.animate.bind(this);
     }
 
     async componentWillMount() {
-        if (!this.props.dialMeta.background) {
+        if (!this.props.data.background) {
             if (this.props.node.get('type') === 'bookmark') {
                 const colorData = await browserUtils.colors.getColors();
-                this.props.onUpdate(this.props.node.get('id'), colorData);
+
+                this.props.onUpdate(
+                    this.props.node.get('id'),
+                    colorData,
+                );
+
             } else if (this.props.node.get('type') === 'folder') {
-                this.props.onUpdate(this.props.node.get('id'), {
-                    background: '#ffffff',
-                    color: '#000000',
-                });
+                this.props.onUpdate(
+                    this.props.node.get('id'),
+                    {
+                        background: '#ffffff',
+                        color: '#000000',
+                    },
+                );
             }
         }
     }
@@ -93,7 +101,7 @@ class Dial extends PureComponent {
         }, { once: true });
     }
 
-    onSave(value) {
+    onUpdate(value) {
         if (value.hasOwnProperty('title') || value.hasOwnProperty('url')) {
             const changed = {};
 
@@ -112,22 +120,29 @@ class Dial extends PureComponent {
         }
 
         if (value.hasOwnProperty('data')) {
-            this.props.onUpdate(this.props.node.get('id'), value.data);
+            this.props.onUpdate(
+                this.props.node.get('id'),
+                value.data.data,
+                value.data.local,
+            );
         }
 
         this.setState({ isModalShown: false });
     }
 
     animate(x, y, duration) {
-        this.refNode.style.transform = `translate3D(${x}px,${y}px,0)`;
-        this.refNode.style.transitionDuration = `${duration}s`;
+        if (this.refNode) {
+            this.refNode.style.transform = `translate3D(${x}px,${y}px,0)`;
+            this.refNode.style.transitionDuration = `${duration}s`;
+        }
     }
 
     render() {
         const {
             node,
             isDragged,
-            dialMeta,
+            data,
+            local,
             onMouseDown,
             view,
         } = this.props;
@@ -147,6 +162,8 @@ class Dial extends PureComponent {
             zIndex: isDragged ? DRAG_ZINDEX : view.get('zIndex'),
         };
 
+        const metaData = { data, local };
+
         return (
             <div
                 ref={(n) => this.onNodeMounted(n)}
@@ -156,8 +173,9 @@ class Dial extends PureComponent {
             >
 
                 <DialTile
-                    data={dialMeta}
+                    data={metaData}
                     node={node}
+                    onUpdate={this.onUpdate}
                     onMouseDown={onMouseDown}
                     onEditMouseDown={this.onEditMouseDown}
                 />
@@ -166,11 +184,11 @@ class Dial extends PureComponent {
                     <Portal node={document && document.getElementById('modals')}>
                         <DialEditModal
                             in={this.state.isModalShown}
-                            data={dialMeta}
+                            data={metaData}
                             node={node}
                             onClose={() => this.setState({ isModalShown: false })}
                             onExited={() => this.setState({ isEdited: false })}
-                            onSave={this.onSave}
+                            onSave={this.onUpdate}
                         />
                     </Portal>
                 }
@@ -183,7 +201,8 @@ Dial.propTypes = {
     node: PropTypes.object.isRequired,
     view: PropTypes.object.isRequired,
     elementRef: PropTypes.func,
-    dialMeta: PropTypes.object,
+    data: PropTypes.object.isRequired,
+    local: PropTypes.object.isRequired,
     xPos: PropTypes.number.isRequired,
     yPos: PropTypes.number.isRequired,
     isDragged: PropTypes.bool.isRequired,

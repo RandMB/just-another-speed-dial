@@ -4,9 +4,11 @@ import PropTypes from 'prop-types';
 import './DialFolder.css';
 
 function DialFolder(props) {
+    const { data } = props.data;
+
     const tileStyle = {
-        background: props.data.background || '#ffffff',
-        color: props.data.color || '#000000',
+        background: data.background || '#ffffff',
+        color: data.color || '#000000',
     };
 
     return (

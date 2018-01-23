@@ -2,6 +2,7 @@ import React, { Component } from 'react';
 import PropTypes from 'prop-types';
 import { Portal } from 'react-portal';
 import _pickBy from 'lodash/pickBy';
+import _cloneDeep from 'lodash/cloneDeep';
 
 import Modal from '../common/modal/Modal';
 import ButtonPrimary from '../common/button-primary/ButtonPrimary';
@@ -44,18 +45,27 @@ class DialEditModal extends Component {
 
         this.onSave = this.onSave.bind(this);
         this.onValueChange = this.onValueChange.bind(this);
-        this.onBackgroundChange = this.onBackgroundChange.bind(this);
+        this.onDataChange = this.onDataChange.bind(this);
+        this.onLocalDataChange = this.onLocalDataChange.bind(this);
         this.showConfirmDialog = this.showConfirmDialog.bind(this);
         this.deleteBookmark = this.deleteBookmark.bind(this);
     }
 
     onSave() {
-        // Only select changed properties
-        const changedProps = _pickBy(this.state, (value, key) => value !== this.initialState[key]);
+        // Only select changed properties, clone them, because some are objects
+        //   and objects would get picked by reference
+        const changedProps =
+            _cloneDeep(_pickBy(this.state, (value, key) => value !== this.initialState[key]));
 
         // Only used for preview, don't emit it.
         //   It is safe to attempt to delete non existant properties
         delete changedProps.node;
+        // If we update local data, however, it can cause flickering between old an new state
+        //   if this data is also part of browser, like an url
+        //   Because this data is just a cache, it has to be safe to let it regenerate
+        if (changedProps.data) {
+            delete changedProps.data.local;
+        }
 
         this.props.onSave(changedProps);
     }
@@ -69,8 +79,14 @@ class DialEditModal extends Component {
         });
     }
 
-    onBackgroundChange(data) {
-        const newValue = Object.assign({}, this.state.data, data);
+    onDataChange(data) {
+        const newValue = Object.assign({}, this.state.data, { data });
+
+        this.setState({ data: newValue });
+    }
+
+    onLocalDataChange(data) {
+        const newValue = Object.assign({}, this.state.data, { local: data.data.local });
 
         this.setState({ data: newValue });
     }
@@ -107,6 +123,7 @@ class DialEditModal extends Component {
                     <div className="modal-body">
                         <div className="modal-edit-preview">
                             <DialTile
+                                onUpdate={this.onLocalDataChange}
                                 data={this.state.data}
                                 node={this.state.node}
                                 type={this.state.type}
@@ -134,8 +151,8 @@ class DialEditModal extends Component {
 
                         <DialBackgroundSelector
                             type={this.state.type}
-                            data={this.state.data}
-                            onBackgroundChange={this.onBackgroundChange}
+                            data={this.state.data.data}
+                            onBackgroundChange={this.onDataChange}
                         />
                     </div>
                     <div className="modal-footer">
@@ -161,7 +178,6 @@ class DialEditModal extends Component {
                             onConfirm={() => this.deleteBookmark()}
                             onCancel={() => this.setState({ isModalShown: false })}
                             onExited={() => this.setState({ confirmDelete: false })}
-                            onSave={this.onSave}
                         />
                     </Portal>
                 }

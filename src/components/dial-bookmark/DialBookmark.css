@@ -14,9 +14,42 @@
 }
 
 .dial-tile-bookmark p {
-    margin-bottom: 0;
+    margin: 0;
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
     max-width: 100%;
+}
+
+.dial-bookmark-text {
+    display: flex;
+    flex-direction: column;
+    width: auto;
+    max-width: 100%;
+}
+
+.dial-bookmark-subdomain {
+    display: flex;
+    flex-direction: row;
+    align-items: flex-start;
+    font-size: 0.9rem;
+    transform: translateY(0.5rem);
+    flex: 1;
+}
+
+.dial-bookmark-domain {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    font-size: 1.5rem;
+    flex: 1;
+}
+
+.dial-bookmark-suffix {
+    display: flex;
+    flex-direction: row;
+    justify-content: flex-end;
+    font-size: 0.9rem;
+    transform: translateY(-0.5rem);
+    flex: 1;
 }

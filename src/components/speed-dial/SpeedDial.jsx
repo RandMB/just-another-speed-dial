@@ -44,7 +44,12 @@ class SpeedDial extends Component {
             currFolderId: props.bookmarkTreeId,
             prevFolderId: null,
             children: null,
-            data: {},
+
+            // Data associated with dials, which is synced
+            metaData: {},
+            // Data associated with dials, which isn't synced (cache)
+            localData: {},
+
             isConfigLoaded: false,
 
             dialColumns: dialUtils.computeColumns(DIAL_WIDTH, WIDTH_TO_LEAVE),
@@ -80,13 +85,18 @@ class SpeedDial extends Component {
 
         const childrenPromise =
             browserUtils.bookmarks.getFolderChildren(this.state.currFolderId);
-        const dataPromise = browserUtils.localStorage.get('metaData');
+        const dataMetaPromise = browserUtils.localStorage.get('metaData');
+        const dataLocalPromise = browserUtils.localStorage.get('localData');
 
-        const [children, data] = await Promise.all([childrenPromise, dataPromise]);
-        const dialData = data['metaData'];
+        const [children, dataMeta, dataLocal] =
+            await Promise.all([childrenPromise, dataMetaPromise, dataLocalPromise]);
+
+        const metaData = dataMeta['metaData'] || {};
+        const localData = dataLocal['localData'] || {};
 
         this.updateList(children, {
-            data: dialData || {},
+            metaData,
+            localData,
             isConfigLoaded: true,
         });
     }
@@ -192,11 +202,17 @@ class SpeedDial extends Component {
         }
     }
 
-    async onDialUpdate(id, colorData) {
-        this.state.data[id] = colorData;
+    async onDialUpdate(id, metaData, localData) {
+        if (metaData) {
+            this.state.metaData[id] = Object.assign({}, this.state.metaData[id], metaData);
+        }
 
-        this.forceUpdate();
+        if (localData) {
+            this.state.localData[id] = Object.assign({}, this.state.localData[id], localData);
+        }
+
         this.throttledSave();
+        this.forceUpdate();
     }
 
     getDialWidth() {
@@ -244,8 +260,11 @@ class SpeedDial extends Component {
         this.setState({ children });
     }
 
-    saveChanges() {
-        browserUtils.localStorage.set({ metaData: this.state.data }).then();
+    async saveChanges() {
+        const metaData = this.state.metaData;
+        const localData = this.state.localData;
+
+        await browserUtils.localStorage.set({ metaData, localData });
     }
 
     updateList(children, additionalState) {
@@ -304,7 +323,7 @@ class SpeedDial extends Component {
 
     render() {
         const children = this.state.children;
-        const data = this.state.data;
+        const { metaData, localData } = this.state;
         const isRoot = this.state.currFolderId === this.props.bookmarkTreeId;
 
         const dialsStyle = {
@@ -350,7 +369,8 @@ class SpeedDial extends Component {
                             key={this.state.currFolderId}
                             folderId={this.state.currFolderId}
                             bookmarks={children}
-                            data={data}
+                            data={metaData}
+                            local={localData}
                             columnCount={this.state.dialColumns}
                             onOpen={this.onOpen}
                             onItemMoved={this.onItemMoved}
