@@ -10,10 +10,19 @@ function computeDialsHeight(itemCount, columnCount, dialHeight) {
     return dialHeight * computeRows(itemCount, columnCount);
 }
 
-function computeColumns(dialWidth, widthToLeave) {
-    const effectiveWidth = window.innerWidth - widthToLeave;
+function computeColumns(dialWidth, hSpace, widthToLeave) {
+    let effectiveWidth = window.innerWidth - widthToLeave;
+
+    // If at least two tiles fit normally, we adjust the width,
+    //   because the last tile does not have a horizontal space.
+    //   This can occur if more tiles would fit, but can't,
+    //   because of horizontal spacing, which shouldn't be counted for the last tile
+    if (effectiveWidth >= (dialWidth * 2 + hSpace)) {
+        effectiveWidth += hSpace;
+    }
+
     // Minimum one tile
-    return Math.max(Math.floor(effectiveWidth / dialWidth), 1);
+    return Math.max(Math.floor(effectiveWidth / (dialWidth + hSpace)), 1);
 }
 
 function computeDialIndex(currentPos, columnCount, dialCount, dialWidth, dialHeight) {

@@ -6,42 +6,39 @@ import _throttle from 'lodash/throttle';
 
 import SpeedDialWithDragging from '../speed-dial-with-dragging/SpeedDialWithDragging';
 import dialUtils from '../../utils/dials';
-import browserUtils from '../../utils/browser';
+import utils from '../../utils/browser';
 
 import './SpeedDial.css';
 
-const DIAL_HEIGHT = 239;
-const DIAL_WIDTH = 250;
-const BETWEEN_DIALS = 30;
-const WIDTH_TO_LEAVE = 60;
-
-function updateChild(children, index, columnCount, itemCount) {
+function updateChild(children, index, columnCount, itemCount, dialWidth, dialHeight) {
     return children.setIn([index, 'view', 'zIndex'], itemCount - index)
         .setIn([index, 'view', 'index'], index)
-        .setIn([index, 'view', 'dialPosX'], dialUtils.computeDialXPos(index, columnCount, DIAL_WIDTH))
-        .setIn([index, 'view', 'dialPosY'], dialUtils.computeDialYPos(index, columnCount, DIAL_HEIGHT));
+        .setIn([index, 'view', 'dialPosX'], dialUtils.computeDialXPos(index, columnCount, dialWidth))
+        .setIn([index, 'view', 'dialPosY'], dialUtils.computeDialYPos(index, columnCount, dialHeight));
 }
 
-function updateChildrenPartial(children, columnCount, start, end) {
+function updateChildrenPartial(children, columnCount, start, end, dialWidth, dialHeight) {
     let updated = children;
 
     for (let index = start; index <= end; index++) {
-        updated = updateChild(updated, index, columnCount, children.count());
+        updated = updateChild(updated, index, columnCount, children.count(), dialWidth, dialHeight);
     }
 
     return updated;
-}
-
-function updateChildren(children, columnCount) {
-    return updateChildrenPartial(children, columnCount, 0, children.count() - 1);
 }
 
 class SpeedDial extends Component {
     constructor(props) {
         super(props);
 
+        const columns = dialUtils.computeColumns(
+            props.config.dialWidth,
+            props.config.hSpace,
+            props.config.edgeWidth,
+        );
+
         this.state = {
-            currFolderId: props.bookmarkTreeId,
+            currFolderId: props.config.rootId,
             prevFolderId: null,
             children: null,
 
@@ -52,7 +49,7 @@ class SpeedDial extends Component {
 
             isConfigLoaded: false,
 
-            dialColumns: dialUtils.computeColumns(DIAL_WIDTH, WIDTH_TO_LEAVE),
+            dialColumns: columns,
         };
 
         this.openFolder = this.openFolder.bind(this);
@@ -78,15 +75,15 @@ class SpeedDial extends Component {
     }
 
     async componentWillMount() {
-        browserUtils.bookmarks.onMoved.addEventListener(this.onBookmarkMoved);
-        browserUtils.bookmarks.onCreated.addEventListener(this.onBookmarkCreated);
-        browserUtils.bookmarks.onRemoved.addEventListener(this.onBookmarkRemoved);
-        browserUtils.bookmarks.onChanged.addEventListener(this.onBookmarkChanged);
+        utils.bookmarks.onMoved.addListener(this.onBookmarkMoved);
+        utils.bookmarks.onCreated.addListener(this.onBookmarkCreated);
+        utils.bookmarks.onRemoved.addListener(this.onBookmarkRemoved);
+        utils.bookmarks.onChanged.addListener(this.onBookmarkChanged);
 
         const childrenPromise =
-            browserUtils.bookmarks.getFolderChildren(this.state.currFolderId);
-        const dataMetaPromise = browserUtils.localStorage.get('metaData');
-        const dataLocalPromise = browserUtils.localStorage.get('localData');
+            utils.bookmarks.getFolderChildren(this.state.currFolderId);
+        const dataMetaPromise = utils.storage.local.get('metaData');
+        const dataLocalPromise = utils.storage.local.get('localData');
 
         const [children, dataMeta, dataLocal] =
             await Promise.all([childrenPromise, dataMetaPromise, dataLocalPromise]);
@@ -101,19 +98,29 @@ class SpeedDial extends Component {
         });
     }
 
+    componentDidUpdate(oldProps) {
+        const newConfig = this.props.config;
+        const oldConfig = oldProps.config;
+
+        if (newConfig.dialWidth !== oldConfig.dialWidth ||
+            newConfig.dialHeight !== oldConfig.dialHeight) {
+            this.onResize(null, true);
+        }
+    }
+
     componentWillUnmount() {
-        browserUtils.bookmarks.onMoved.removeEventListener(this.onBookmarkMoved);
-        browserUtils.bookmarks.onCreated.removeEventListener(this.onBookmarkCreated);
-        browserUtils.bookmarks.onRemoved.removeEventListener(this.onBookmarkRemoved);
-        browserUtils.bookmarks.onChanged.removeEventListener(this.onBookmarkChanged);
+        utils.bookmarks.onMoved.removeListener(this.onBookmarkMoved);
+        utils.bookmarks.onCreated.removeListener(this.onBookmarkCreated);
+        utils.bookmarks.onRemoved.removeListener(this.onBookmarkRemoved);
+        utils.bookmarks.onChanged.removeListener(this.onBookmarkChanged);
     }
 
     async onBookmarkChanged(id) {
-        const bookmark = await browserUtils.bookmarks.get(id);
+        const bookmark = await utils.bookmarks.get(id);
 
         if (bookmark[0].parentId === this.state.currFolderId) {
             const children =
-                await browserUtils.bookmarks.getFolderChildren(this.state.currFolderId);
+                await utils.bookmarks.getFolderChildren(this.state.currFolderId);
 
             this.updateList(children);
         }
@@ -122,7 +129,7 @@ class SpeedDial extends Component {
     async onBookmarkRemoved(id, removedInfo) {
         if (removedInfo.parentId === this.state.currFolderId) {
             const children =
-                await browserUtils.bookmarks.getFolderChildren(this.state.currFolderId);
+                await utils.bookmarks.getFolderChildren(this.state.currFolderId);
 
             this.updateList(children);
         }
@@ -131,7 +138,7 @@ class SpeedDial extends Component {
     async onBookmarkCreated(id, bookmark) {
         if (bookmark.parentId === this.state.currFolderId) {
             const children =
-                await browserUtils.bookmarks.getFolderChildren(this.state.currFolderId);
+                await utils.bookmarks.getFolderChildren(this.state.currFolderId);
 
             this.updateList(children);
         }
@@ -152,18 +159,25 @@ class SpeedDial extends Component {
         if (moveInfo.parentId === this.state.currFolderId ||
             moveInfo.oldParentId === this.state.currFolderId) {
             const children =
-                await browserUtils.bookmarks.getFolderChildren(this.state.currFolderId);
+                await utils.bookmarks.getFolderChildren(this.state.currFolderId);
 
             this.updateList(children);
         }
     }
 
-    onResize() {
-        const columns = dialUtils.computeColumns(DIAL_WIDTH, WIDTH_TO_LEAVE);
+    onResize(event, force = false) {
+        const columns = dialUtils.computeColumns(
+            this.props.config.dialWidth,
+            this.props.config.hSpace,
+            this.props.config.edgeWidth,
+        );
 
-        if (columns !== this.state.dialColumns) {
+        if (columns !== this.state.dialColumns || force) {
             this.setState(({ children }) => {
-                const newChildren = updateChildren(children, columns);
+                const newChildren = this.updateChildren(
+                    children,
+                    columns,
+                );
 
                 return {
                     children: newChildren,
@@ -179,7 +193,7 @@ class SpeedDial extends Component {
             const newchildren = children.splice(oldIndex, 1);
             const insertedChildren = newchildren.splice(newIndex, 0, removed);
 
-            const updatedChildren = updateChildrenPartial(
+            const updatedChildren = this.updateChildren(
                 insertedChildren,
                 this.state.dialColumns,
                 Math.min(newIndex, oldIndex),
@@ -216,7 +230,11 @@ class SpeedDial extends Component {
     }
 
     getDialWidth() {
-        return dialUtils.computeDialsWidth(this.state.dialColumns, DIAL_WIDTH, BETWEEN_DIALS);
+        return dialUtils.computeDialsWidth(
+            this.state.dialColumns,
+            this.props.config.dialWidth + this.props.config.hSpace,
+            this.props.config.hSpace,
+        );
     }
 
     getDialHeight() {
@@ -225,7 +243,20 @@ class SpeedDial extends Component {
         return dialUtils.computeDialsHeight(
             count,
             this.state.dialColumns,
-            DIAL_HEIGHT,
+            this.props.config.dialHeight + this.props.config.vSpace,
+        );
+    }
+
+    updateChildren(children, columns, start = 0, end) {
+        const endIndex = end || children.count() - 1;
+
+        return updateChildrenPartial(
+            children,
+            columns,
+            start,
+            endIndex,
+            this.props.config.dialWidth + this.props.config.hSpace,
+            this.props.config.dialHeight + this.props.config.vSpace,
         );
     }
 
@@ -233,7 +264,7 @@ class SpeedDial extends Component {
         const id = this.state.children.getIn([newIndex, 'treeNode', 'id']);
         this.scheduledUpdate.push(id);
 
-        browserUtils.bookmarks.move(
+        utils.bookmarks.move(
             id,
             { index: indexToMove },
         );
@@ -264,7 +295,7 @@ class SpeedDial extends Component {
         const metaData = this.state.metaData;
         const localData = this.state.localData;
 
-        await browserUtils.localStorage.set({ metaData, localData });
+        await utils.storage.local.set({ metaData, localData });
     }
 
     updateList(children, additionalState) {
@@ -276,7 +307,10 @@ class SpeedDial extends Component {
             });
         });
 
-        const updatedChildren = updateChildren(newChildren, this.state.dialColumns);
+        const updatedChildren = this.updateChildren(
+            newChildren,
+            this.state.dialColumns,
+        );
 
         this.setState({
             children: updatedChildren,
@@ -285,15 +319,15 @@ class SpeedDial extends Component {
     }
 
     async goBack() {
-        if (this.state.currFolderId === this.props.bookmarkTreeId) {
+        if (this.state.currFolderId === this.props.config.rootId) {
             console.warn('Attempting to go back beyond the root folder');
             return;
         }
 
         const folderId = this.state.prevFolderId;
 
-        const childrenNodes = browserUtils.bookmarks.getFolderChildren(folderId);
-        const folderNode = browserUtils.bookmarks.get(folderId);
+        const childrenNodes = utils.bookmarks.getFolderChildren(folderId);
+        const folderNode = utils.bookmarks.get(folderId);
 
         const [children, folder] = await Promise.all([childrenNodes, folderNode]);
 
@@ -308,7 +342,7 @@ class SpeedDial extends Component {
 
     async openFolder(folderId) {
         const children =
-            await browserUtils.bookmarks.getFolderChildren(folderId);
+            await utils.bookmarks.getFolderChildren(folderId);
 
         const prevFolder = this.state.currFolderId;
 
@@ -322,9 +356,9 @@ class SpeedDial extends Component {
     }
 
     render() {
-        const children = this.state.children;
-        const { metaData, localData } = this.state;
-        const isRoot = this.state.currFolderId === this.props.bookmarkTreeId;
+        const { config } = this.props;
+        const { metaData, localData, children, dialColumns } = this.state;
+        const isRoot = this.state.currFolderId === this.props.config.rootId;
 
         const dialsStyle = {
             width: this.getDialWidth(),
@@ -353,7 +387,7 @@ class SpeedDial extends Component {
                     <div className="dial-container-end" >
                         <div
                             className="config-open-button"
-                            onClick={() => chrome.tabs.create({ url: browserUtils.runtime.getURL('options.html') })}
+                            onClick={() => chrome.tabs.create({ url: utils.runtime.getURL('options.html') })}
                             tile="Open configuration sidebar"
                         >
                             <i className="fas fa-cog" />
@@ -367,11 +401,12 @@ class SpeedDial extends Component {
 
                         <SpeedDialWithDragging
                             key={this.state.currFolderId}
-                            folderId={this.state.currFolderId}
                             bookmarks={children}
                             data={metaData}
                             local={localData}
-                            columnCount={this.state.dialColumns}
+                            config={config}
+                            columnCount={dialColumns}
+
                             onOpen={this.onOpen}
                             onItemMoved={this.onItemMoved}
                             onEdit={this.onEdit}
@@ -387,7 +422,7 @@ class SpeedDial extends Component {
 }
 
 SpeedDial.propTypes = {
-    bookmarkTreeId: PropTypes.string.isRequired,
+    config: PropTypes.object.isRequired,
 };
 
 export default SpeedDial;

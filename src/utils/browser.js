@@ -1,4 +1,4 @@
-import localStorage from './storage';
+import storage from './storage';
 import bookmarks from './bookmarks';
 import colors from './color';
 import runtime from '../../extension/shared/runtime';
@@ -17,7 +17,7 @@ if (/Chrome\/([0-9.]+)/.exec(navigator.userAgent)) {
 
 export default {
     colors,
-    localStorage,
+    storage,
     bookmarks,
     runtime,
     browserType,

@@ -5,10 +5,6 @@ import DraggableDial from '../draggable-dial/DraggableDial';
 import dialUtils from '../../utils/dials';
 import browserUtils from '../../utils/browser';
 
-const DIAL_HEIGHT = 239;
-const DIAL_WIDTH = 250;
-const BETWEEN_DIALS = 30;
-
 class SpeedDialWithDragging extends Component {
     constructor(props) {
         super(props);
@@ -22,15 +18,15 @@ class SpeedDialWithDragging extends Component {
             x: dialUtils.nomalizePosX(
                 dragData.dragPosX,
                 this.props.columnCount,
-                DIAL_WIDTH,
-                BETWEEN_DIALS,
+                this.props.config.dialWidth + this.props.config.hSpace,
+                this.props.config.hSpace,
             ),
 
             y: dialUtils.nomalizePosY(
                 dragData.dragPosY,
                 this.props.bookmarks.count(),
                 this.props.columnCount,
-                DIAL_HEIGHT,
+                this.props.config.dialHeight + this.props.config.vSpace,
             ),
         };
 
@@ -38,8 +34,8 @@ class SpeedDialWithDragging extends Component {
             normalizedPositions,
             this.props.columnCount,
             this.props.bookmarks.count(),
-            DIAL_WIDTH,
-            DIAL_HEIGHT,
+            this.props.config.dialWidth + this.props.config.hSpace,
+            this.props.config.dialHeight + this.props.config.vSpace,
         );
 
         if (newIndex !== dragData.index) {
@@ -67,10 +63,10 @@ class SpeedDialWithDragging extends Component {
     }
 
     render() {
-        const bookmarkTree = this.props.bookmarks;
+        const { bookmarks, config } = this.props;
 
         return (
-            bookmarkTree.map((child, index) => {
+            bookmarks.map((child, index) => {
                 const id = child.getIn(['treeNode', 'id']);
                 const data = this.props.data[id] || {};
                 const local = this.props.local[id] || {};
@@ -84,6 +80,7 @@ class SpeedDialWithDragging extends Component {
                         onDragEnd={this.onDragEnd}
                         onClick={this.props.onOpen}
                         key={'' + id}
+                        config={config}
 
                         node={child.get('treeNode')}
                         view={child.get('view')}
@@ -106,6 +103,7 @@ SpeedDialWithDragging.propTypes = {
     onOpen: PropTypes.func.isRequired,
     data: PropTypes.object.isRequired,
     local: PropTypes.object.isRequired,
+    config: PropTypes.object.isRequired,
     moveBookmark: PropTypes.func.isRequired,
 };
 

@@ -4,5 +4,5 @@
     height: 209px;
     display: flex;
     flex-direction: column;
-    transition: transform 0.25s ease;
+    transition: transform 0.25s ease, width 0.25s ease, height 0.25s ease;
 }

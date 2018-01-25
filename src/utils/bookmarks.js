@@ -124,41 +124,41 @@ async function getFolderChildren(id) {
 
 function OnMoved() {}
 
-OnMoved.prototype.addEventListener = function onMovedAddEventListener(func) {
+OnMoved.prototype.addListener = function onMovedAddListener(func) {
     chrome.bookmarks.onMoved.addListener(func);
 };
 
-OnMoved.prototype.removeEventListener = function onMovedRemoveEventListener(func) {
+OnMoved.prototype.removeListener = function onMovedRemoveListener(func) {
     chrome.bookmarks.onMoved.removeListener(func);
 };
 
 function OnCreated() {}
 
-OnCreated.prototype.addEventListener = function onCreatedAddEventListener(func) {
+OnCreated.prototype.addListener = function onCreatedAddListener(func) {
     chrome.bookmarks.onCreated.addListener(func);
 };
 
-OnCreated.prototype.removeEventListener = function onCreatedRemoveEventListener(func) {
+OnCreated.prototype.removeListener = function onCreatedRemoveListener(func) {
     chrome.bookmarks.onCreated.removeListener(func);
 };
 
 function OnRemoved() {}
 
-OnRemoved.prototype.addEventListener = function onRemovedAddEventListener(func) {
+OnRemoved.prototype.addListener = function onRemovedAddListener(func) {
     chrome.bookmarks.onRemoved.addListener(func);
 };
 
-OnRemoved.prototype.removeEventListener = function onRemovedRemoveEventListener(func) {
+OnRemoved.prototype.removeListener = function onRemovedRemoveListener(func) {
     chrome.bookmarks.onRemoved.removeListener(func);
 };
 
 function OnChanged() {}
 
-OnChanged.prototype.addEventListener = function onChangedAddEventListener(func) {
+OnChanged.prototype.addListener = function onChangedAddListener(func) {
     chrome.bookmarks.onChanged.addListener(func);
 };
 
-OnChanged.prototype.removeEventListener = function onChangedRemoveEventListener(func) {
+OnChanged.prototype.removeListener = function onChangedRemoveListener(func) {
     chrome.bookmarks.onChanged.removeListener(func);
 };
 

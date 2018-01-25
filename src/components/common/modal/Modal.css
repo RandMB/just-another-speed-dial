@@ -9,12 +9,13 @@
     background-color: white;
 }
 
-.modal-appear {
+.modal-appear, .modal-enter {
     opacity: 0;
     transform: translateY(5%);
 }
 
-.modal-appear.modal-appear-active {
+.modal-appear.modal-appear-active,
+.modal-enter.modal-enter-active {
     opacity: 1;
     transition: opacity 150ms ease-in, transform 150ms ease-in;
     transform: translateY(0);
@@ -44,11 +45,12 @@
     overflow-y: auto;
 }
 
-.modal-overlay-appear {
+.modal-overlay-appear, .modal-overlay-enter {
     opacity: 0;
 }
 
-.modal-overlay-appear.modal-overlay-appear-active {
+.modal-overlay-appear.modal-overlay-appear-active,
+.modal-overlay-enter.modal-overlay-enter-active {
     opacity: 1;
     transition: opacity 150ms ease-in;
 }

@@ -143,6 +143,7 @@ class Dial extends PureComponent {
             isDragged,
             data,
             local,
+            config,
             onMouseDown,
             view,
         } = this.props;
@@ -160,6 +161,8 @@ class Dial extends PureComponent {
             transform: `translate3D(${currentPosX}px,${currentPosY}px,0)`,
             transitionDuration: `${transitionDuration}s`,
             zIndex: isDragged ? DRAG_ZINDEX : view.get('zIndex'),
+            width: config.dialWidth,
+            height: config.dialHeight,
         };
 
         const metaData = { data, local };
@@ -203,6 +206,7 @@ Dial.propTypes = {
     elementRef: PropTypes.func,
     data: PropTypes.object.isRequired,
     local: PropTypes.object.isRequired,
+    config: PropTypes.object.isRequired,
     xPos: PropTypes.number.isRequired,
     yPos: PropTypes.number.isRequired,
     isDragged: PropTypes.bool.isRequired,

@@ -1,0 +1,20 @@
+.navigation-link-container {
+    padding: 16px 8px;
+    font-size: 1.2rem;
+}
+
+.navigation-link-container:hover {
+    background-color: rgba(12, 12, 13, .2);
+}
+
+.navigation-link-container:active {
+    background-color: rgba(12, 12, 13, .3);
+}
+
+.navigation-link span {
+    padding-left: 12px;
+}
+
+.navigation-link-container.selected {
+    color: rgb(10, 132, 255);
+}

@@ -1,20 +1,19 @@
 import React, { Component } from 'react';
 import PropTypes from 'prop-types';
-import _isEmpty from 'lodash/isEmpty';
 
 import SpeedDial from '../speed-dial/SpeedDial';
 import FolderPickerContainer from '../folder-picker-container/FolderPickerContainer';
 
-import browserUtils from '../../utils/browser';
+import utils from '../../utils/browser';
 
 import './DialApp.css';
 import backgroundImageUrl from '../../assets/background-default.jpg';
 
 function Container(props) {
-    if (props.rootBookmarkTreeId) {
+    if (props.config.rootId) {
         return (
             <SpeedDial
-                bookmarkTreeId={props.rootBookmarkTreeId}
+                config={props.config}
             />
         );
     } else {
@@ -27,7 +26,7 @@ function Container(props) {
 }
 
 Container.propTypes = {
-    rootBookmarkTreeId: PropTypes.string,
+    config: PropTypes.object.isRequired,
     onFolderSelect: PropTypes.func.isRequired,
 };
 
@@ -35,60 +34,76 @@ class DialApp extends Component {
     constructor(props) {
         super(props);
 
+        this.defaultConfig = {
+            rootId: null,
+            dialWidth: 220,
+            dialHeight: 220,
+            edgeWidth: 0,
+            hSpace: 30,
+            vSpace: 20,
+        };
+
         // Initialize state
         this.state = {
-            config: {
-                rootId: null,
-            },
+            config: this.defaultConfig,
 
             isLoaded: false,
         };
 
         this.onFolderSelect = this.onFolderSelect.bind(this);
+        this.onChanged = this.onChanged.bind(this);
     }
 
     async componentWillMount() {
-        const config = await browserUtils.localStorage.get('config');
+        utils.storage.onChanged.addListener(this.onChanged);
 
-        let newConfig = {
-            rootId: null,
-        };
+        const configData = await utils.storage.local.get('config');
+        const newConfig = configData['config'] || {};
 
-        if (!_isEmpty(config)) {
-            newConfig = config.config;
-        }
+        const config = Object.assign({}, this.defaultConfig, newConfig);
 
         this.setState({
-            config: newConfig,
+            config,
             isLoaded: true,
         });
     }
 
-    async onFolderSelect(folderId) {
-        const newConfig = {
-            rootId: folderId,
-        };
+    componentWillUnmount() {
+        utils.storage.onChanged.removeListener(this.onChanged);
+    }
 
-        await browserUtils.localStorage.set({ config: newConfig });
+    async onFolderSelect(folderId) {
+        const newConfig = Object.assign({}, this.defaultConfig, { rootId: folderId });
+
+        await utils.storage.local.set({ config: newConfig });
 
         this.setState({
             config: newConfig,
         });
+    }
+
+    onChanged(changes, area) {
+        // We are only interested in local configuration changes
+        if (area === 'local' && !!changes.config) {
+            if (changes.config.newValue) {
+                this.setState({ config: changes.config.newValue });
+            } else {
+                this.setState({ config: this.defaultConfig });
+            }
+        }
     }
 
     render() {
         // Styling for page body
         document.body.style = `background-image: url('${backgroundImageUrl}'); background-size: cover;`;
 
-        const rootBookmarkTreeId = this.state.config.rootId;
-
         return (
             <React.Fragment>
                 {this.state.isLoaded &&
                     <Container
-                        key={rootBookmarkTreeId}
+                        key={this.state.config.rootId}
                         onFolderSelect={this.onFolderSelect}
-                        rootBookmarkTreeId={rootBookmarkTreeId}
+                        config={this.state.config}
                     />
                 }
             </React.Fragment>

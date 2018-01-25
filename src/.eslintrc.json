@@ -6,7 +6,7 @@
     "rules": {
         "semi": "error",
         "linebreak-style": "off",
-        "indent": ["error", 4],
+        "indent": ["error", 4, { "SwitchCase": 1 }],
         "padded-blocks": "off",
         "prefer-template": "off",
         "prefer-destructuring": "off",
@@ -26,6 +26,7 @@
             "object": "Math",
             "property": "pow"
         }],
+        "no-restricted-syntax": "off",
         "react/jsx-indent": ["error", 4],
         "react/jsx-boolean-value": "off",
         "react/jsx-indent-props": "off",
