@@ -5,11 +5,10 @@ const webpack = require('webpack');
 const ExtractTextPlugin = require('extract-text-webpack-plugin');
 const eslintFormatter = require('react-dev-utils/eslintFormatter');
 const ModuleScopePlugin = require('react-dev-utils/ModuleScopePlugin');
-const MinifyPlugin = require("babel-minify-webpack-plugin");
+const UglifyJsPlugin = require('uglifyjs-webpack-plugin')
 const paths = require('./paths');
 
 const shouldUseRelativeAssetPaths = true;
-const shouldUseSourceMap = process.env.SOURCEMAPS_ENABLE ? true : false;
 
 const env = { 'process.env': { NODE_ENV: '"production"' } };
 
@@ -28,7 +27,7 @@ const cssFilename = 'css/[name].css';
 // To have this structure working with relative paths, we have to use custom options.
 const extractTextPluginOptions = shouldUseRelativeAssetPaths
   ? // Making sure that the publicPath goes back to to build folder.
-    { publicPath: Array(cssFilename.split('/').length).join('../') }
+  { publicPath: Array(cssFilename.split('/').length).join('../') }
   : {};
 
 const plugins = [
@@ -41,12 +40,25 @@ const plugins = [
   new ExtractTextPlugin({
     filename: cssFilename,
   }),
+  new UglifyJsPlugin({
+    cache: true,
+    parallel: true,
+    sourceMap: true,
+    uglifyOptions: {
+      ie8: false,
+      ecma: 8,
+      output: {
+        comments: 'some',
+      },
+      warnings: false,
+    }
+  }),
 ];
 
 // https://github.com/webpack-contrib/babel-minify-webpack-plugin/issues/68
-if (!process.env.SOURCEMAPS_ENABLE) {
+/* if (!process.env.SOURCEMAPS_ENABLE) {
   plugins.push(new MinifyPlugin({}, {}));
-}
+} */
 
 // This is the production configuration.
 // It compiles slowly and is focused on producing a fast and minimal bundle.
@@ -56,7 +68,7 @@ module.exports = {
   bail: true,
   // We generate sourcemaps in production. This is slow but gives good results.
   // You can exclude the *.map files from the build during deployment.
-  devtool: shouldUseSourceMap ? 'source-map' : false,
+  devtool: 'source-map',
   // In production, we only want to load the polyfills and the app code.
   entry: {
     dial: paths.dialIndexJs,
@@ -105,7 +117,7 @@ module.exports = {
             options: {
               formatter: eslintFormatter,
               eslintPath: require.resolve('eslint'),
-              
+
             },
             loader: require.resolve('eslint-loader'),
           },
@@ -120,11 +132,11 @@ module.exports = {
           // Process JS with Babel.
           {
             test: /\.(js|jsx)$/,
-            
+
             exclude: '/node_modules/',
             loader: require.resolve('babel-loader'),
             options: {
-              
+
               compact: true,
             },
           },
@@ -157,7 +169,7 @@ module.exports = {
                       options: {
                         importLoaders: 1,
                         minimize: true,
-                        sourceMap: shouldUseSourceMap,
+                        sourceMap: true,
                       },
                     },
                   ],
