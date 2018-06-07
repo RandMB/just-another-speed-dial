@@ -2,9 +2,9 @@
 
 const path = require('path');
 const webpack = require('webpack');
-const ExtractTextPlugin = require('extract-text-webpack-plugin');
-const eslintFormatter = require('react-dev-utils/eslintFormatter');
+const MiniCssExtractPlugin = require('mini-css-extract-plugin');
 const ModuleScopePlugin = require('react-dev-utils/ModuleScopePlugin');
+const OptimizeCSSAssetsPlugin = require("optimize-css-assets-webpack-plugin");
 const UglifyJsPlugin = require('uglifyjs-webpack-plugin')
 const paths = require('./paths');
 
@@ -37,28 +37,10 @@ const plugins = [
   // Otherwise React will be compiled in the very slow development mode.
   new webpack.DefinePlugin(env),
   // Note: this won't work without ExtractTextPlugin.extract(..) in `loaders`.
-  new ExtractTextPlugin({
+  new MiniCssExtractPlugin({
     filename: cssFilename,
   }),
-  new UglifyJsPlugin({
-    cache: true,
-    parallel: true,
-    sourceMap: true,
-    uglifyOptions: {
-      ie8: false,
-      ecma: 8,
-      output: {
-        comments: 'some',
-      },
-      warnings: false,
-    }
-  }),
 ];
-
-// https://github.com/webpack-contrib/babel-minify-webpack-plugin/issues/68
-/* if (!process.env.SOURCEMAPS_ENABLE) {
-  plugins.push(new MinifyPlugin({}, {}));
-} */
 
 // This is the production configuration.
 // It compiles slowly and is focused on producing a fast and minimal bundle.
@@ -74,6 +56,7 @@ module.exports = {
     dial: paths.dialIndexJs,
     options: paths.optionsIndexJs,
   },
+  mode: 'production',
   output: {
     // The build folder.
     path: paths.appBuild,
@@ -103,27 +86,6 @@ module.exports = {
   module: {
     strictExportPresence: true,
     rules: [
-      // TODO: Disable require.ensure as it's not a standard language feature.
-      // We are waiting for https://github.com/facebookincubator/create-react-app/issues/2176.
-      // { parser: { requireEnsure: false } },
-
-      // First, run the linter.
-      // It's important to do this before Babel processes the JS.
-      {
-        test: /\.(js|jsx)$/,
-        enforce: 'pre',
-        use: [
-          {
-            options: {
-              formatter: eslintFormatter,
-              eslintPath: require.resolve('eslint'),
-
-            },
-            loader: require.resolve('eslint-loader'),
-          },
-        ],
-        include: paths.appSrc,
-      },
       {
         // "oneOf" will traverse all following loaders until one will
         // match the requirements. When no loader matches it will fall
@@ -154,30 +116,20 @@ module.exports = {
           // in the main CSS file.
           {
             test: /\.css$/,
-            loader: ExtractTextPlugin.extract(
-              Object.assign(
-                {
-                  fallback: {
-                    loader: require.resolve('style-loader'),
-                    options: {
-                      hmr: false,
-                    },
-                  },
-                  use: [
-                    {
-                      loader: require.resolve('css-loader'),
-                      options: {
-                        importLoaders: 1,
-                        minimize: true,
-                        sourceMap: true,
-                      },
-                    },
-                  ],
+            use: [
+              {
+                loader:MiniCssExtractPlugin.loader,
+                options: extractTextPluginOptions,
+              },
+              {
+                loader: require.resolve('css-loader'),
+                options: {
+                  importLoaders: 1,
+                  minimize: false,
+                  sourceMap: true,
                 },
-                extractTextPluginOptions
-              )
-            ),
-            // Note: this won't work without `new ExtractTextPlugin()` in `plugins`.
+              },
+            ],
           },
           // "file" loader makes sure assets end up in the `build` folder.
           // When you `import` an asset, you get its filename.
@@ -203,6 +155,24 @@ module.exports = {
       },
     ],
   },
+  optimization: {
+    minimizer: [
+      new UglifyJsPlugin({
+        cache: true,
+        parallel: true,
+        sourceMap: true,
+        uglifyOptions: {
+          ie8: false,
+          ecma: 8,
+          output: {
+            comments: 'some',
+          },
+          warnings: false,
+        }
+      }),
+      new OptimizeCSSAssetsPlugin({})
+    ]
+  },
   plugins: plugins,
   // Some libraries import Node modules but don't use them in the browser.
   // Tell Webpack to provide empty mocks for them so importing them works.
@@ -212,5 +182,8 @@ module.exports = {
     net: 'empty',
     tls: 'empty',
     child_process: 'empty',
+  },
+  performance: {
+    hints: false,
   },
 };

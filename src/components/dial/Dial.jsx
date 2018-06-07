@@ -74,8 +74,8 @@ class Dial extends PureComponent {
                         this.animate(newX, newY, TRANSITION_DURATION);
                     });
                 });
-            } else if (this.props.isDragged === false && prevProps.isDragged === true) {
-                // When dragging ends, the dial can end up floatng in the middle of nowhere
+            } else if (prevProps.isDragged === true) {
+                // When dragging ends, the dial can end up floating in the middle of nowhere
                 //    because at that point coordinates do not change
                 // The dial has stopped being dragged. Update position again
                 requestAnimationFrame(() => {
