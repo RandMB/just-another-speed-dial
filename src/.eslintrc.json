@@ -26,6 +26,7 @@
             "object": "Math",
             "property": "pow"
         }],
+        "no-param-reassign": ["error", { "props": false }],
         "no-restricted-syntax": "off",
         "react/jsx-indent": ["error", 4],
         "react/jsx-boolean-value": "off",

@@ -24,7 +24,7 @@ class SpeedDialWithDragging extends Component {
 
             y: dialUtils.nomalizePosY(
                 dragData.dragPosY,
-                this.props.bookmarks.count(),
+                this.props.bookmarks.length,
                 this.props.columnCount,
                 this.props.config.dialHeight + this.props.config.vSpace,
             ),
@@ -33,7 +33,7 @@ class SpeedDialWithDragging extends Component {
         const newIndex = dialUtils.computeDialIndex(
             normalizedPositions,
             this.props.columnCount,
-            this.props.bookmarks.count(),
+            this.props.bookmarks.length,
             this.props.config.dialWidth + this.props.config.hSpace,
             this.props.config.dialHeight + this.props.config.vSpace,
         );
@@ -48,9 +48,9 @@ class SpeedDialWithDragging extends Component {
             let indexToMove;
 
             if (newIndex < oldIndex) {
-                indexToMove = this.props.bookmarks.getIn([newIndex + 1, 'treeNode', 'index']);
+                indexToMove = this.props.bookmarks[newIndex + 1].treeNode.index;
             } else {
-                indexToMove = this.props.bookmarks.getIn([newIndex - 1, 'treeNode', 'index']);
+                indexToMove = this.props.bookmarks[newIndex - 1].treeNode.index;
 
                 // Chrome behaves different when moving bookmarks forward
                 if (browserUtils.browserType === 'chrome') {
@@ -67,14 +67,14 @@ class SpeedDialWithDragging extends Component {
 
         return (
             bookmarks.map((child, index) => {
-                const id = child.getIn(['treeNode', 'id']);
+                const id = child.treeNode.id;
                 const data = this.props.data[id] || {};
                 const local = this.props.local[id] || {};
 
                 return (
                     <DraggableDial
-                        xPos={child.getIn(['view', 'dialPosX'])}
-                        yPos={child.getIn(['view', 'dialPosY'])}
+                        xPos={child.view.dialPosX}
+                        yPos={child.view.dialPosY}
                         id={index}
                         onDrag={this.onDrag}
                         onDragEnd={this.onDragEnd}
@@ -82,8 +82,8 @@ class SpeedDialWithDragging extends Component {
                         key={'' + id}
                         config={config}
 
-                        node={child.get('treeNode')}
-                        view={child.get('view')}
+                        node={child.treeNode}
+                        view={child.view}
                         data={data}
                         local={local}
                         onUpdate={this.props.onDialUpdate}
@@ -96,7 +96,7 @@ class SpeedDialWithDragging extends Component {
 }
 
 SpeedDialWithDragging.propTypes = {
-    bookmarks: PropTypes.object.isRequired,
+    bookmarks: PropTypes.array.isRequired,
     columnCount: PropTypes.number.isRequired,
     onItemMoved: PropTypes.func.isRequired,
     onDialUpdate: PropTypes.func.isRequired,

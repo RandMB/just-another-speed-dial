@@ -34,17 +34,17 @@ class Dial extends PureComponent {
 
     async componentWillMount() {
         if (!this.props.data.background) {
-            if (this.props.node.get('type') === 'bookmark') {
+            if (this.props.node.type === 'bookmark') {
                 const colorData = await browserUtils.colors.getColors();
 
                 this.props.onUpdate(
-                    this.props.node.get('id'),
+                    this.props.node.id,
                     colorData,
                 );
 
-            } else if (this.props.node.get('type') === 'folder') {
+            } else if (this.props.node.type === 'folder') {
                 this.props.onUpdate(
-                    this.props.node.get('id'),
+                    this.props.node.id,
                     {
                         background: '#ffffff',
                         color: '#000000',
@@ -114,14 +114,14 @@ class Dial extends PureComponent {
             }
 
             browserUtils.bookmarks.update(
-                this.props.node.get('id'),
+                this.props.node.id,
                 changed,
             );
         }
 
         if (value.hasOwnProperty('data')) {
             this.props.onUpdate(
-                this.props.node.get('id'),
+                this.props.node.id,
                 value.data.data,
                 value.data.local,
             );
@@ -160,7 +160,7 @@ class Dial extends PureComponent {
         const dialStyle = {
             transform: `translate3D(${currentPosX}px,${currentPosY}px,0)`,
             transitionDuration: `${transitionDuration}s`,
-            zIndex: isDragged ? DRAG_ZINDEX : view.get('zIndex'),
+            zIndex: isDragged ? DRAG_ZINDEX : view.zIndex,
             width: config.dialWidth,
             height: config.dialHeight,
         };

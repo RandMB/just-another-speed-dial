@@ -170,7 +170,10 @@ module.exports = {
           warnings: false,
         }
       }),
-      new OptimizeCSSAssetsPlugin({})
+      new OptimizeCSSAssetsPlugin({
+        cssProcessor: require('cssnano'),
+        cssProcessorOptions: { preset: 'default' },
+      })
     ]
   },
   plugins: plugins,

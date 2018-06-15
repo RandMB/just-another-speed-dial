@@ -7,9 +7,7 @@ import DialBookmark from '../dial-bookmark/DialBookmark';
 import DialTitle from '../dial-title/DialTitle';
 
 function DialTile(props) {
-    const title = props.node.get('title');
-    const type = props.node.get('type');
-    const url = props.node.get('url');
+    const { title, type, url } = props.node;
 
     return (
         <React.Fragment>

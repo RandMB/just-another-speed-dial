@@ -31,9 +31,9 @@ class DialEditModal extends Component {
         super(props);
 
         this.state = {
-            title: props.node.get('title'),
-            url: props.node.get('url'),
-            type: props.node.get('type'),
+            title: props.node.title,
+            url: props.node.url,
+            type: props.node.type,
             node: props.node,
             data: props.data,
 
@@ -71,11 +71,10 @@ class DialEditModal extends Component {
     }
 
     onValueChange(key, value) {
-        const newNode = this.state.node.set(key, value);
+        this.state.node[key] = value;
 
         this.setState({
             [key]: value,
-            node: newNode,
         });
     }
 
@@ -97,9 +96,9 @@ class DialEditModal extends Component {
 
     deleteBookmark() {
         if (this.state.type === 'bookmark') {
-            chrome.bookmarks.remove(this.props.node.get('id'));
+            chrome.bookmarks.remove(this.props.node.id);
         } else {
-            chrome.bookmarks.removeTree(this.props.node.get('id'));
+            chrome.bookmarks.removeTree(this.props.node.id);
         }
     }
 

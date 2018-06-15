@@ -1,5 +1,4 @@
 import React, { Component } from 'react';
-import { Map, List } from 'immutable';
 import PropTypes from 'prop-types';
 import _debounce from 'lodash/debounce';
 import _throttle from 'lodash/throttle';
@@ -10,21 +9,24 @@ import utils from '../../utils/browser';
 
 import './SpeedDial.css';
 
-function updateChild(children, index, columnCount, itemCount, dialWidth, dialHeight) {
-    return children.setIn([index, 'view', 'zIndex'], itemCount - index)
-        .setIn([index, 'view', 'index'], index)
-        .setIn([index, 'view', 'dialPosX'], dialUtils.computeDialXPos(index, columnCount, dialWidth))
-        .setIn([index, 'view', 'dialPosY'], dialUtils.computeDialYPos(index, columnCount, dialHeight));
+function updateChild(child, index, columnCount, itemCount, dialWidth, dialHeight) {
+    Object.assign(
+        child.view,
+        {
+            zIndex: itemCount - index,
+            index,
+            dialPosX: dialUtils.computeDialXPos(index, columnCount, dialWidth),
+            dialPosY: dialUtils.computeDialYPos(index, columnCount, dialHeight),
+        },
+    );
 }
 
 function updateChildrenPartial(children, columnCount, start, end, dialWidth, dialHeight) {
-    let updated = children;
-
     for (let index = start; index <= end; index++) {
-        updated = updateChild(updated, index, columnCount, children.count(), dialWidth, dialHeight);
+        updateChild(children[index], index, columnCount, children.length, dialWidth, dialHeight);
     }
 
-    return updated;
+    return children;
 }
 
 class SpeedDial extends Component {
@@ -189,12 +191,12 @@ class SpeedDial extends Component {
 
     onItemMoved(oldIndex, newIndex) {
         this.setState(({ children }) => {
-            const removed = children.get(oldIndex);
-            const newchildren = children.splice(oldIndex, 1);
-            const insertedChildren = newchildren.splice(newIndex, 0, removed);
+            const removed = children[oldIndex];
+            children.splice(oldIndex, 1);
+            children.splice(newIndex, 0, removed);
 
             const updatedChildren = this.updateChildren(
-                insertedChildren,
+                children,
                 this.state.dialColumns,
                 Math.min(newIndex, oldIndex),
                 Math.max(newIndex, oldIndex),
@@ -207,12 +209,12 @@ class SpeedDial extends Component {
     }
 
     onOpen(index) {
-        const node = this.state.children.getIn([index, 'treeNode']);
+        const node = this.state.children[index].treeNode;
 
-        if (node.get('type') === 'folder') {
-            this.openFolder(node.get('id'));
-        } else if (node.get('type') === 'bookmark') {
-            window.location.href = node.get('url');
+        if (node.type === 'folder') {
+            this.openFolder(node.id);
+        } else if (node.type === 'bookmark') {
+            window.location.href = node.url;
         }
     }
 
@@ -238,7 +240,7 @@ class SpeedDial extends Component {
     }
 
     getDialHeight() {
-        const count = this.state.children ? this.state.children.count() : 0;
+        const count = this.state.children ? this.state.children.length : 0;
 
         return dialUtils.computeDialsHeight(
             count,
@@ -248,7 +250,7 @@ class SpeedDial extends Component {
     }
 
     updateChildren(children, columns, start = 0, end) {
-        const endIndex = end || children.count() - 1;
+        const endIndex = end || children.length - 1;
 
         return updateChildrenPartial(
             children,
@@ -261,7 +263,7 @@ class SpeedDial extends Component {
     }
 
     moveBookmark(oldIndex, newIndex, indexToMove) {
-        const id = this.state.children.getIn([newIndex, 'treeNode', 'id']);
+        const id = this.state.children[newIndex].treeNode.id;
         this.scheduledUpdate.push(id);
 
         utils.bookmarks.move(
@@ -269,7 +271,7 @@ class SpeedDial extends Component {
             { index: indexToMove },
         );
 
-        let children = this.state.children.setIn([newIndex, 'treeNode', 'index'], indexToMove);
+        this.state.children[newIndex].treeNode.index = indexToMove;
 
         if (newIndex > oldIndex) {
             // The bookmark was moved forward
@@ -277,18 +279,18 @@ class SpeedDial extends Component {
             // The start is at zero as because we don't really know where to start from
             //   as filtered elements make gaps in our indexes
             for (let i = oldIndex; i < newIndex; i++) {
-                children = children.updateIn([i, 'treeNode', 'index'], index => index - 1);
+                this.state.children[i].treeNode.index -= 1;
             }
         } else if (newIndex < oldIndex) {
             // The bookmark was moved backwards
             // Increment items indexes form newIndex + 1 to oldIndex, inclusive
             // Start from the next one ahead of changed one
             for (let i = newIndex + 1; i <= oldIndex; i++) {
-                children = children.updateIn([i, 'treeNode', 'index'], index => index + 1);
+                this.state.children[i].treeNode.index += 1;
             }
         }
 
-        this.setState({ children });
+        this.forceUpdate();
     }
 
     async saveChanges() {
@@ -300,11 +302,11 @@ class SpeedDial extends Component {
 
     updateList(children, additionalState) {
         // We need a different structure than just an plain array
-        const newChildren = List(children).map(child => {
-            return Map({
-                treeNode: Map(child),
-                view: Map({}),
-            });
+        const newChildren = children.map(child => {
+            return {
+                treeNode: child,
+                view: {},
+            };
         });
 
         const updatedChildren = this.updateChildren(
